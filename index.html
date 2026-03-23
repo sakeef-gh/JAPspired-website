@@ -10,7 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --navy: #1a2744;
       --off-white: #f5f2ed;
@@ -19,9 +18,7 @@
       --rule: #d8d3cb;
       --accent: #c8bfaa;
     }
-
     html { scroll-behavior: smooth; }
-
     body {
       background-color: var(--off-white);
       color: var(--charcoal);
@@ -31,722 +28,283 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ── NAV ── */
+    /* NAV */
     nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
       padding: 20px 48px;
       background: var(--off-white);
       border-bottom: 1px solid var(--rule);
     }
-
     .nav-logo {
       font-family: 'Cormorant Garamond', serif;
-      font-weight: 500;
-      font-size: 1.35rem;
-      letter-spacing: 0.08em;
-      color: var(--charcoal);
-      text-decoration: none;
+      font-weight: 500; font-size: 1.35rem; letter-spacing: 0.08em;
+      color: var(--charcoal); text-decoration: none;
     }
-
-    .nav-links {
-      display: flex;
-      gap: 32px;
-      list-style: none;
-    }
-
+    .nav-links { display: flex; gap: 32px; list-style: none; }
     .nav-links a {
-      font-size: 0.78rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--charcoal-light);
-      text-decoration: none;
-      transition: color 0.2s;
+      font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--charcoal-light); text-decoration: none; transition: color 0.2s;
     }
-
     .nav-links a:hover { color: var(--charcoal); }
 
     /* hamburger */
     .nav-hamburger {
-      display: none;
-      flex-direction: column;
-      gap: 5px;
-      cursor: pointer;
-      padding: 4px;
-      background: none;
-      border: none;
+      display: none; flex-direction: column; gap: 5px; cursor: pointer;
+      padding: 4px; background: none; border: none;
     }
-
-    .nav-hamburger span {
-      display: block;
-      width: 24px;
-      height: 1.5px;
-      background: var(--charcoal);
-      transition: all 0.25s;
-    }
-
+    .nav-hamburger span { display: block; width: 24px; height: 1.5px; background: var(--charcoal); transition: all 0.25s; }
     .nav-hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
     .nav-hamburger.open span:nth-child(2) { opacity: 0; }
     .nav-hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
-
     .nav-mobile {
-      display: none;
-      position: fixed;
-      top: 61px; left: 0; right: 0;
-      background: var(--off-white);
-      border-bottom: 1px solid var(--rule);
-      z-index: 99;
-      padding: 0;
-      list-style: none;
-      flex-direction: column;
+      display: none; position: fixed; top: 61px; left: 0; right: 0;
+      background: var(--off-white); border-bottom: 1px solid var(--rule);
+      z-index: 99; padding: 0; list-style: none; flex-direction: column;
     }
-
     .nav-mobile.open { display: flex; }
-
     .nav-mobile li a {
-      display: block;
-      padding: 18px 24px;
-      font-size: 0.82rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--charcoal);
-      text-decoration: none;
+      display: block; padding: 18px 24px; font-size: 0.82rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--charcoal); text-decoration: none; border-bottom: 1px solid var(--rule);
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center; padding-top: 61px;
       border-bottom: 1px solid var(--rule);
     }
-
-    /* ── HERO ── */
-    .hero {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      padding-top: 61px;
-    }
-
     .hero-left {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 80px 48px 80px 64px;
-      border-right: 1px solid var(--rule);
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 80px 64px; max-width: 720px;
     }
-
     .hero-eyebrow {
-      font-size: 0.72rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--charcoal-light);
-      margin-bottom: 24px;
+      font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--charcoal-light); margin-bottom: 24px;
     }
-
     .hero-heading {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2.8rem, 5vw, 4.2rem);
-      font-weight: 300;
-      line-height: 1.1;
-      color: var(--charcoal);
-      margin-bottom: 28px;
+      font-size: clamp(2.8rem, 5vw, 4.2rem); font-weight: 300; line-height: 1.1;
+      color: var(--charcoal); margin-bottom: 28px;
     }
-
-    .hero-heading em {
-      font-style: italic;
-      color: var(--navy);
-    }
-
+    .hero-heading em { font-style: italic; color: var(--navy); }
     .hero-body {
-      font-size: 0.92rem;
-      line-height: 1.75;
-      color: var(--charcoal-light);
-      max-width: 400px;
-      margin-bottom: 44px;
+      font-size: 0.92rem; line-height: 1.75; color: var(--charcoal-light);
+      max-width: 400px; margin-bottom: 44px;
     }
-
     .hero-social-proof {
-      font-size: 0.78rem;
-      color: var(--charcoal-light);
-      letter-spacing: 0.06em;
-      margin-bottom: 28px;
-      padding-left: 14px;
-      border-left: 2px solid var(--navy);
+      font-size: 0.78rem; color: var(--charcoal-light); letter-spacing: 0.06em;
+      margin-bottom: 28px; padding-left: 14px; border-left: 2px solid var(--navy);
     }
-
     .hero-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--navy);
-      color: #fff;
-      text-decoration: none;
-      padding: 14px 28px;
-      font-size: 0.78rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      transition: background 0.25s;
-      align-self: flex-start;
+      display: inline-flex; align-items: center; gap: 12px;
+      background: var(--navy); color: #fff; text-decoration: none;
+      padding: 14px 28px; font-size: 0.78rem; letter-spacing: 0.14em;
+      text-transform: uppercase; transition: background 0.25s; align-self: flex-start;
     }
-
     .hero-cta:hover { background: #243260; }
     .hero-cta:hover .arrow { transform: translateX(4px); }
     .arrow { display: inline-block; transition: transform 0.2s; }
 
-    .hero-right {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 80px 48px;
-      background: #eee9e1;
-      position: relative;
-      overflow: hidden;
-    }
+    /* pen showcase removed — no longer used */
 
-    /* pen illustration grid */
-    .pen-showcase {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
-      width: 100%;
-      max-width: 360px;
-    }
-
-    .pen-item {
-      background: var(--off-white);
-      border: 1px solid var(--rule);
-      padding: 24px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .pen-item-brand {
-      font-size: 0.62rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--charcoal-light);
-    }
-
-    .pen-item-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.05rem;
-      font-weight: 500;
-      color: var(--charcoal);
-      line-height: 1.2;
-    }
-
-    .pen-item-price {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.2rem;
-      color: var(--navy);
-      margin-top: auto;
-    }
-
-    .pen-item-bar {
-      height: 3px;
-      background: var(--navy);
-      width: 32px;
-    }
-
-    .hero-note {
-      margin-top: 28px;
-      font-size: 0.78rem;
-      color: var(--charcoal-light);
-      line-height: 1.6;
-      text-align: center;
-    }
-
-    /* ── SECTION SHARED ── */
+    /* SECTION SHARED */
     section { padding: 100px 64px; }
-
     .section-label {
-      font-size: 0.7rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--charcoal-light);
-      margin-bottom: 16px;
+      font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--charcoal-light); margin-bottom: 16px;
     }
-
     .section-title {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2rem, 3.5vw, 2.8rem);
-      font-weight: 300;
-      color: var(--charcoal);
-      margin-bottom: 48px;
-      line-height: 1.2;
+      font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 300;
+      color: var(--charcoal); margin-bottom: 48px; line-height: 1.2;
     }
+    .order-intro { font-size: 0.88rem; color: var(--charcoal-light); margin-bottom: 48px; margin-top: -28px; }
+    hr.section-rule { border: none; border-top: 1px solid var(--rule); margin-bottom: 64px; }
 
-    .order-intro {
-      font-size: 0.88rem;
-      color: var(--charcoal-light);
-      margin-bottom: 48px;
-      margin-top: -28px;
-    }
-
-    hr.section-rule {
-      border: none;
-      border-top: 1px solid var(--rule);
-      margin-bottom: 64px;
-    }
-
-    /* ── ABOUT ── */
-    .about {
-      background: var(--navy);
-      color: #fff;
-      padding: 100px 64px;
-    }
-
+    /* ABOUT */
+    .about { background: var(--navy); color: #fff; padding: 100px 64px; }
     .about .section-label { color: var(--accent); }
-
-    .about-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px;
-      align-items: start;
-    }
-
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
     .about-heading {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2rem, 3.5vw, 3rem);
-      font-weight: 300;
-      line-height: 1.15;
-      color: #fff;
+      font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 300; line-height: 1.15; color: #fff;
     }
-
     .about-heading em { font-style: italic; color: var(--accent); }
-
-    .about-body {
-      font-size: 0.92rem;
-      line-height: 1.85;
-      color: rgba(255,255,255,0.65);
-    }
-
+    .about-body { font-size: 0.92rem; line-height: 1.85; color: rgba(255,255,255,0.65); }
     .about-body p + p { margin-top: 20px; }
 
-    /* ── PRODUCTS ── */
+    /* PRODUCTS */
     .products { background: var(--off-white); }
-
     .products-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--rule);
-      border: 1px solid var(--rule);
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--rule); border: 1px solid var(--rule);
     }
-
     .product-card {
-      background: var(--off-white);
-      padding: 40px 36px;
-      display: flex;
-      flex-direction: column;
+      background: var(--off-white); display: flex; flex-direction: column;
       transition: background 0.2s;
     }
-
     .product-card:hover { background: #eee9e1; }
+    .product-card:last-child:nth-child(3n+1) { grid-column: 1 / -1; }
 
-    /* last card: span full row if alone in its row on 3-col grid */
-    .product-card:last-child:nth-child(3n+1) {
-      grid-column: 1 / -1;
+    /* product card content */
+    .product-card-body { padding: 40px 36px; display: flex; flex-direction: column; flex: 1; }
+    .product-tag {
+      font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--charcoal-light); margin-bottom: 10px;
     }
-
-    /* last card alone in row on 2-col grid (tablet) — handled in media query */
-
-    .product-badge {
-      display: inline-block;
-      font-size: 0.62rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      background: var(--navy);
-      color: #fff;
-      padding: 3px 8px;
-      margin-bottom: 14px;
-    }
-      font-size: 0.65rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--charcoal-light);
-      margin-bottom: 20px;
-    }
-
     .product-name {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.55rem;
-      font-weight: 500;
-      color: var(--charcoal);
-      margin-bottom: 14px;
-      line-height: 1.2;
+      font-size: 1.55rem; font-weight: 500; color: var(--charcoal);
+      margin-bottom: 14px; line-height: 1.2;
     }
-
     .product-desc {
-      font-size: 0.83rem;
-      line-height: 1.75;
-      color: var(--charcoal-light);
-      margin-bottom: 28px;
-      flex: 1;
+      font-size: 0.83rem; line-height: 1.75; color: var(--charcoal-light);
+      margin-bottom: 28px; flex: 1;
     }
-
     .product-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: auto;
-      padding-top: 20px;
-      border-top: 1px solid var(--rule);
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: auto; padding-top: 20px; border-top: 1px solid var(--rule);
     }
-
     .product-price {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.7rem;
-      font-weight: 400;
-      color: var(--navy);
+      font-size: 1.7rem; font-weight: 400; color: var(--navy);
     }
-
     .product-price span {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.72rem;
-      color: var(--charcoal-light);
-      letter-spacing: 0.06em;
-      margin-left: 4px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.72rem;
+      color: var(--charcoal-light); letter-spacing: 0.06em; margin-left: 4px;
     }
 
-    .product-order-link {
-      font-size: 0.72rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--navy);
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: gap 0.2s;
-    }
-
-    .product-order-link:hover { gap: 10px; }
-
-    /* ── PRODUCTS CTA WRAP ── */
+    /* PRODUCTS CTA WRAP */
     .products-cta-wrap {
-      margin-top: 48px;
-      padding-top: 48px;
-      border-top: 1px solid var(--rule);
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      flex-wrap: wrap;
+      margin-top: 48px; padding-top: 48px; border-top: 1px solid var(--rule);
+      display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
     }
+    .products-cta-note { font-size: 0.82rem; color: var(--charcoal-light); line-height: 1.6; }
 
-    .products-cta-note {
-      font-size: 0.82rem;
-      color: var(--charcoal-light);
-      line-height: 1.6;
-    }
 
-    /* ── ORDER REASSURANCE ── */
-    .order-reassurance {
-      font-size: 0.82rem;
-      color: var(--charcoal-light);
-      padding: 12px 16px;
-      border: 1px solid var(--rule);
-      margin-bottom: 20px;
-      display: inline-block;
-      background: var(--off-white);
-    }
 
-    /* ── FOOTER CTA BAND ── */
+    /* FOOTER CTA BAND */
     .footer-cta-band {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 40px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      gap: 24px;
-      flex-wrap: wrap;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 40px 0; border-bottom: 1px solid rgba(255,255,255,0.1);
+      gap: 24px; flex-wrap: wrap;
     }
-
     .footer-cta-text {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.4rem;
-      font-weight: 300;
-      color: #fff;
+      font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 300; color: #fff;
     }
-
     .footer-cta-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      border: 1px solid rgba(255,255,255,0.3);
-      color: #fff;
-      text-decoration: none;
-      padding: 12px 24px;
-      font-size: 0.78rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      transition: all 0.2s;
-      white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 10px;
+      border: 1px solid rgba(255,255,255,0.3); color: #fff; text-decoration: none;
+      padding: 12px 24px; font-size: 0.78rem; letter-spacing: 0.14em;
+      text-transform: uppercase; transition: all 0.2s; white-space: nowrap;
     }
-
     .footer-cta-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.6); }
     .footer-cta-btn:hover .arrow { transform: translateX(4px); }
-
     .footer-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 32px 0 0;
-      flex-wrap: wrap;
-      gap: 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 32px 0 0; flex-wrap: wrap; gap: 24px;
     }
 
-    /* ── HOW TO ORDER ── */
-    .order {
-      background: #eee9e1;
-      padding: 100px 64px;
-    }
-
-    .order-steps {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 48px;
-    }
-
-    .order-step {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
+    /* HOW TO ORDER */
+    .order { background: #eee9e1; padding: 100px 64px; }
+    .order-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; }
+    .order-step { display: flex; flex-direction: column; gap: 16px; }
     .step-number {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 3.5rem;
-      font-weight: 300;
-      color: var(--rule);
-      line-height: 1;
+      font-family: 'Cormorant Garamond', serif; font-size: 3.5rem;
+      font-weight: 300; color: var(--rule); line-height: 1;
     }
-
-    .step-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.3rem;
-      font-weight: 500;
-      color: var(--charcoal);
-    }
-
-    .step-desc {
-      font-size: 0.85rem;
-      line-height: 1.75;
-      color: var(--charcoal-light);
-    }
-
+    .step-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 500; color: var(--charcoal); }
+    .step-desc { font-size: 0.85rem; line-height: 1.75; color: var(--charcoal-light); }
     .order-cta-wrap {
-      margin-top: 64px;
-      padding-top: 48px;
-      border-top: 1px solid var(--rule);
-      display: flex;
-      align-items: center;
-      gap: 32px;
+      margin-top: 64px; padding-top: 48px; border-top: 1px solid var(--rule);
+      display: flex; align-items: center; gap: 32px;
     }
-
     .order-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--navy);
-      color: #fff;
-      text-decoration: none;
-      padding: 14px 28px;
-      font-size: 0.78rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      transition: background 0.25s;
+      display: inline-flex; align-items: center; gap: 12px;
+      background: var(--navy); color: #fff; text-decoration: none;
+      padding: 14px 28px; font-size: 0.78rem; letter-spacing: 0.14em;
+      text-transform: uppercase; transition: background 0.25s;
     }
-
     .order-cta:hover { background: #243260; }
     .order-cta:hover .arrow { transform: translateX(4px); }
+    .order-note { font-size: 0.8rem; color: var(--charcoal-light); }
 
-    .order-note {
-      font-size: 0.8rem;
-      color: var(--charcoal-light);
-    }
-
-    /* ── FOOTER ── */
-    footer {
-      background: var(--charcoal);
-      color: rgba(255,255,255,0.5);
-      padding: 48px 64px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
+    /* FOOTER */
+    footer { background: var(--charcoal); color: rgba(255,255,255,0.5); padding: 48px 64px; }
     .footer-logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.2rem;
-      font-weight: 500;
-      color: #fff;
-      letter-spacing: 0.08em;
-      text-decoration: none;
+      font-family: 'Cormorant Garamond', serif; font-size: 1.2rem;
+      font-weight: 500; color: #fff; letter-spacing: 0.08em; text-decoration: none;
     }
-
-    .footer-links {
-      display: flex;
-      gap: 28px;
-      list-style: none;
-    }
-
+    .footer-links { display: flex; gap: 28px; list-style: none; }
     .footer-links a {
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.5);
-      text-decoration: none;
-      transition: color 0.2s;
+      font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.2s;
     }
-
     .footer-links a:hover { color: #fff; }
+    .footer-copy { font-size: 0.72rem; letter-spacing: 0.06em; }
 
-    .footer-copy {
-      font-size: 0.72rem;
-      letter-spacing: 0.06em;
-    }
-
-    /* ── ANIMATIONS ── */
+    /* ANIMATIONS */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+    .hero-eyebrow  { animation: fadeUp 0.6s ease both; animation-delay: 0.1s; }
+    .hero-heading  { animation: fadeUp 0.6s ease both; animation-delay: 0.25s; }
+    .hero-body     { animation: fadeUp 0.6s ease both; animation-delay: 0.4s; }
+    .hero-cta      { animation: fadeUp 0.6s ease both; animation-delay: 0.55s; }
+    .pen-showcase  { animation: fadeUp 0.6s ease both; animation-delay: 0.3s; }
+    .hero-note     { animation: fadeUp 0.6s ease both; animation-delay: 0.5s; }
 
-    .hero-eyebrow { animation: fadeUp 0.6s ease both; animation-delay: 0.1s; }
-    .hero-heading { animation: fadeUp 0.6s ease both; animation-delay: 0.25s; }
-    .hero-body    { animation: fadeUp 0.6s ease both; animation-delay: 0.4s; }
-    .hero-cta     { animation: fadeUp 0.6s ease both; animation-delay: 0.55s; }
-    .pen-showcase { animation: fadeUp 0.6s ease both; animation-delay: 0.3s; }
-    .hero-note    { animation: fadeUp 0.6s ease both; animation-delay: 0.5s; }
+    /* DESKTOP MAX WIDTH */
+    .constrain { max-width: 1400px; margin: 0 auto; width: 100%; }
 
-    /* ── DESKTOP MAX WIDTH ── */
-    .constrain {
-      max-width: 1400px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    /* ── TABLET (768px – 1024px) ── */
+    /* TABLET */
     @media (min-width: 768px) and (max-width: 1024px) {
       nav { padding: 16px 32px; }
       .nav-links { display: none; }
       .nav-hamburger { display: flex; }
       .nav-mobile { top: 57px; }
-
       .hero { grid-template-columns: 1fr; min-height: auto; }
-      .hero-left { padding: 64px 40px 40px; border-right: none; border-bottom: 1px solid var(--rule); }
-      .hero-right { padding: 40px 40px 64px; }
-      .pen-showcase { max-width: 480px; }
-
+      .hero-left { padding: 64px 40px; }
       section, .about, .order { padding: 80px 40px; }
-
       .about-grid { grid-template-columns: 1fr 1fr; gap: 48px; }
-
       .products-grid { grid-template-columns: repeat(2, 1fr); }
       .product-card:last-child:nth-child(3n+1) { grid-column: auto; }
       .product-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
-
       .order-steps { grid-template-columns: repeat(3, 1fr); gap: 32px; }
-
       footer { padding: 40px; }
     }
 
-    /* ── TABLET PORTRAIT (768px – 900px) ── */
+    /* TABLET PORTRAIT */
     @media (min-width: 768px) and (max-width: 900px) {
       .order-steps { grid-template-columns: 1fr; gap: 36px; }
       .about-grid { grid-template-columns: 1fr; gap: 40px; }
     }
 
-    /* ── MOBILE (below 768px) ── */
+    /* MOBILE */
     @media (max-width: 767px) {
       nav { padding: 16px 24px; }
       .nav-links { display: none; }
       .nav-hamburger { display: flex; }
-
-      /* Fix 4: tighten hero heading floor */
       .hero-heading { font-size: clamp(2.2rem, 8vw, 2.8rem); }
-
-      /* Fix 1: swap hero order — showcase above CTA on mobile */
-      .hero { grid-template-columns: 1fr; min-height: auto; display: flex; flex-direction: column; }
-      .hero-left { padding: 56px 24px 32px; border-right: none; order: 1; display: flex; flex-direction: column; }
-      .hero-right { padding: 32px 24px 40px; order: 2; border-top: 1px solid var(--rule); }
-
-      /* Move CTA below hero-right by reordering within hero-left */
-      .hero-eyebrow { order: 1; }
-      .hero-heading { order: 2; }
-      .hero-body { order: 3; margin-bottom: 0; }
-      .hero-social-proof { order: 5; margin-top: 24px; margin-bottom: 20px; }
-      .hero-cta { order: 6; }
-
-      /* Fix 2: pen showcase single column list on mobile */
-      .pen-showcase {
-        grid-template-columns: 1fr;
-        max-width: 100%;
-        gap: 1px;
-        background: var(--rule);
-        border: 1px solid var(--rule);
+      .hero {
+        grid-template-columns: 1fr; min-height: auto;
+        display: flex; flex-direction: column;
       }
-
-      .pen-item {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        padding: 16px 20px;
-        gap: 0;
-        background: var(--off-white);
-      }
-
-      .pen-item-bar { display: none; }
-
-      .pen-item-brand {
-        font-size: 0.62rem;
-        color: var(--charcoal-light);
-        margin-bottom: 2px;
-      }
-
-      .pen-item-name {
-        font-size: 0.95rem;
-      }
-
-      .pen-item-price {
-        font-size: 1.1rem;
-        margin-top: 0;
-      }
-
-      /* Fix 3: explicit product card padding on mobile */
-      .product-card { padding: 28px 20px; }
-
+      .hero-left { padding: 56px 24px 40px; }
+      .product-card-body { padding: 20px; }
       section, .about, .order { padding: 56px 20px; }
       .about-grid { grid-template-columns: 1fr; gap: 40px; }
       .products-grid { grid-template-columns: 1fr; }
       .product-card:last-child:nth-child(3n+1) { grid-column: auto; }
-      .product-card:last-child:nth-child(odd) { grid-column: auto; }
       .order-steps { grid-template-columns: 1fr; gap: 40px; }
       .order-cta-wrap { flex-direction: column; align-items: flex-start; gap: 16px; }
-
-      /* Fix 5: full width CTAs on mobile */
-      .hero-cta {
-        align-self: stretch;
-        justify-content: center;
-        padding: 16px 24px;
-      }
-
-      .order-cta {
-        width: 100%;
-        justify-content: center;
-        padding: 16px 24px;
-      }
-
-      .products-cta-wrap .hero-cta {
-        width: 100%;
-        justify-content: center;
-      }
-
+      .hero-cta { align-self: stretch; justify-content: center; padding: 16px 24px; }
+      .order-cta { width: 100%; justify-content: center; padding: 16px 24px; }
+      .products-cta-wrap .hero-cta { width: 100%; justify-content: center; }
       .products-cta-wrap { flex-direction: column; align-items: stretch; }
       .products-cta-note { text-align: center; }
-
       footer { padding: 40px 20px; }
       .footer-cta-band { flex-direction: column; align-items: flex-start; gap: 16px; }
       .footer-cta-btn { width: 100%; justify-content: center; }
@@ -757,102 +315,75 @@
 </head>
 <body>
 
-  <!-- NAV — Facebook link removed, only wayfinding links remain -->
-  <nav>
-    <div class="constrain" style="display:flex;justify-content:space-between;align-items:center;width:100%;">
-      <a href="#" class="nav-logo">JAPspired</a>
-      <ul class="nav-links">
-        <li><a href="#products">Products</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#order">How to Order</a></li>
-      </ul>
-      <button class="nav-hamburger" id="hamburger" aria-label="Menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </nav>
+<!-- NAV -->
+<nav>
+  <div class="constrain" style="display:flex;justify-content:space-between;align-items:center;width:100%;">
+    <a href="#" class="nav-logo">JAPspired</a>
+    <ul class="nav-links">
+      <li><a href="#products">Products</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#order">How to Order</a></li>
+    </ul>
+    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
 
-  <!-- MOBILE NAV -->
-  <ul class="nav-mobile" id="mobileNav">
-    <li><a href="#products" onclick="closeNav()">Products</a></li>
-    <li><a href="#about" onclick="closeNav()">About</a></li>
-    <li><a href="#order" onclick="closeNav()">How to Order</a></li>
-  </ul>
+<!-- MOBILE NAV -->
+<ul class="nav-mobile" id="mobileNav">
+  <li><a href="#products" onclick="closeNav()">Products</a></li>
+  <li><a href="#about" onclick="closeNav()">About</a></li>
+  <li><a href="#order" onclick="closeNav()">How to Order</a></li>
+</ul>
 
-  <!-- HERO -->
-  <section class="hero" id="home">
-    <div class="hero-left">
-      <p class="hero-eyebrow">Japanese Stationery &mdash; Bangladesh</p>
-      <h1 class="hero-heading">
-        Authentic Japanese<br>
-        stationery,<br>
-        <em>delivered to you.</em>
-      </h1>
-      <p class="hero-body">
-        JAPspired sources writing tools directly from Japan and delivers them
-        across Bangladesh. Every product is tested for comfort, precision,
-        and daily use before it reaches you.
-      </p>
-      <p class="hero-social-proof">Used by writers, students, and daily note-takers across Dhaka.</p>
-      <a href="https://www.facebook.com/JAPspired" target="_blank" class="hero-cta">
-        Shop on Facebook <span class="arrow">&#8594;</span>
-      </a>
-    </div>
-    <div class="hero-right">
-      <div class="pen-showcase">
-        <div class="pen-item">
-          <div class="pen-item-bar"></div>
-          <div class="pen-item-brand">Zebra</div>
-          <div class="pen-item-name">Sarasa Clip</div>
-          <div class="pen-item-price">&#2547;150</div>
-        </div>
-        <div class="pen-item">
-          <div class="pen-item-bar"></div>
-          <div class="pen-item-brand">Zebra</div>
-          <div class="pen-item-name">bLen U</div>
-          <div class="pen-item-price">&#2547;270</div>
-        </div>
-        <div class="pen-item">
-          <div class="pen-item-bar"></div>
-          <div class="pen-item-brand">Uni-ball</div>
-          <div class="pen-item-name">Jetstream</div>
-          <div class="pen-item-price">&#2547;160</div>
-        </div>
-        <div class="pen-item">
-          <div class="pen-item-bar"></div>
-          <div class="pen-item-brand">Kokuyo</div>
-          <div class="pen-item-name">Campus Notebook</div>
-          <div class="pen-item-price">&#2547;380</div>
-        </div>
-      </div>
-      <p class="hero-note">
-        Delivered via Pathao &nbsp;&middot;&nbsp; bKash &amp; COD accepted
-      </p>
-    </div>
-  </section>
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-left">
+    <p class="hero-eyebrow">Japanese Stationery &ndash; Bangladesh</p>
+    <h1 class="hero-heading">
+      Authentic Japanese<br>
+      stationery,<br>
+      <em>delivered to you.</em>
+    </h1>
+    <p class="hero-body">
+      JAPspired sources writing tools directly from Japan and delivers them across Bangladesh.
+      Every product is tested for comfort, precision, and daily use before it reaches you.
+    </p>
+    <p class="hero-social-proof">Used by writers, students, and daily note-takers across Dhaka.</p>
+    <a href="https://www.facebook.com/JAPspired" target="_blank" class="hero-cta">
+      Shop on Facebook <span class="arrow">&#8594;</span>
+    </a>
+  </div>
+</section>
 
-  <!-- PRODUCTS — moved before About -->
-  <section class="products" id="products">
-    <div class="constrain">
-      <p class="section-label">The Collection</p>
-      <h2 class="section-title">Each product<br>chosen deliberately.</h2>
-      <hr class="section-rule" />
-      <div class="products-grid">
+<!-- PRODUCTS -->
+<section class="products" id="products">
+  <div class="constrain">
+    <p class="section-label">The Collection</p>
+    <h2 class="section-title">Each product<br>chosen deliberately.</h2>
+    <hr class="section-rule" />
+    <div class="products-grid">
 
-        <div class="product-card">
-          <p class="product-tag">Gel Pen &mdash; Zebra</p>
+      <!-- Sarasa Clip -->
+      <div class="product-card">
+        <div class="product-card-body">
+          <p class="product-tag">Gel Pen &ndash; Zebra</p>
           <h3 class="product-name">Sarasa Clip 0.5mm</h3>
           <p class="product-desc">
-            Smooth gel ink with a retractable clip design. Consistent from the first stroke
-            to the last. If you are new to Japanese pens, this is where to start.
+            Smooth gel ink with a retractable clip design. Consistent from the first stroke to the last.
+            If you are new to Japanese pens, this is where to start.
           </p>
           <div class="product-footer">
             <div class="product-price">&#2547;150 <span>BDT</span></div>
           </div>
         </div>
+      </div>
 
-        <div class="product-card">
-          <p class="product-tag">Ballpoint &mdash; Zebra</p>
+      <!-- bLen U -->
+      <div class="product-card">
+        <div class="product-card-body">
+          <p class="product-tag">Ballpoint &ndash; Zebra</p>
           <h3 class="product-name">bLen U 0.5mm</h3>
           <p class="product-desc">
             Built to reduce hand fatigue. Low centre of gravity, stabilised barrel.
@@ -862,167 +393,167 @@
             <div class="product-price">&#2547;270 <span>BDT</span></div>
           </div>
         </div>
+      </div>
 
-        <div class="product-card">
-          <p class="product-tag">Ballpoint &mdash; Uni-ball</p>
+      <!-- Jetstream -->
+      <div class="product-card">
+        <div class="product-card-body">
+          <p class="product-tag">Ballpoint &ndash; Uni-ball</p>
           <h3 class="product-name">Jetstream 0.5mm</h3>
           <p class="product-desc">
-            The world's bestselling ballpoint. Hybrid ink that flows like gel but
-            dries like oil. Fast, smooth, reliable.
+            The world's bestselling ballpoint. Hybrid ink that flows like gel but dries like oil.
+            Fast, smooth, reliable.
           </p>
           <div class="product-footer">
             <div class="product-price">&#2547;160 <span>BDT</span></div>
           </div>
         </div>
+      </div>
 
-        <div class="product-card">
-          <p class="product-tag">Gel Pen &mdash; Uni-ball</p>
+      <!-- Uni-ball One -->
+      <div class="product-card">
+        <div class="product-card-body">
+          <p class="product-tag">Gel Pen &ndash; Uni-ball</p>
           <h3 class="product-name">Uni-ball One 0.5mm</h3>
           <p class="product-desc">
-            Deep, saturated ink with a concentrated pigment formula.
-            Colours stay vivid on paper longer than standard gel ink.
-            The most visually distinctive pen in the range.
+            Deep, saturated ink with a concentrated pigment formula. Colours stay vivid on paper
+            longer than standard gel ink. The most visually distinctive pen in the range.
           </p>
           <div class="product-footer">
             <div class="product-price">&#2547;180 <span>BDT</span></div>
           </div>
         </div>
+      </div>
 
-        <div class="product-card">
-          <p class="product-tag">Notebook &mdash; Kokuyo</p>
+      <!-- Kokuyo Campus Notebook -->
+      <div class="product-card">
+        <div class="product-card-body">
+          <p class="product-tag">Notebook &ndash; Kokuyo</p>
           <h3 class="product-name">Campus Notebook</h3>
           <p class="product-desc">
-            Japan's most widely used student notebook. Lays flat when open,
-            takes ink cleanly without bleed-through, and holds up to daily use.
-            Designed for the way students actually write.
+            Japan's most widely used student notebook. Lays flat when open, takes ink cleanly
+            without bleed-through, and holds up to daily use. Designed for the way students actually write.
           </p>
           <div class="product-footer">
             <div class="product-price">&#2547;380 <span>BDT</span></div>
           </div>
         </div>
-
       </div>
 
-      <!-- Single concentrated CTA after product grid -->
-      <div class="products-cta-wrap">
-        <a href="https://www.facebook.com/JAPspired" target="_blank" class="hero-cta">
-          Order on Facebook <span class="arrow">&#8594;</span>
-        </a>
-        <p class="products-cta-note">Message us with the product name and quantity. We confirm availability and send you the total.</p>
-      </div>
+    </div>
 
-    </div><!-- /constrain -->
-  </section>
+    <div class="products-cta-wrap">
+      <a href="https://www.facebook.com/JAPspired" target="_blank" class="hero-cta">
+        Order on Facebook <span class="arrow">&#8594;</span>
+      </a>
+      <p class="products-cta-note">Message us with the product name and quantity. We confirm availability and send you the total.</p>
+    </div>
+  </div>
+</section>
 
-  <!-- ABOUT — moved after Products -->
-  <section class="about" id="about">
-    <div class="constrain">
-      <p class="section-label">About JAPspired</p>
-      <div class="about-grid">
-        <h2 class="about-heading">
-          Stationery that<br>
-          <em>earns its place</em><br>
-          on your desk.
-        </h2>
-        <div class="about-body">
-          <p>
-            Japan has spent decades refining writing tools. Low-viscosity inks that do not blob.
-            Needle tips that write precisely at any angle. Paper engineered for the way ink
-            sits and dries. These are not small details — they change how writing feels.
-          </p>
-          <p>
-            JAPspired exists to make these tools available in Bangladesh at honest prices.
-            No noise. No hype. Just products that work, sourced directly from Japan and
-            delivered to your door.
-          </p>
-          <p>
-            JAPspired is run by one person in Dhaka who uses every product we carry.
-            Every item is personally tested before it is offered for sale.
-          </p>
-        </div>
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="constrain">
+    <p class="section-label">About JAPspired</p>
+    <div class="about-grid">
+      <h2 class="about-heading">
+        Stationery that<br>
+        <em>earns its place</em><br>
+        on your desk.
+      </h2>
+      <div class="about-body">
+        <p>
+          Japan has spent decades refining writing tools. Low-viscosity inks that do not blob.
+          Needle tips that write precisely at any angle. Paper engineered for the way ink sits and dries.
+          These are not small details. They change how writing feels.
+        </p>
+        <p>
+          JAPspired exists to make these tools available in Bangladesh at honest prices.
+          No noise. No hype. Just products that work, sourced directly from Japan and delivered to your door.
+        </p>
+        <p>
+          Every product in the range has been personally selected, tested, and used before it is offered for sale.
+        </p>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- HOW TO ORDER -->
-  <section class="order" id="order">
-    <div class="constrain">
-      <p class="section-label">How to Order</p>
-      <h2 class="section-title">Three steps.<br>Delivered to your door.</h2>
-      <p class="order-intro">No checkout process. A message is all it takes.</p>
-      <hr class="section-rule" />
-      <div class="order-steps">
-        <div class="order-step">
-          <div class="step-number">01</div>
-          <div class="step-title">Message us on Facebook</div>
-          <p class="step-desc">
-            Send a DM to our Facebook page with the product name and quantity.
-            We will confirm availability and send you the total.
-          </p>
-        </div>
-        <div class="order-step">
-          <div class="step-number">02</div>
-          <div class="step-title">Confirm and pay</div>
-          <p class="step-desc">
-            Pay via bKash (01680064597) or choose cash on delivery.
-            We confirm your order once payment is received.
-          </p>
-        </div>
-        <div class="order-step">
-          <div class="step-number">03</div>
-          <div class="step-title">Receive your order</div>
-          <p class="step-desc">
-            Delivered via Pathao courier across Bangladesh.
-            Most orders arrive within 2 to 3 business days.
-          </p>
-        </div>
+<!-- HOW TO ORDER -->
+<section class="order" id="order">
+  <div class="constrain">
+    <p class="section-label">How to Order</p>
+    <h2 class="section-title">Three steps.<br>Delivered to your door.</h2>
+    <p class="order-intro">No checkout process. A message is all it takes.</p>
+    <hr class="section-rule" />
+    <div class="order-steps">
+      <div class="order-step">
+        <div class="step-number">01</div>
+        <div class="step-title">Message us on Facebook</div>
+        <p class="step-desc">
+          Send a DM to our Facebook page with the product name and quantity.
+          We will confirm availability and send you the total.
+        </p>
       </div>
-      <div class="order-cta-wrap">
-        <p class="order-reassurance">Not happy with your first order? We will make it right.</p>
-        <a href="https://www.facebook.com/JAPspired" target="_blank" class="order-cta">
-          Message us on Facebook <span class="arrow">&#8594;</span>
-        </a>
-        <p class="order-note">We typically respond within a few hours.</p>
+      <div class="order-step">
+        <div class="step-number">02</div>
+        <div class="step-title">Confirm and pay</div>
+        <p class="step-desc">
+          Pay via bKash (01680064597) or choose cash on delivery.
+          We confirm your order once payment is received.
+        </p>
       </div>
-    </div><!-- /constrain -->
-  </section>
-
-  <!-- FOOTER — with final CTA -->
-  <footer>
-    <div class="constrain" style="width:100%;">
-      <div class="footer-cta-band">
-        <p class="footer-cta-text">Find the right tool for your desk.</p>
-        <a href="https://www.facebook.com/JAPspired" target="_blank" class="footer-cta-btn">
-          Shop on Facebook <span class="arrow">&#8594;</span>
-        </a>
-      </div>
-      <div class="footer-bottom">
-        <a href="#" class="footer-logo">JAPspired</a>
-        <ul class="footer-links">
-          <li><a href="https://www.facebook.com/JAPspired" target="_blank">Facebook</a></li>
-          <li><a href="https://www.instagram.com/japspired" target="_blank">Instagram</a></li>
-          <li><a href="#products">Products</a></li>
-          <li><a href="#order">How to Order</a></li>
-        </ul>
-        <p class="footer-copy">Dhaka, Bangladesh</p>
+      <div class="order-step">
+        <div class="step-number">03</div>
+        <div class="step-title">Receive your order</div>
+        <p class="step-desc">
+          Delivered across Bangladesh.
+          Most orders arrive within 2 to 3 business days.
+        </p>
       </div>
     </div>
-  </footer>
+    <div class="order-cta-wrap">
+      <a href="https://www.facebook.com/JAPspired" target="_blank" class="order-cta">
+        Message us on Facebook <span class="arrow">&#8594;</span>
+      </a>
+      <p class="order-note">We typically respond within a few hours.</p>
+    </div>
+  </div>
+</section>
 
-  <script>
-    const hamburger = document.getElementById('hamburger');
-    const mobileNav = document.getElementById('mobileNav');
+<!-- FOOTER -->
+<footer>
+  <div class="constrain" style="width:100%;">
+    <div class="footer-cta-band">
+      <p class="footer-cta-text">Find the right tool for your desk.</p>
+      <a href="https://www.facebook.com/JAPspired" target="_blank" class="footer-cta-btn">
+        Shop on Facebook <span class="arrow">&#8594;</span>
+      </a>
+    </div>
+    <div class="footer-bottom">
+      <a href="#" class="footer-logo">JAPspired</a>
+      <ul class="footer-links">
+        <li><a href="https://www.facebook.com/JAPspired" target="_blank">Facebook</a></li>
+        <li><a href="https://www.instagram.com/japspired" target="_blank">Instagram</a></li>
+        <li><a href="#products">Products</a></li>
+        <li><a href="#order">How to Order</a></li>
+      </ul>
+      <p class="footer-copy">Dhaka, Bangladesh</p>
+    </div>
+  </div>
+</footer>
 
-    hamburger.addEventListener('click', () => {
-      hamburger.classList.toggle('open');
-      mobileNav.classList.toggle('open');
-    });
-
-    function closeNav() {
-      hamburger.classList.remove('open');
-      mobileNav.classList.remove('open');
-    }
-  </script>
-
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const mobileNav = document.getElementById('mobileNav');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileNav.classList.toggle('open');
+  });
+  function closeNav() {
+    hamburger.classList.remove('open');
+    mobileNav.classList.remove('open');
+  }
+</script>
 </body>
 </html>
