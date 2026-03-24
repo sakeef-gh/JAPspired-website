@@ -106,8 +106,6 @@
     .hero-cta:hover .arrow { transform: translateX(4px); }
     .arrow { display: inline-block; transition: transform 0.2s; }
 
-    /* pen showcase removed — no longer used */
-
     /* SECTION SHARED */
     section { padding: 100px 64px; }
     .section-label {
@@ -162,17 +160,18 @@
       font-size: 0.83rem; line-height: 1.75; color: var(--charcoal-light);
       margin-bottom: 28px; flex: 1;
     }
+    .product-ink {
+      font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--charcoal-light); margin-bottom: 20px;
+    }
     .product-footer {
       display: flex; align-items: center; justify-content: space-between;
       margin-top: auto; padding-top: 20px; border-top: 1px solid var(--rule);
     }
     .product-price {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.7rem; font-weight: 400; color: var(--navy);
-    }
-    .product-price span {
-      font-family: 'DM Sans', sans-serif; font-size: 0.72rem;
-      color: var(--charcoal-light); letter-spacing: 0.06em; margin-left: 4px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.1rem; font-weight: 400; color: var(--navy);
+      letter-spacing: 0.04em;
     }
 
     /* PRODUCTS CTA WRAP */
@@ -181,8 +180,6 @@
       display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
     }
     .products-cta-note { font-size: 0.82rem; color: var(--charcoal-light); line-height: 1.6; }
-
-
 
     /* FOOTER CTA BAND */
     .footer-cta-band {
@@ -253,8 +250,6 @@
     .hero-heading  { animation: fadeUp 0.6s ease both; animation-delay: 0.25s; }
     .hero-body     { animation: fadeUp 0.6s ease both; animation-delay: 0.4s; }
     .hero-cta      { animation: fadeUp 0.6s ease both; animation-delay: 0.55s; }
-    .pen-showcase  { animation: fadeUp 0.6s ease both; animation-delay: 0.3s; }
-    .hero-note     { animation: fadeUp 0.6s ease both; animation-delay: 0.5s; }
 
     /* DESKTOP MAX WIDTH */
     .constrain { max-width: 1400px; margin: 0 auto; width: 100%; }
@@ -368,29 +363,14 @@
       <!-- Sarasa Clip -->
       <div class="product-card">
         <div class="product-card-body">
-          <p class="product-tag">Gel Pen &ndash; Zebra</p>
-          <h3 class="product-name">Sarasa Clip 0.5mm</h3>
+          <p class="product-tag">Gel &ndash; Black Ink</p>
+          <h3 class="product-name">Zebra Sarasa Clip</h3>
           <p class="product-desc">
             Smooth gel ink with a retractable clip design. Consistent from the first stroke to the last.
             If you are new to Japanese pens, this is where to start.
           </p>
           <div class="product-footer">
-            <div class="product-price">&#2547;150 <span>BDT</span></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- bLen U -->
-      <div class="product-card">
-        <div class="product-card-body">
-          <p class="product-tag">Ballpoint &ndash; Zebra</p>
-          <h3 class="product-name">bLen U 0.5mm</h3>
-          <p class="product-desc">
-            Built to reduce hand fatigue. Low centre of gravity, stabilised barrel.
-            Winner of all three major Japanese stationery design awards.
-          </p>
-          <div class="product-footer">
-            <div class="product-price">&#2547;270 <span>BDT</span></div>
+            <div class="product-price">150 BDT</div>
           </div>
         </div>
       </div>
@@ -398,14 +378,14 @@
       <!-- Jetstream -->
       <div class="product-card">
         <div class="product-card-body">
-          <p class="product-tag">Ballpoint &ndash; Uni-ball</p>
-          <h3 class="product-name">Jetstream 0.5mm</h3>
+          <p class="product-tag">Ballpoint &ndash; Black Ink</p>
+          <h3 class="product-name">Uni-ball Jetstream</h3>
           <p class="product-desc">
             The world's bestselling ballpoint. Hybrid ink that flows like gel but dries like oil.
             Fast, smooth, reliable.
           </p>
           <div class="product-footer">
-            <div class="product-price">&#2547;160 <span>BDT</span></div>
+            <div class="product-price">160 BDT</div>
           </div>
         </div>
       </div>
@@ -413,14 +393,29 @@
       <!-- Uni-ball One -->
       <div class="product-card">
         <div class="product-card-body">
-          <p class="product-tag">Gel Pen &ndash; Uni-ball</p>
-          <h3 class="product-name">Uni-ball One 0.5mm</h3>
+          <p class="product-tag">Gel &ndash; Black Ink</p>
+          <h3 class="product-name">Uni-ball One</h3>
           <p class="product-desc">
             Deep, saturated ink with a concentrated pigment formula. Colours stay vivid on paper
             longer than standard gel ink. The most visually distinctive pen in the range.
           </p>
           <div class="product-footer">
-            <div class="product-price">&#2547;180 <span>BDT</span></div>
+            <div class="product-price">180 BDT</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- bLen U -->
+      <div class="product-card">
+        <div class="product-card-body">
+          <p class="product-tag">Ballpoint &ndash; Black Ink</p>
+          <h3 class="product-name">Zebra bLen U</h3>
+          <p class="product-desc">
+            Built to reduce hand fatigue. Low centre of gravity, stabilised barrel.
+            Winner of all three major Japanese stationery design awards.
+          </p>
+          <div class="product-footer">
+            <div class="product-price">270 BDT</div>
           </div>
         </div>
       </div>
@@ -428,14 +423,14 @@
       <!-- Kokuyo Campus Notebook -->
       <div class="product-card">
         <div class="product-card-body">
-          <p class="product-tag">Notebook &ndash; Kokuyo</p>
-          <h3 class="product-name">Campus Notebook</h3>
+          <p class="product-tag">Notebook</p>
+          <h3 class="product-name">Kokuyo Campus Notebook</h3>
           <p class="product-desc">
             Japan's most widely used student notebook. Lays flat when open, takes ink cleanly
             without bleed-through, and holds up to daily use. Designed for the way students actually write.
           </p>
           <div class="product-footer">
-            <div class="product-price">&#2547;380 <span>BDT</span></div>
+            <div class="product-price">380 BDT</div>
           </div>
         </div>
       </div>
