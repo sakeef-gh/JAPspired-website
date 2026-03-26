@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1a2744" />
   <title>JAPspired — Japanese Stationery in Bangladesh</title>
   <meta name="description" content="Authentic Japanese writing tools. Tested for comfort and daily use. Delivered across Bangladesh." />
   <link rel="canonical" href="https://japspired.com/" />
@@ -16,8 +17,38 @@
   <meta property="og:title" content="JAPspired — Japanese Stationery in Bangladesh" />
   <meta property="og:description" content="Authentic Japanese writing tools — sourced directly from Japan, delivered across Bangladesh. Zebra, Uni-ball, and Kokuyo at honest prices." />
   <meta property="og:image" content="https://japspired.com/images/Sarasa_clip.webp" />
+  <meta property="og:image:alt" content="Zebra Sarasa Clip gel pen product image" />
+  <meta property="og:image:width" content="800" />
+  <meta property="og:image:height" content="800" />
   <meta property="og:site_name" content="JAPspired" />
   <meta property="fb:app_id" content="966242223397117" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="JAPspired — Japanese Stationery in Bangladesh" />
+  <meta name="twitter:description" content="Authentic Japanese writing tools — sourced directly from Japan, delivered across Bangladesh. Zebra, Uni-ball, and Kokuyo at honest prices." />
+  <meta name="twitter:image" content="https://japspired.com/images/Sarasa_clip.webp" />
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "JAPspired",
+    "url": "https://japspired.com/",
+    "logo": "https://japspired.com/images/favicon.png",
+    "description": "Authentic Japanese writing tools sourced directly from Japan, delivered across Bangladesh.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Dhaka",
+      "addressCountry": "BD"
+    },
+    "sameAs": [
+      "https://www.facebook.com/JAPspired",
+      "https://www.instagram.com/japspired"
+    ]
+  }
+  </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -174,10 +205,6 @@
       font-size: 0.83rem; line-height: 1.75; color: var(--charcoal-light);
       margin-bottom: 28px; flex: 1;
     }
-    .product-ink {
-      font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--charcoal-light); margin-bottom: 20px;
-    }
     .product-image {
       width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
       display: block; border-bottom: 1px solid var(--rule);
@@ -246,7 +273,7 @@
     .order-note { font-size: 0.8rem; color: var(--charcoal-light); }
 
     /* FOOTER */
-    footer { background: var(--charcoal); color: rgba(255,255,255,0.5); padding: 48px 64px; }
+    footer { background: var(--charcoal); color: rgba(255,255,255,0.75); padding: 48px 64px; }
     .footer-logo {
       font-family: 'Cormorant Garamond', serif; font-size: 1.2rem;
       font-weight: 500; color: #fff; letter-spacing: 0.08em; text-decoration: none;
@@ -254,7 +281,7 @@
     .footer-links { display: flex; gap: 28px; list-style: none; }
     .footer-links a {
       font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
-      color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.2s;
+      color: rgba(255,255,255,0.75); text-decoration: none; transition: color 0.2s;
     }
     .footer-links a:hover { color: #fff; }
     .footer-copy { font-size: 0.72rem; letter-spacing: 0.06em; }
@@ -331,7 +358,7 @@
 <!-- NAV -->
 <nav>
   <div class="constrain" style="display:flex;justify-content:space-between;align-items:center;width:100%;">
-    <a href="#" class="nav-logo">JAPspired</a>
+    <a href="#home" class="nav-logo">JAPspired</a>
     <ul class="nav-links">
       <li><a href="#products">Products</a></li>
       <li><a href="#about">About</a></li>
@@ -350,6 +377,8 @@
   <li><a href="#order" onclick="closeNav()">How to Order</a></li>
 </ul>
 
+<main>
+
 <!-- HERO -->
 <section class="hero" id="home">
   <div class="hero-left">
@@ -363,7 +392,7 @@
       JAPspired sources writing tools directly from Japan and delivers them across Bangladesh.
       Every product is tested for comfort, precision, and daily use before it reaches you.
     </p>
-    <p class="hero-social-proof">Used by writers, students, and daily note-takers across Bangladesh.</p>
+    <p class="hero-social-proof">Used by writers, students, professionals and daily note-takers across Bangladesh.</p>
     <a href="https://www.facebook.com/JAPspired" target="_blank" class="hero-cta">
       Shop on Facebook <span class="arrow">&#8594;</span>
     </a>
@@ -380,7 +409,7 @@
 
       <!-- Sarasa Clip -->
       <div class="product-card">
-        <img src="images/Sarasa_clip.webp" alt="Zebra Sarasa Clip" class="product-image" />
+        <img src="images/Sarasa_clip.webp" alt="Zebra Sarasa Clip gel pen" class="product-image" loading="lazy" />
         <div class="product-card-body">
           <p class="product-tag">Gel &ndash; Black Ink</p>
           <h3 class="product-name">Zebra Sarasa Clip</h3>
@@ -396,7 +425,7 @@
 
       <!-- Jetstream -->
       <div class="product-card">
-        <img src="images/Jetstream.webp" alt="Uni-ball Jetstream" class="product-image" />
+        <img src="images/Jetstream.webp" alt="Uni-ball Jetstream ballpoint pen" class="product-image" loading="lazy" />
         <div class="product-card-body">
           <p class="product-tag">Ballpoint &ndash; Black Ink</p>
           <h3 class="product-name">Uni-ball Jetstream</h3>
@@ -412,7 +441,7 @@
 
       <!-- Uni-ball One -->
       <div class="product-card">
-        <img src="images/Uni-ball_one.webp" alt="Uni-ball One" class="product-image" />
+        <img src="images/Uni-ball_one.webp" alt="Uni-ball One gel pen" class="product-image" loading="lazy" />
         <div class="product-card-body">
           <p class="product-tag">Gel &ndash; Black Ink</p>
           <h3 class="product-name">Uni-ball One</h3>
@@ -428,7 +457,7 @@
 
       <!-- bLen U -->
       <div class="product-card">
-        <img src="images/bLen_U.webp" alt="Zebra bLen U" class="product-image" />
+        <img src="images/bLen_U.webp" alt="Zebra bLen U ballpoint pen" class="product-image" loading="lazy" />
         <div class="product-card-body">
           <p class="product-tag">Ballpoint &ndash; Black Ink</p>
           <h3 class="product-name">Zebra bLen U</h3>
@@ -444,7 +473,7 @@
 
       <!-- Kokuyo Campus Notebook -->
       <div class="product-card">
-        <img src="images/Kokuyo_Campus_Notebook.webp" alt="Kokuyo Campus Notebook" class="product-image" />
+        <img src="images/Kokuyo_Campus_Notebook.webp" alt="Kokuyo Campus Notebook open flat" class="product-image" loading="lazy" />
         <div class="product-card-body">
           <p class="product-tag">Notebook</p>
           <h3 class="product-name">Kokuyo Campus Notebook</h3>
@@ -517,7 +546,7 @@
         <div class="step-number">02</div>
         <div class="step-title">Confirm and pay</div>
         <p class="step-desc">
-          Pay via bKash (01680064597) or choose cash on delivery.
+          Pay via bKash (<a href="tel:+8801680064597" style="color:inherit;">01680064597</a>) or choose cash on delivery.
           We confirm your order once payment is received.
         </p>
       </div>
@@ -539,6 +568,8 @@
   </div>
 </section>
 
+</main>
+
 <!-- FOOTER -->
 <footer>
   <div class="constrain" style="width:100%;">
@@ -549,7 +580,7 @@
       </a>
     </div>
     <div class="footer-bottom">
-      <a href="#" class="footer-logo">JAPspired</a>
+      <a href="#home" class="footer-logo">JAPspired</a>
       <ul class="footer-links">
         <li><a href="https://www.facebook.com/JAPspired" target="_blank">Facebook</a></li>
         <li><a href="https://www.instagram.com/japspired" target="_blank">Instagram</a></li>
