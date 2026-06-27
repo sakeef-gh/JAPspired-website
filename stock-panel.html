@@ -26,15 +26,16 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'DM Sans', sans-serif; background: var(--off-white); color: var(--charcoal); min-height: 100vh; font-size: 13px; }
 
-header { background: var(--navy); padding: 22px 36px 18px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+header { background: var(--navy); padding: 22px 36px 18px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
 header h1 { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; color: var(--white); letter-spacing: 0.02em; }
 header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); letter-spacing: 0.08em; text-transform: uppercase; }
 .refresh-area { margin-left: auto; display: flex; align-items: center; gap: 10px; }
 .last-updated { font-size: 10px; color: rgba(255,255,255,0.45); font-family: 'DM Mono', monospace; }
 .btn-refresh {
   background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25);
-  color: rgba(255,255,255,0.85); font-family: 'DM Sans', sans-serif; font-size: 11px;
-  padding: 6px 14px; border-radius: 4px; cursor: pointer; transition: background 0.15s;
+  color: rgba(255,255,255,0.85); font-family: 'DM Sans', sans-serif; font-size: 12px;
+  padding: 11px 20px; min-height: 40px; border-radius: 4px; cursor: pointer; transition: background 0.15s;
+  display: inline-flex; align-items: center; justify-content: center;
 }
 .btn-refresh:hover { background: rgba(255,255,255,0.2); }
 .btn-refresh:disabled { opacity: 0.5; cursor: default; }
@@ -46,10 +47,12 @@ header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,25
   color: var(--mid); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
 }
 
-.summary-strip { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 22px; max-width: 600px; }
-.summary-item { background: var(--white); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+.summary-strip { display: flex; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
+.summary-item { background: var(--white); border: 1px solid var(--border); border-radius: 4px; padding: 14px 20px; min-width: 180px; flex: 0 0 auto; }
+.summary-item.primary { border-left: 3px solid var(--navy); }
 .summary-item .lbl { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--mid); margin-bottom: 5px; }
 .summary-item .val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--navy); }
+.summary-item.primary .val { font-size: 22px; }
 .summary-item .val.profit { color: var(--green); }
 
 .sheet-wrap { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: var(--white); margin-bottom: 28px; }
@@ -59,28 +62,45 @@ header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,25
   font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;
   color: rgba(255,255,255,0.7); padding: 9px 8px; text-align: right; white-space: nowrap; user-select: none;
 }
-.sheet-table th:first-child { text-align: left; }
+.sheet-table th:first-child, .sheet-table th:nth-child(2) { text-align: left; }
 .sheet-table td { padding: 10px 12px; border-bottom: 1px solid #EDE8E0; vertical-align: middle; text-align: right; font-family: 'DM Mono', monospace; font-size: 12px; }
 .sheet-table td:first-child { text-align: left; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 13px; }
+.sheet-table td.lot-label { text-align: left; color: var(--mid); font-family: 'DM Sans', sans-serif; }
 .sheet-table tbody tr:last-child td { border-bottom: none; }
-.sheet-table tbody tr:nth-child(even) { background: var(--row-alt); }
 .sheet-table tbody tr:hover { background: var(--navy-pale); }
+.sheet-table td.profit-cell { color: var(--green); font-weight: 500; }
 .low-stock { color: var(--red); font-weight: 600; }
 .low-stock-pill {
   display: inline-block; margin-left: 6px; font-size: 9px; background: var(--red-bg); color: var(--red);
   padding: 1px 6px; border-radius: 20px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em;
 }
+.out-stock-pill {
+  display: inline-block; margin-left: 6px; font-size: 9px; background: var(--red); color: var(--white);
+  padding: 1px 6px; border-radius: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+}
 .cost-note { font-size: 10px; color: var(--mid); display: block; margin-top: 1px; }
 
-.mobile-cards { display: none; }
-.sku-card { background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; margin-bottom: 10px; }
-.sku-card-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
-.sku-card-header .name { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--navy); }
-.sku-card-header .remaining { font-family: 'DM Mono', monospace; font-size: 13px; }
+.sku-group { margin-bottom: 14px; }
+.sku-group:last-child { margin-bottom: 0; }
+.sku-group-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 12px 16px 10px; background: var(--white); border: 1px solid var(--border);
+  border-bottom: none; border-radius: 6px 6px 0 0;
+}
+.sku-group-header .name { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--navy); }
+.sku-group-header .remaining { font-family: 'DM Mono', monospace; font-size: 13px; }
+.sku-group-body { border: 1px solid var(--border); border-radius: 0 0 6px 6px; overflow: hidden; background: var(--white); }
+.sku-group-body.single-lot { border-radius: 6px; }
+.lot-row { padding: 12px 16px; border-top: 1px solid #EDE8E0; }
+.sku-group-body.single-lot .lot-row { border-top: none; }
+.lot-row-label { font-size: 10px; color: var(--mid); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
 .card-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 .card-stat { display: flex; flex-direction: column; gap: 2px; }
 .card-stat label { font-size: 9px; color: var(--mid); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
 .card-stat .v { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--charcoal); }
+.card-stat .v.profit-cell { color: var(--green); }
+
+.mobile-cards { display: none; }
 
 .state-msg { text-align: center; padding: 60px 20px; color: var(--mid); font-size: 13px; }
 .state-msg.error { color: var(--red); }
@@ -97,8 +117,10 @@ header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,25
   .container { padding: 16px 16px 48px; }
   .desktop-only { display: none; }
   .mobile-cards { display: block; }
-  .summary-strip { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .summary-strip { gap: 8px; }
+  .summary-item { min-width: 0; flex: 1 1 0; padding: 12px 14px; }
   .summary-item .val { font-size: 15px; }
+  .summary-item.primary .val { font-size: 18px; }
   .refresh-area { margin-left: 0; width: 100%; justify-content: space-between; margin-top: 8px; }
 }
 @media (min-width: 769px) {
@@ -130,7 +152,7 @@ header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,25
 
     <div class="section-label">Overview</div>
     <div class="summary-strip">
-      <div class="summary-item"><div class="lbl">Remaining Units (total)</div><div class="val" id="sumRemaining">—</div></div>
+      <div class="summary-item primary"><div class="lbl">Remaining Units (total)</div><div class="val" id="sumRemaining">—</div></div>
       <div class="summary-item"><div class="lbl">Units Sold (all time)</div><div class="val" id="sumSold">—</div></div>
     </div>
 
@@ -199,13 +221,28 @@ async function loadStock() {
 }
 
 function render(data) {
-  const lots = data.lots.slice().sort(function(a, b) {
-    return a.sku.localeCompare(b.sku) || a.lot - b.lot;
+  // Group lots by SKU, compute per-group stats
+  const groupsBySku = {};
+  data.lots.forEach(l => {
+    if (!groupsBySku[l.sku]) groupsBySku[l.sku] = [];
+    groupsBySku[l.sku].push(l);
   });
+  const groups = Object.keys(groupsBySku).map(sku => {
+    const lots = groupsBySku[sku].slice().sort((a, b) => a.lot - b.lot);
+    return {
+      sku: sku,
+      lots: lots,
+      minRemaining: Math.min(...lots.map(l => l.remainingStock)),
+      totalRemaining: lots.reduce((a, l) => a + l.remainingStock, 0),
+      totalSold: lots.reduce((a, l) => a + l.unitsSoldFromLot, 0)
+    };
+  });
+  // Most urgent (lowest remaining) SKU group floats to top
+  groups.sort((a, b) => a.minRemaining - b.minRemaining);
 
-  // Summary — sums across all lots
-  const totalRemaining = lots.reduce((a, l) => a + l.remainingStock, 0);
-  const totalSold = lots.reduce((a, l) => a + l.unitsSoldFromLot, 0);
+  // Overview
+  const totalRemaining = groups.reduce((a, g) => a + g.totalRemaining, 0);
+  const totalSold = groups.reduce((a, g) => a + g.totalSold, 0);
   document.getElementById('sumRemaining').textContent = totalRemaining;
   document.getElementById('sumSold').textContent = totalSold;
 
@@ -215,50 +252,63 @@ function render(data) {
     day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
   });
 
-  // Desktop table — one row per lot, grouped visually by SKU
+  function severityHtml(remaining) {
+    if (remaining <= 0) return '<span class="out-stock-pill">Out</span>';
+    if (remaining <= LOW_STOCK_THRESHOLD) return '<span class="low-stock-pill">Low</span>';
+    return '';
+  }
+
+  // Desktop table — rows grouped by SKU, banded by group (not by row),
+  // most urgent SKU first
   const tbody = document.getElementById('skuBody');
   tbody.innerHTML = '';
-  let lastSku = null;
-  lots.forEach(l => {
-    const low = l.remainingStock <= LOW_STOCK_THRESHOLD;
-    const isNewGroup = l.sku !== lastSku;
-    const tr = document.createElement('tr');
-    if (isNewGroup) tr.style.borderTop = '2px solid var(--border)';
-    tr.innerHTML = `
-      <td>${isNewGroup ? l.sku : ''}</td>
-      <td style="text-align:right">Lot ${l.lot}</td>
-      <td><span class="${low ? 'low-stock' : ''}">${l.remainingStock}</span>${low ? '<span class="low-stock-pill">Low</span>' : ''}</td>
-      <td>${bdt(l.unitCost)}</td>
-      <td>${bdt(l.sellingPrice)}</td>
-      <td>${bdt(l.profitPerUnit)}</td>
-      <td>${l.unitsSoldFromLot}</td>`;
-    tbody.appendChild(tr);
-    lastSku = l.sku;
+  groups.forEach((g, groupIndex) => {
+    g.lots.forEach((l, lotIndex) => {
+      const isCritical = l.remainingStock <= 0;
+      const isLow = l.remainingStock > 0 && l.remainingStock <= LOW_STOCK_THRESHOLD;
+      const tr = document.createElement('tr');
+      if (groupIndex % 2 === 1) tr.style.background = 'var(--row-alt)';
+      if (lotIndex === 0 && groupIndex > 0) tr.style.borderTop = '2px solid var(--border)';
+      tr.innerHTML = `
+        <td>${lotIndex === 0 ? g.sku : ''}</td>
+        <td class="lot-label">Lot ${l.lot}</td>
+        <td><span class="${isCritical || isLow ? 'low-stock' : ''}">${l.remainingStock}</span>${severityHtml(l.remainingStock)}</td>
+        <td>${bdt(l.unitCost)}</td>
+        <td>${bdt(l.sellingPrice)}</td>
+        <td class="profit-cell">${bdt(l.profitPerUnit)}</td>
+        <td>${l.unitsSoldFromLot}</td>`;
+      tbody.appendChild(tr);
+    });
   });
 
-  // Mobile cards — one card per lot, header shows "SKU — Lot N" when a
-  // SKU has more than one lot, otherwise just the SKU name
-  const lotCountBySku = {};
-  lots.forEach(l => { lotCountBySku[l.sku] = (lotCountBySku[l.sku] || 0) + 1; });
-
+  // Mobile cards — one outer group card per SKU, lots nested inside
   const cards = document.getElementById('skuCards');
   cards.innerHTML = '';
-  lots.forEach(l => {
-    const low = l.remainingStock <= LOW_STOCK_THRESHOLD;
-    const hasMultipleLots = lotCountBySku[l.sku] > 1;
-    const card = document.createElement('div');
-    card.className = 'sku-card';
-    card.innerHTML = `
-      <div class="sku-card-header">
-        <span class="name">${l.sku}${hasMultipleLots ? ' — Lot ' + l.lot : ''}</span>
-        <span class="remaining ${low ? 'low-stock' : ''}">${l.remainingStock} left${low ? '<span class="low-stock-pill">Low</span>' : ''}</span>
+  groups.forEach(g => {
+    const singleLot = g.lots.length === 1;
+    const groupEl = document.createElement('div');
+    groupEl.className = 'sku-group';
+
+    let lotRowsHtml = '';
+    g.lots.forEach(l => {
+      lotRowsHtml += `
+        <div class="lot-row">
+          ${!singleLot ? `<div class="lot-row-label">Lot ${l.lot}</div>` : ''}
+          <div class="card-row">
+            <div class="card-stat"><label>Remaining</label><span class="v ${l.remainingStock <= LOW_STOCK_THRESHOLD ? 'low-stock' : ''}">${l.remainingStock}${severityHtml(l.remainingStock)}</span></div>
+            <div class="card-stat"><label>Unit Cost</label><span class="v">${bdt(l.unitCost)}</span></div>
+            <div class="card-stat"><label>Profit/Unit</label><span class="v profit-cell">${bdt(l.profitPerUnit)}</span></div>
+          </div>
+        </div>`;
+    });
+
+    groupEl.innerHTML = `
+      <div class="sku-group-header">
+        <span class="name">${g.sku}</span>
+        <span class="remaining">${g.totalRemaining} left</span>
       </div>
-      <div class="card-row">
-        <div class="card-stat"><label>Unit Cost</label><span class="v">${bdt(l.unitCost)}</span></div>
-        <div class="card-stat"><label>Sell Price</label><span class="v">${bdt(l.sellingPrice)}</span></div>
-        <div class="card-stat"><label>Profit/Unit</label><span class="v">${bdt(l.profitPerUnit)}</span></div>
-      </div>`;
-    cards.appendChild(card);
+      <div class="sku-group-body ${singleLot ? 'single-lot' : ''}">${lotRowsHtml}</div>`;
+    cards.appendChild(groupEl);
   });
 }
 
