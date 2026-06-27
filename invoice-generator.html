@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>JAPspired Invoice</title>
+<!-- FIX #4: <link> tag instead of @import — faster on mobile -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- html2canvas loaded in <head> so offline check works reliably -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --navy: #1a2744;
+    --navy-light: #243358;
+    --offwhite: #f5f2ec;
+    --charcoal: #2c2c2c;
+    --charcoal-light: #555;
+    --border: #ddd8ce;
+    --error: #c0392b;
+    --success-bg: #eaf4ef;
+    --success-border: #a8d5b5;
+    --success-text: #2e7d5e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--offwhite);
+    font-family: 'DM Sans', Georgia, sans-serif;
+    color: var(--charcoal);
+    min-height: 100vh;
+    padding: 0 0 80px 0;
+  }
+  .app-header {
+    background: var(--navy);
+    padding: 20px 20px 16px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .app-header-inner {
+    max-width: 1100px; margin: 0 auto; width: 100%;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .app-header-left h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--offwhite); font-size: 22px; font-weight: 600; letter-spacing: 0.02em;
+  }
+  .app-header-left p {
+    color: rgba(245,242,236,0.55); font-size: 11px; font-weight: 300;
+    margin-top: 2px; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .reset-btn {
+    background: rgba(245,242,236,0.12); border: 1px solid rgba(245,242,236,0.25);
+    color: rgba(245,242,236,0.8); font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500; padding: 10px 18px; min-height: 40px;
+    border-radius: 6px; cursor: pointer; letter-spacing: 0.04em; transition: all 0.15s;
+  }
+  .reset-btn:active { background: rgba(245,242,236,0.22); }
+  .page-wrap { max-width: 1100px; margin: 0 auto; }
+  .form-grid { display: block; }
+  .form-col { display: block; }
+  .section {
+    background: #fff; margin: 12px 14px 0;
+    border-radius: 10px; overflow: hidden; border: 1px solid var(--border);
+  }
+  .section-label {
+    background: var(--navy); color: var(--offwhite);
+    font-size: 10px; font-weight: 500; letter-spacing: 0.12em;
+    text-transform: uppercase; padding: 7px 14px;
+  }
+  .section-body { padding: 14px; }
+  .field { margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: block; font-size: 11px; font-weight: 500;
+    color: var(--charcoal-light); margin-bottom: 5px;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .field input, .field select, .field textarea {
+    width: 100%; background: var(--offwhite); border: 1px solid var(--border);
+    border-radius: 7px; padding: 11px 13px;
+    font-family: 'DM Sans', Georgia, sans-serif; font-size: 16px;
+    color: var(--charcoal); outline: none; transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+  .field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--navy); }
+  .field textarea { resize: none; height: 64px; }
+  .prefix-row {
+    display: flex; align-items: center; background: var(--offwhite);
+    border: 1px solid var(--border); border-radius: 7px; overflow: hidden;
+  }
+  .prefix-row:focus-within { border-color: var(--navy); }
+  .prefix-label {
+    padding: 11px 12px; font-size: 15px; font-weight: 600;
+    color: var(--navy); background: #e8e4dc;
+    border-right: 1px solid var(--border); white-space: nowrap;
+  }
+  .prefix-row input { border: none; border-radius: 0; background: transparent; flex: 1; }
+  .pay-toggle { display: flex; gap: 8px; }
+  .pay-btn {
+    flex: 1; padding: 12px 8px; border: 2px solid var(--border);
+    border-radius: 8px; background: var(--offwhite);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    color: var(--charcoal-light); cursor: pointer; transition: all 0.15s; text-align: center;
+  }
+  .pay-btn.active { border-color: var(--navy); background: var(--navy); color: var(--offwhite); }
+  .pay-btn .pay-icon { font-size: 18px; display: block; margin-bottom: 3px; }
+  .add-item-row { display: flex; gap: 8px; align-items: flex-end; }
+  .add-item-row .field { flex: 1; margin-bottom: 0; }
+  .add-item-row .qty-field { flex: 0 0 64px; }
+  .add-btn {
+    height: 44px; width: 44px; background: var(--navy);
+    border: none; border-radius: 8px; color: #fff; font-size: 22px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background 0.15s;
+  }
+  .add-btn:active { background: var(--navy-light); }
+  .items-list { margin-top: 12px; }
+  .items-empty {
+    text-align: center; padding: 18px 0 6px;
+    font-size: 12px; color: #bbb; letter-spacing: 0.04em;
+  }
+  .item-row {
+    display: flex; align-items: center; padding: 10px 12px;
+    background: var(--offwhite); border-radius: 8px; margin-bottom: 7px;
+    border: 1px solid var(--border);
+  }
+  .item-info { flex: 1; }
+  .item-name { font-size: 13px; font-weight: 500; color: var(--charcoal); }
+  .item-meta { font-size: 12px; color: var(--charcoal-light); margin-top: 1px; }
+  .item-price { font-size: 14px; font-weight: 600; color: var(--navy); margin-right: 10px; }
+  .item-del { background: none; border: none; color: #bbb; font-size: 20px; cursor: pointer; padding: 10px 10px; line-height: 1; min-width: 40px; min-height: 40px; }
+  .item-del:active { color: var(--error); }
+  .total-summary {
+    display: none; margin: 0 14px; background: var(--navy);
+    border-radius: 0 0 10px 10px; border: 1px solid var(--navy);
+    border-top: none; padding: 14px 16px;
+  }
+  .summary-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .summary-line:last-child { margin-bottom: 0; }
+  .summary-line .lbl { color: rgba(245,242,236,0.6); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .summary-line .val { color: rgba(245,242,236,0.75); font-size: 14px; font-weight: 500; }
+  .summary-divider { height: 1px; background: rgba(245,242,236,0.15); margin: 10px 0; }
+  .summary-line.grand .lbl { color: var(--offwhite); font-size: 13px; font-weight: 600; letter-spacing: 0.08em; }
+  .summary-line.grand .val { color: var(--offwhite); font-size: 22px; font-weight: 600; font-family: 'Playfair Display', Georgia, serif; }
+  .gen-btn {
+    display: block; width: calc(100% - 28px); margin: 16px 14px 0; padding: 16px;
+    background: var(--navy); color: var(--offwhite);
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    border: none; border-radius: 10px; cursor: pointer; transition: background 0.15s;
+  }
+  .gen-btn:active { background: var(--navy-light); }
+  .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .msg {
+    font-size: 12px; margin: 8px 14px 0; padding: 10px 14px;
+    border-radius: 8px; display: none;
+  }
+  .msg.error { color: var(--error); background: #fdf0ef; border: 1px solid #f5c6c2; }
+  .msg.success { color: var(--success-text); background: var(--success-bg); border: 1px solid var(--success-border); }
+
+  /* ── DESKTOP (≥900px) ──────────────────────────────────────────────
+     Everything above this point is the original mobile-first design,
+     untouched. This block only adds layout on wider screens — it never
+     changes mobile behavior, and never touches #invoice-render (the
+     hidden template used to generate the actual invoice JPG, which must
+     always stay at a fixed 800px regardless of viewport). */
+  @media (min-width: 900px) {
+    .page-wrap { padding: 0 24px; }
+    .form-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+      align-items: start; margin-top: 4px;
+    }
+    .section { margin: 16px 0 0; }
+    .form-col > .section:first-child { margin-top: 0; }
+    .pay-btn { max-width: 240px; }
+    .total-summary, .gen-btn, .msg { margin-left: 0; margin-right: 0; }
+    .gen-btn { width: 100%; }
+  }
+
+  /* INVOICE RENDER */
+  #invoice-render {
+    position: fixed; left: -9999px; top: 0;
+    width: 800px; background: var(--offwhite);
+    font-family: 'DM Sans', Georgia, sans-serif;
+  }
+  .inv-outer { width: 800px; background: var(--offwhite); padding: 0 0 40px 0; }
+  .inv-header {
+    background: var(--navy); padding: 36px 48px 28px;
+    display: flex; justify-content: space-between; align-items: flex-end;
+  }
+  .inv-brand { font-family: 'Playfair Display', Georgia, serif; color: var(--offwhite); font-size: 36px; font-weight: 600; }
+  .inv-brand-sub { color: rgba(245,242,236,0.5); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 4px; }
+  .inv-meta { text-align: right; }
+  .inv-num { color: var(--offwhite); font-size: 14px; font-weight: 500; letter-spacing: 0.04em; }
+  .inv-date { color: rgba(245,242,236,0.5); font-size: 12px; margin-top: 4px; }
+  .inv-body { padding: 36px 48px 0; }
+  .inv-to-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--charcoal-light); margin-bottom: 8px; }
+  .inv-customer-name { font-size: 20px; font-weight: 600; color: var(--charcoal); font-family: 'Playfair Display', Georgia, serif; word-break: break-word; max-width: 420px; }
+  .inv-customer-detail { font-size: 13px; color: var(--charcoal-light); margin-top: 4px; line-height: 1.6; word-break: break-word; max-width: 420px; }
+  .inv-divider { height: 1px; background: var(--border); margin: 28px 0; }
+  .inv-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .inv-table col.col-product { width: 45%; }
+  .inv-table col.col-price { width: 20%; }
+  .inv-table col.col-qty { width: 10%; }
+  .inv-table col.col-amount { width: 25%; }
+  .inv-table th { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--charcoal-light); font-weight: 500; padding: 0 0 10px; border-bottom: 1px solid var(--border); text-align: left; overflow: hidden; }
+  .inv-table th:last-child, .inv-table td:last-child { text-align: right; }
+  .inv-table td { padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--charcoal); vertical-align: middle; overflow: hidden; word-break: break-word; }
+  .inv-table td.item-col { font-weight: 500; padding-right: 8px; }
+  .inv-table td.muted { color: var(--charcoal-light); }
+  .inv-table td.amount { font-weight: 600; color: var(--navy); }
+  .inv-totals { width: 100%; margin-top: 20px; border-collapse: collapse; }
+  .inv-totals td { padding: 6px 0; font-size: 13px; color: var(--charcoal-light); border: none; }
+  .inv-totals td:last-child { text-align: right; font-weight: 500; color: var(--charcoal); }
+  .inv-totals tr.grand td { padding-top: 10px; border-top: 2px solid var(--navy); font-size: 16px; font-weight: 700; color: var(--navy); }
+  .inv-total-section { display: flex; justify-content: flex-end; margin-top: 8px; }
+  .inv-total-wrap { min-width: 260px; }
+  .inv-payment-row { margin-top: 28px; display: flex; gap: 12px; }
+  .inv-pay-box { flex: 1; background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; }
+  .inv-pay-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--charcoal-light); margin-bottom: 6px; }
+  .inv-pay-val { font-size: 14px; font-weight: 600; color: var(--charcoal); }
+  .inv-pay-sub { font-size: 12px; color: var(--charcoal-light); margin-top: 2px; }
+  .inv-footer { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .inv-footer-brand { font-family: 'Playfair Display', Georgia, serif; font-size: 13px; color: var(--charcoal-light); }
+  .inv-footer-note { font-size: 11px; color: #aaa; letter-spacing: 0.04em; }
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(26,39,68,0.85); z-index: 200;
+    flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  }
+  .overlay.show { display: flex; }
+  .overlay-text { color: var(--offwhite); font-size: 15px; letter-spacing: 0.04em; }
+  .spinner { width: 36px; height: 36px; border: 3px solid rgba(245,242,236,0.2); border-top-color: var(--offwhite); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-header-inner">
+    <div class="app-header-left">
+      <h1>JAPspired</h1>
+      <p>Invoice Generator</p>
+    </div>
+    <button class="reset-btn" onclick="resetForm()">New Invoice</button>
+  </div>
+</div>
+
+<div class="page-wrap">
+<div class="form-grid">
+<div class="form-col">
+
+<!-- INVOICE NUMBER -->
+<div class="section">
+  <div class="section-label">Invoice</div>
+  <div class="section-body">
+    <div class="field">
+      <label>Invoice Number</label>
+      <div class="prefix-row">
+        <span class="prefix-label">JAP-</span>
+        <!-- FIX #6: sanitise on blur instead of oninput to avoid Gboard cursor jumping -->
+        <input type="text" id="inv-num" placeholder="001" inputmode="numeric"
+               maxlength="20"
+               onblur="this.value=this.value.replace(/[^A-Za-z0-9\-]/g,'').trim()">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMER -->
+<div class="section">
+  <div class="section-label">Customer</div>
+  <div class="section-body">
+    <div class="field">
+      <label>Full Name</label>
+      <input type="text" id="cust-name" placeholder="Recipient name" maxlength="80">
+    </div>
+    <div class="field">
+      <label>Phone</label>
+      <input type="tel" id="cust-phone" placeholder="01XXXXXXXXX" inputmode="tel" maxlength="20" oninput="this.value=this.value.replace(/[^0-9+\-]/g,'')">
+    </div>
+    <div class="field">
+      <label>Delivery Address</label>
+      <textarea id="cust-addr" placeholder="Full delivery address" maxlength="300"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT METHOD -->
+<div class="section">
+  <div class="section-label">Payment Method</div>
+  <div class="section-body">
+    <div class="pay-toggle">
+      <button class="pay-btn active" id="btn-cod" onclick="setPayment('cod')">
+        <span class="pay-icon">💵</span>Cash on Delivery
+      </button>
+      <button class="pay-btn" id="btn-bkash" onclick="setPayment('bkash')">
+        <span class="pay-icon">📱</span>bKash
+      </button>
+    </div>
+  </div>
+</div>
+
+</div>
+<div class="form-col">
+
+<!-- ITEMS -->
+<div class="section">
+  <div class="section-label">Items</div>
+  <div class="section-body">
+    <div class="add-item-row">
+      <div class="field">
+        <label>Product</label>
+        <select id="sku-select">
+          <option value="">Select product…</option>
+          <optgroup label="── Zebra ──────────────">
+            <option value="Zebra Sarasa Clip Black|150">Sarasa Clip Black — ৳150</option>
+            <option value="Zebra Sarasa Clip Blue|150">Sarasa Clip Blue — ৳150</option>
+            <option value="Zebra bLen U|270">bLen U — ৳270</option>
+          </optgroup>
+          <optgroup label="── Uni-ball ────────────">
+            <option value="Uni-ball Jetstream Standard|160">Jetstream Standard — ৳160</option>
+            <option value="Uni-ball Jetstream Lite Touch|250">Jetstream Lite Touch — ৳250</option>
+            <option value="Uni-ball One Black|180">Uni-ball One Black — ৳180</option>
+            <option value="Uni-ball One Blue|180">Uni-ball One Blue — ৳180</option>
+          </optgroup>
+          <optgroup label="── Kokuyo ──────────────">
+            <option value="Kokuyo Campus Notebook|380">Campus Notebook — ৳380</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="field qty-field">
+        <label>Qty</label>
+        <input type="number" id="qty-input" value="1" min="1" max="99" step="1" inputmode="numeric">
+      </div>
+      <button class="add-btn" onclick="addItem()">+</button>
+    </div>
+    <div class="items-list" id="items-list">
+      <div class="items-empty" id="items-empty">No items added yet</div>
+    </div>
+  </div>
+</div>
+
+<!-- DELIVERY CHARGE -->
+<div class="section">
+  <div class="section-label">Delivery Charge</div>
+  <div class="section-body">
+    <div class="pay-toggle">
+      <button class="pay-btn active" id="btn-dhaka" onclick="setDelivery('dhaka')">
+        <span class="pay-icon">🏙️</span>Inside Dhaka — ৳60
+      </button>
+      <button class="pay-btn" id="btn-outside" onclick="setDelivery('outside')">
+        <span class="pay-icon">🚚</span>Outside Dhaka — ৳110
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DISCOUNT -->
+<div class="section">
+  <div class="section-label">Discount</div>
+  <div class="section-body">
+    <div class="field" style="margin-bottom:0;">
+      <label>Discount Amount (৳)</label>
+      <div class="prefix-row">
+        <span class="prefix-label">৳</span>
+        <input type="number" id="discount-amount" placeholder="0" min="0"
+               step="1" inputmode="numeric" oninput="onDiscountInput()">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOTAL SUMMARY -->
+<div class="total-summary" id="total-summary">
+  <div class="summary-line">
+    <span class="lbl">Subtotal</span>
+    <span class="val" id="subtotal-display">৳0</span>
+  </div>
+  <div class="summary-line">
+    <span class="lbl">Delivery</span>
+    <span class="val" id="delivery-display">৳0</span>
+  </div>
+  <div class="summary-line" id="discount-line" style="display:none;">
+    <span class="lbl">Discount</span>
+    <span class="val" id="discount-display" style="color:#2e7d5e;">—৳0</span>
+  </div>
+  <div class="summary-divider"></div>
+  <div class="summary-line grand">
+    <span class="lbl">Total</span>
+    <span class="val" id="total-display">৳0</span>
+  </div>
+</div>
+
+<div class="msg error" id="error-msg"></div>
+<div class="msg success" id="success-msg">Invoice downloaded successfully</div>
+<button class="gen-btn" id="gen-btn" onclick="generateInvoice()">Generate Invoice →</button>
+
+</div>
+</div>
+</div>
+
+<!-- HIDDEN INVOICE RENDER -->
+<div id="invoice-render">
+  <div class="inv-outer" id="inv-content"></div>
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="spinner"></div>
+  <div class="overlay-text">Generating invoice…</div>
+</div>
+
+<script>
+  var items = [];
+  var paymentMethod = 'cod';
+  var deliveryZone = 'dhaka';
+  var isGenerating = false;
+  var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwmQoAz2OtFADWXiqF9TVHkEOrFOCFgdqCc01-2P71CrxlmWePgSywL2SfvV0EANAZA/exec';
+
+  function esc(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function safeFilename(str) {
+    return String(str)
+      .replace(/[^a-zA-Z0-9\-_\u0980-\u09FF]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '') || 'invoice';
+  }
+
+  function unlockBtn() {
+    isGenerating = false;
+    document.getElementById('gen-btn').disabled = false;
+  }
+
+  function hideOverlay() {
+    document.getElementById('overlay').classList.remove('show');
+  }
+
+  function setPayment(method) {
+    paymentMethod = method;
+    document.getElementById('btn-cod').classList.toggle('active', method === 'cod');
+    document.getElementById('btn-bkash').classList.toggle('active', method === 'bkash');
+  }
+
+  function onDeliveryInput() {
+    var el = document.getElementById('delivery-charge');
+    var val = el.value;
+    // FIX #2: explicit NaN guard before comparisons — no silent NaN reliance
+    var parsed = parseFloat(val);
+    if (val === '' || isNaN(parsed)) {
+      renderTotal();
+      return;
+    }
+    // Strip decimals in real time
+    if (val.indexOf('.') !== -1) el.value = Math.round(parsed);
+    // Enforce bounds
+    var int = parseInt(el.value);
+    if (int < 0) el.value = 0;
+    if (int > 9999) el.value = 9999;
+    renderTotal();
+  }
+
+  function addItem() {
+    var skuSelect = document.getElementById('sku-select');
+    var qtyInput = document.getElementById('qty-input');
+    var val = skuSelect.value;
+    if (!val) return;
+
+    var qty = Math.floor(parseFloat(qtyInput.value));
+    if (isNaN(qty) || qty < 1) return showError('Quantity must be at least 1.');
+    if (qty > 99) return showError('Maximum quantity per item is 99.');
+
+    var parts = val.split('|');
+    var name = parts[0];
+    var price = parseInt(parts[1]);
+    var existing = null;
+    for (var fi = 0; fi < items.length; fi++) { if (items[fi].name === name) { existing = items[fi]; break; } }
+    if (existing) {
+      var newQty = existing.qty + qty;
+      if (newQty > 99) return showError('Total quantity for this item cannot exceed 99.');
+      existing.qty = newQty;
+    } else {
+      items.push({ name: name, price: price, qty: qty });
+    }
+    skuSelect.value = '';
+    qtyInput.value = 1;
+    renderItems();
+  }
+
+  function removeItem(idx) {
+    items.splice(idx, 1);
+    renderItems();
+  }
+
+  function setDelivery(zone) {
+    deliveryZone = zone;
+    document.getElementById('btn-dhaka').classList.toggle('active', zone === 'dhaka');
+    document.getElementById('btn-outside').classList.toggle('active', zone === 'outside');
+    renderTotal();
+  }
+
+  function getDeliveryValue() {
+    return deliveryZone === 'outside' ? 110 : 60;
+  }
+
+  function onDiscountInput() {
+    renderTotal();
+  }
+
+  function getDiscountValue() {
+    var raw = document.getElementById('discount-amount').value;
+    if (raw === '') return 0;
+    var parsed = Math.round(parseFloat(raw));
+    return (!isNaN(parsed) && parsed > 0) ? parsed : 0;
+  }
+
+  function renderItems() {
+    var list = document.getElementById('items-list');
+    var emptyEl = document.getElementById('items-empty');
+    [].slice.call(list.querySelectorAll('.item-row')).forEach(function(r) { r.remove(); });
+    if (items.length === 0) {
+      emptyEl.style.display = 'block';
+      renderTotal();
+      return;
+    }
+    emptyEl.style.display = 'none';
+    items.forEach(function(item, idx) {
+      var subtotal = item.price * item.qty;
+      var row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML =
+        '<div class="item-info">' +
+          '<div class="item-name">' + esc(item.name) + '</div>' +
+          '<div class="item-meta">৳' + item.price + ' \u00d7 ' + item.qty + '</div>' +
+        '</div>' +
+        '<span class="item-price">৳' + subtotal.toLocaleString('en-US') + '</span>' +
+        '<button class="item-del" onclick="removeItem(' + idx + ')">\u00d7</button>';
+      list.appendChild(row);
+    });
+    renderTotal();
+  }
+
+  function renderTotal() {
+    var summaryEl = document.getElementById('total-summary');
+    if (items.length === 0) { summaryEl.style.display = 'none'; return; }
+    var subtotal = items.reduce(function(s, i) { return s + i.price * i.qty; }, 0);
+    var delivery = getDeliveryValue();
+    var discount = getDiscountValue();
+    var total = Math.max(0, subtotal + delivery - discount);
+    document.getElementById('subtotal-display').textContent = '৳' + subtotal.toLocaleString('en-US');
+    document.getElementById('delivery-display').textContent = '৳' + delivery.toLocaleString('en-US');
+    var discountLine = document.getElementById('discount-line');
+    if (discount > 0) {
+      document.getElementById('discount-display').textContent = '—৳' + discount.toLocaleString('en-US');
+      discountLine.style.display = 'flex';
+    } else {
+      discountLine.style.display = 'none';
+    }
+    document.getElementById('total-display').textContent = '৳' + total.toLocaleString('en-US');
+    summaryEl.style.display = 'block';
+  }
+
+  function showError(msg) {
+    document.getElementById('success-msg').style.display = 'none';
+    var el = document.getElementById('error-msg');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function clearMessages() {
+    document.getElementById('error-msg').style.display = 'none';
+    document.getElementById('success-msg').style.display = 'none';
+  }
+
+  function showSuccess() {
+    document.getElementById('error-msg').style.display = 'none';
+    document.getElementById('success-msg').style.display = 'block';
+  }
+
+  function getDate() {
+    return new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
+
+  function resetForm() {
+    if (!confirm('Clear all fields and start a new invoice?')) return;
+    items = [];
+    paymentMethod = 'cod';
+    deliveryZone = 'dhaka';
+    document.getElementById('inv-num').value = '';
+    document.getElementById('cust-name').value = '';
+    document.getElementById('cust-phone').value = '';
+    document.getElementById('cust-addr').value = '';
+    document.getElementById('discount-amount').value = '';
+    document.getElementById('sku-select').value = '';
+    document.getElementById('qty-input').value = 1;
+    document.getElementById('items-empty').style.display = 'block';
+    [].slice.call(document.querySelectorAll('.item-row')).forEach(function(r) { r.remove(); });
+    document.getElementById('total-summary').style.display = 'none';
+    document.getElementById('btn-cod').classList.add('active');
+    document.getElementById('btn-bkash').classList.remove('active');
+    document.getElementById('btn-dhaka').classList.add('active');
+    document.getElementById('btn-outside').classList.remove('active');
+    clearMessages();
+    hideOverlay();
+    unlockBtn();
+    window.scrollTo(0, 0);
+  }
+
+  // Silently logs this invoice to the Stock Panel's backend Sheet (Orders +
+  // Sales Log tabs). Fire-and-forget: failures here never block or delay
+  // invoice generation, and never show an error to Sakeef — per his own
+  // decision that this is rare enough to not warrant a warning. If a write
+  // ever fails, Stock Panel numbers simply will not reflect this sale until
+  // corrected by hand in the Sheet.
+  //
+  // Uses Content-Type: text/plain (not application/json) on purpose — this
+  // keeps the request inside the CORS "simple request" rules, avoiding a
+  // preflight OPTIONS call that Apps Script Web Apps do not handle and
+  // would otherwise cause this to fail silently every time.
+  function logSaleToSheet(invNum, custName, custPhone, custAddr, subtotal, delivery, discount, grandTotal) {
+    var payload = {
+      action: 'saveInvoice',
+      invoiceNumber: invNum,
+      date: new Date().toISOString().slice(0, 10),
+      customer: { name: custName, phone: custPhone, address: custAddr },
+      paymentMethod: paymentMethod,
+      items: items.map(function(it) { return { sku: it.name, qty: it.qty, price: it.price }; }),
+      subtotal: subtotal,
+      delivery: delivery,
+      discount: discount,
+      total: grandTotal
+    };
+    fetch(WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).catch(function(err) {
+      // Intentionally silent in the UI — see comment above.
+      console.warn('Stock Panel logging failed (invoice itself was not affected):', err);
+    });
+  }
+
+  function generateInvoice() {
+    if (isGenerating) return;
+
+    // FIX #5: check html2canvas loaded before locking the button
+    if (typeof html2canvas === 'undefined') {
+      return showError('Image library not loaded. Please check your internet connection and reload the page.');
+    }
+
+    // Lock immediately — true debounce
+    isGenerating = true;
+    document.getElementById('gen-btn').disabled = true;
+    clearMessages();
+
+    var invNum = document.getElementById('inv-num').value.trim();
+    // Also sanitise inv-num at generate time in case user bypassed blur
+    invNum = invNum.replace(/[^A-Za-z0-9\-]/g, '');
+
+    var custName = document.getElementById('cust-name').value.trim();
+    var custPhone = document.getElementById('cust-phone').value.trim();
+    var custAddr = document.getElementById('cust-addr').value.trim();
+
+    var delivery = getDeliveryValue();
+    var discount = getDiscountValue();
+
+    if (!invNum)   { unlockBtn(); return showError('Please enter an invoice number.'); }
+    if (!custName) { unlockBtn(); return showError('Please enter the customer name.'); }
+    if (!custPhone){ unlockBtn(); return showError('Please enter the customer phone.'); }
+    if (!custAddr) { unlockBtn(); return showError('Please enter the delivery address.'); }
+    if (items.length === 0) { unlockBtn(); return showError('Please add at least one item.'); }
+
+    var subtotal = items.reduce(function(s, i) { return s + i.price * i.qty; }, 0);
+    var grandTotal = Math.max(0, subtotal + delivery - discount);
+
+    // Log to Stock Panel backend now — fires in the background, does not
+    // block or delay the invoice image below. Also covers the regenerate-
+    // after-change case: the backend replaces any prior rows for this same
+    // invoice number, so editing and re-generating is self-correcting.
+    logSaleToSheet(invNum, custName, custPhone, custAddr, subtotal, delivery, discount, grandTotal);
+
+    var payLabel  = paymentMethod === 'cod' ? 'Cash on Delivery' : 'bKash';
+    var payDetail = paymentMethod === 'bkash' ? 'Send Money to 01680064597' : 'Collect at delivery';
+
+    var tableRows = items.map(function(item) {
+      return '<tr>' +
+        '<td class="item-col">' + esc(item.name) + '</td>' +
+        '<td class="muted" style="text-align:center;">\u09f3' + item.price.toLocaleString('en-US') + '</td>' +
+        '<td class="muted" style="text-align:center;">' + item.qty + '</td>' +
+        '<td class="amount">\u09f3' + (item.price * item.qty).toLocaleString('en-US') + '</td>' +
+      '</tr>';
+    }).join('');
+
+
+
+    document.getElementById('inv-content').innerHTML =
+      '<div class="inv-header">' +
+        '<div>' +
+          '<div class="inv-brand">JAPspired</div>' +
+          '<div class="inv-brand-sub">Japanese Stationery</div>' +
+        '</div>' +
+        '<div class="inv-meta">' +
+          '<div class="inv-num">Invoice #JAP-' + esc(invNum) + '</div>' +
+          '<div class="inv-date">' + getDate() + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="inv-body">' +
+        '<div class="inv-to-label">Bill To</div>' +
+        '<div class="inv-customer-name">' + esc(custName) + '</div>' +
+        '<div class="inv-customer-detail">' + esc(custPhone) + '<br>' + esc(custAddr).replace(/\n/g,'<br>') + '</div>' +
+        '<div class="inv-divider"></div>' +
+        '<table class="inv-table">' +
+          '<colgroup><col class="col-product"><col class="col-price"><col class="col-qty"><col class="col-amount"></colgroup>' +
+          '<thead><tr>' +
+            '<th>Product</th>' +
+            '<th style="text-align:center;">Unit Price</th>' +
+            '<th style="text-align:center;">Qty</th>' +
+            '<th>Amount</th>' +
+          '</tr></thead>' +
+          '<tbody>' + tableRows + '</tbody>' +
+        '</table>' +
+        '<div class="inv-total-section"><div class="inv-total-wrap">' +
+          '<table class="inv-totals">' +
+            '<tr><td>Subtotal</td><td>\u09f3' + subtotal.toLocaleString('en-US') + '</td></tr>' +
+            '<tr><td>Delivery Charge</td><td>\u09f3' + delivery.toLocaleString('en-US') + '</td></tr>' +
+            (discount > 0 ? '<tr><td>Discount</td><td style="color:#2e7d5e;">\u2014\u09f3' + discount.toLocaleString('en-US') + '</td></tr>' : '') +
+            '<tr class="grand"><td>Total</td><td>\u09f3' + grandTotal.toLocaleString('en-US') + '</td></tr>' +
+          '</table>' +
+        '</div></div>' +
+        '<div class="inv-payment-row">' +
+          '<div class="inv-pay-box">' +
+            '<div class="inv-pay-label">Payment Method</div>' +
+            '<div class="inv-pay-val">' + esc(payLabel) + '</div>' +
+            '<div class="inv-pay-sub">' + esc(payDetail) + '</div>' +
+          '</div>' +
+          '<div class="inv-pay-box">' +
+            '<div class="inv-pay-label">Delivery</div>' +
+            '<div class="inv-pay-val">Pathao Courier</div>' +
+            '<div class="inv-pay-sub">Standard delivery</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="inv-footer">' +
+          '<div class="inv-footer-brand">JAPspired</div>' +
+          '<div class="inv-footer-note">Thank you for your order</div>' +
+        '</div>' +
+      '</div>';
+
+    document.getElementById('overlay').classList.add('show');
+
+    setTimeout(function() {
+      html2canvas(document.getElementById('inv-content'), {
+        scale: 2, useCORS: true,
+        backgroundColor: '#f5f2ec',
+        logging: false, width: 800, windowWidth: 800
+      }).then(function(canvas) {
+        hideOverlay();
+        var safeInvNum = safeFilename(invNum);
+        var safeName   = safeFilename(custName);
+
+        // FIX #1: wrap toBlob in try/catch — handles null blob and WebView errors
+        try {
+          canvas.toBlob(function(blob) {
+            try {
+              if (!blob) throw new Error('toBlob returned null');
+              var url = URL.createObjectURL(blob);
+              // Safari on iOS/iPadOS does not support the download attribute —
+              // detect and open in new tab so user can long-press > Save Image
+              var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+              if (isSafari) {
+                var newTab = window.open(url, '_blank');
+                if (newTab) {
+                  document.getElementById('success-msg').textContent = 'Invoice opened — long-press the image and tap Save to Photos';
+                } else {
+                  // Pop-ups blocked — fall back to same-tab navigation
+                  window.location.href = url;
+                  document.getElementById('success-msg').textContent = 'Invoice opened — long-press the image and tap Save to Photos';
+                }
+                setTimeout(function() { URL.revokeObjectURL(url); }, 8000);
+              } else {
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'JAP-' + safeInvNum + '_' + safeName + '.jpg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                document.getElementById('success-msg').textContent = 'Invoice downloaded successfully';
+                setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+              }
+              showSuccess();
+              unlockBtn();
+            } catch(blobErr) {
+              hideOverlay();
+              showError('Could not save image. Please try again.');
+              unlockBtn();
+            }
+          }, 'image/jpeg', 0.95);
+        } catch(outerErr) {
+          hideOverlay();
+          showError('Could not generate image. Please try again.');
+          unlockBtn();
+        }
+
+      }).catch(function() {
+        hideOverlay();
+        showError('Could not generate image. Please try again.');
+        unlockBtn();
+      });
+    }, 300);
+  }
+</script>
+</body>
+</html>
