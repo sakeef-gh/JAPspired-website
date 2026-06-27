@@ -141,8 +141,9 @@ header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,25
           <thead>
             <tr>
               <th>SKU</th>
+              <th>Lot</th>
               <th>Remaining</th>
-              <th>Current Unit Cost</th>
+              <th>Unit Cost</th>
               <th>Selling Price</th>
               <th>Profit / Unit</th>
               <th>Units Sold</th>
@@ -198,11 +199,13 @@ async function loadStock() {
 }
 
 function render(data) {
-  const skus = data.skus.slice().sort(function(a, b) { return a.sku.localeCompare(b.sku); });
+  const lots = data.lots.slice().sort(function(a, b) {
+    return a.sku.localeCompare(b.sku) || a.lot - b.lot;
+  });
 
-  // Summary
-  const totalRemaining = skus.reduce((a, s) => a + s.remainingStock, 0);
-  const totalSold = skus.reduce((a, s) => a + s.unitsSold, 0);
+  // Summary — sums across all lots
+  const totalRemaining = lots.reduce((a, l) => a + l.remainingStock, 0);
+  const totalSold = lots.reduce((a, l) => a + l.unitsSoldFromLot, 0);
   document.getElementById('sumRemaining').textContent = totalRemaining;
   document.getElementById('sumSold').textContent = totalSold;
 
@@ -212,38 +215,48 @@ function render(data) {
     day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
   });
 
-  // Desktop table
+  // Desktop table — one row per lot, grouped visually by SKU
   const tbody = document.getElementById('skuBody');
   tbody.innerHTML = '';
-  skus.forEach(s => {
-    const low = s.remainingStock <= LOW_STOCK_THRESHOLD;
+  let lastSku = null;
+  lots.forEach(l => {
+    const low = l.remainingStock <= LOW_STOCK_THRESHOLD;
+    const isNewGroup = l.sku !== lastSku;
     const tr = document.createElement('tr');
+    if (isNewGroup) tr.style.borderTop = '2px solid var(--border)';
     tr.innerHTML = `
-      <td>${s.sku}</td>
-      <td><span class="${low ? 'low-stock' : ''}">${s.remainingStock}</span>${low ? '<span class="low-stock-pill">Low</span>' : ''}</td>
-      <td>${bdt(s.currentUnitCost)}</td>
-      <td>${bdt(s.sellingPrice)}</td>
-      <td>${bdt(s.profitPerUnit)}</td>
-      <td>${s.unitsSold}</td>`;
+      <td>${isNewGroup ? l.sku : ''}</td>
+      <td style="text-align:right">Lot ${l.lot}</td>
+      <td><span class="${low ? 'low-stock' : ''}">${l.remainingStock}</span>${low ? '<span class="low-stock-pill">Low</span>' : ''}</td>
+      <td>${bdt(l.unitCost)}</td>
+      <td>${bdt(l.sellingPrice)}</td>
+      <td>${bdt(l.profitPerUnit)}</td>
+      <td>${l.unitsSoldFromLot}</td>`;
     tbody.appendChild(tr);
+    lastSku = l.sku;
   });
 
-  // Mobile cards
+  // Mobile cards — one card per lot, header shows "SKU — Lot N" when a
+  // SKU has more than one lot, otherwise just the SKU name
+  const lotCountBySku = {};
+  lots.forEach(l => { lotCountBySku[l.sku] = (lotCountBySku[l.sku] || 0) + 1; });
+
   const cards = document.getElementById('skuCards');
   cards.innerHTML = '';
-  skus.forEach(s => {
-    const low = s.remainingStock <= LOW_STOCK_THRESHOLD;
+  lots.forEach(l => {
+    const low = l.remainingStock <= LOW_STOCK_THRESHOLD;
+    const hasMultipleLots = lotCountBySku[l.sku] > 1;
     const card = document.createElement('div');
     card.className = 'sku-card';
     card.innerHTML = `
       <div class="sku-card-header">
-        <span class="name">${s.sku}</span>
-        <span class="remaining ${low ? 'low-stock' : ''}">${s.remainingStock} left${low ? '<span class="low-stock-pill">Low</span>' : ''}</span>
+        <span class="name">${l.sku}${hasMultipleLots ? ' — Lot ' + l.lot : ''}</span>
+        <span class="remaining ${low ? 'low-stock' : ''}">${l.remainingStock} left${low ? '<span class="low-stock-pill">Low</span>' : ''}</span>
       </div>
       <div class="card-row">
-        <div class="card-stat"><label>Unit Cost</label><span class="v">${bdt(s.currentUnitCost)}</span></div>
-        <div class="card-stat"><label>Sell Price</label><span class="v">${bdt(s.sellingPrice)}</span></div>
-        <div class="card-stat"><label>Profit/Unit</label><span class="v">${bdt(s.profitPerUnit)}</span></div>
+        <div class="card-stat"><label>Unit Cost</label><span class="v">${bdt(l.unitCost)}</span></div>
+        <div class="card-stat"><label>Sell Price</label><span class="v">${bdt(l.sellingPrice)}</span></div>
+        <div class="card-stat"><label>Profit/Unit</label><span class="v">${bdt(l.profitPerUnit)}</span></div>
       </div>`;
     cards.appendChild(card);
   });
