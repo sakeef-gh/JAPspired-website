@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JAPspired — Stock Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1B3A6B;
+  --navy-light: #2E6DB4;
+  --navy-pale: #EBF1FA;
+  --off-white: #F7F3ED;
+  --charcoal: #2C2C2C;
+  --mid: #888;
+  --border: #D0C8BC;
+  --green: #2E7D52;
+  --green-bg: #EAF5EF;
+  --yellow: #7A5C00;
+  --yellow-bg: #FFF8E1;
+  --red: #B71C1C;
+  --red-bg: #FFEBEE;
+  --white: #FFFFFF;
+  --row-alt: #FAF7F3;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--off-white); color: var(--charcoal); min-height: 100vh; font-size: 13px; }
+
+header { background: var(--navy); padding: 22px 36px 18px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+header h1 { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; color: var(--white); letter-spacing: 0.02em; }
+header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); letter-spacing: 0.08em; text-transform: uppercase; }
+.refresh-area { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.last-updated { font-size: 10px; color: rgba(255,255,255,0.45); font-family: 'DM Mono', monospace; }
+.btn-refresh {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.85); font-family: 'DM Sans', sans-serif; font-size: 11px;
+  padding: 6px 14px; border-radius: 4px; cursor: pointer; transition: background 0.15s;
+}
+.btn-refresh:hover { background: rgba(255,255,255,0.2); }
+.btn-refresh:disabled { opacity: 0.5; cursor: default; }
+
+.container { max-width: 1300px; margin: 0 auto; padding: 28px 36px 60px; }
+
+.section-label {
+  font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--mid); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+}
+
+.summary-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 22px; }
+.summary-item { background: var(--white); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+.summary-item .lbl { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--mid); margin-bottom: 5px; }
+.summary-item .val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--navy); }
+.summary-item .val.profit { color: var(--green); }
+
+.sheet-wrap { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: var(--white); margin-bottom: 28px; }
+.sheet-table { width: 100%; border-collapse: collapse; }
+.sheet-table thead tr { background: #2C2C2C; }
+.sheet-table th {
+  font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.7); padding: 9px 8px; text-align: right; white-space: nowrap; user-select: none;
+}
+.sheet-table th:first-child { text-align: left; }
+.sheet-table td { padding: 10px 12px; border-bottom: 1px solid #EDE8E0; vertical-align: middle; text-align: right; font-family: 'DM Mono', monospace; font-size: 12px; }
+.sheet-table td:first-child { text-align: left; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 13px; }
+.sheet-table tbody tr:last-child td { border-bottom: none; }
+.sheet-table tbody tr:nth-child(even) { background: var(--row-alt); }
+.sheet-table tbody tr:hover { background: var(--navy-pale); }
+.low-stock { color: var(--red); font-weight: 600; }
+.low-stock-pill {
+  display: inline-block; margin-left: 6px; font-size: 9px; background: var(--red-bg); color: var(--red);
+  padding: 1px 6px; border-radius: 20px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.cost-note { font-size: 10px; color: var(--mid); display: block; margin-top: 1px; }
+
+.mobile-cards { display: none; }
+.sku-card { background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; margin-bottom: 10px; }
+.sku-card-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.sku-card-header .name { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--navy); }
+.sku-card-header .remaining { font-family: 'DM Mono', monospace; font-size: 13px; }
+.card-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.card-stat { display: flex; flex-direction: column; gap: 2px; }
+.card-stat label { font-size: 9px; color: var(--mid); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+.card-stat .v { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--charcoal); }
+
+.state-msg { text-align: center; padding: 60px 20px; color: var(--mid); font-size: 13px; }
+.state-msg.error { color: var(--red); }
+.spinner {
+  width: 22px; height: 22px; border: 2px solid var(--border); border-top-color: var(--navy-light);
+  border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 14px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.note { margin-top: 4px; padding: 11px 15px; background: var(--navy-pale); border-left: 3px solid var(--navy-light); border-radius: 0 3px 3px 0; font-size: 12px; color: var(--navy); line-height: 1.6; }
+
+@media (max-width: 768px) {
+  header { padding: 16px 20px; }
+  .container { padding: 16px 16px 48px; }
+  .desktop-only { display: none; }
+  .mobile-cards { display: block; }
+  .summary-strip { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .summary-item .val { font-size: 15px; }
+  .refresh-area { margin-left: 0; width: 100%; justify-content: space-between; margin-top: 8px; }
+}
+@media (min-width: 769px) {
+  .mobile-only { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>JAPspired</h1>
+  <span class="subtitle">Stock Panel</span>
+  <div class="refresh-area">
+    <span class="last-updated" id="lastUpdated"></span>
+    <button class="btn-refresh" id="refreshBtn" onclick="loadStock()">Refresh</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <div id="loadingState" class="state-msg">
+    <div class="spinner"></div>
+    Loading current stock…
+  </div>
+
+  <div id="errorState" class="state-msg error" style="display:none"></div>
+
+  <div id="content" style="display:none">
+
+    <div class="section-label">Overview</div>
+    <div class="summary-strip">
+      <div class="summary-item"><div class="lbl">SKUs Tracked</div><div class="val" id="sumSkuCount">—</div></div>
+      <div class="summary-item"><div class="lbl">Remaining Units (total)</div><div class="val" id="sumRemaining">—</div></div>
+      <div class="summary-item"><div class="lbl">Units Sold (all time)</div><div class="val" id="sumSold">—</div></div>
+      <div class="summary-item"><div class="lbl">Profit Realized (all time)</div><div class="val profit" id="sumProfit">—</div></div>
+    </div>
+
+    <div class="desktop-only">
+      <div class="section-label">SKUs</div>
+      <div class="sheet-wrap">
+        <table class="sheet-table">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Remaining</th>
+              <th>Current Unit Cost</th>
+              <th>Selling Price</th>
+              <th>Profit / Unit</th>
+              <th>Profit Realized</th>
+              <th>Units Sold</th>
+            </tr>
+          </thead>
+          <tbody id="skuBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mobile-cards mobile-only">
+      <div class="section-label" style="margin-bottom:10px">SKUs</div>
+      <div id="skuCards"></div>
+    </div>
+
+    <div class="note">
+      Remaining stock and current unit cost are calculated automatically from Stock Master and Sales Log —
+      nothing here is typed in manually. Low stock is flagged at 8 units or fewer.
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwmQoAz2OtFADWXiqF9TVHkEOrFOCFgdqCc01-2P71CrxlmWePgSywL2SfvV0EANAZA/exec';
+const LOW_STOCK_THRESHOLD = 8;
+const bdt = n => '৳' + Math.round(n).toLocaleString('en-US');
+
+function showState(state, message) {
+  document.getElementById('loadingState').style.display = state === 'loading' ? 'block' : 'none';
+  document.getElementById('errorState').style.display = state === 'error' ? 'block' : 'none';
+  document.getElementById('content').style.display = state === 'content' ? 'block' : 'none';
+  if (state === 'error') document.getElementById('errorState').textContent = message;
+}
+
+async function loadStock() {
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  showState('loading');
+  try {
+    const res = await fetch(WEB_APP_URL + '?action=getStock');
+    if (!res.ok) throw new Error('Server responded with ' + res.status);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    render(data);
+    showState('content');
+  } catch (err) {
+    showState('error', 'Could not load stock data. ' + err.message + ' — check the Web App is deployed and accessible, then try Refresh.');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function render(data) {
+  const skus = data.skus.slice().sort(function(a, b) { return a.sku.localeCompare(b.sku); });
+
+  // Summary
+  const totalRemaining = skus.reduce((a, s) => a + s.remainingStock, 0);
+  const totalSold = skus.reduce((a, s) => a + s.unitsSold, 0);
+  const totalProfit = skus.reduce((a, s) => a + s.totalProfitRealized, 0);
+  document.getElementById('sumSkuCount').textContent = skus.length;
+  document.getElementById('sumRemaining').textContent = totalRemaining;
+  document.getElementById('sumSold').textContent = totalSold;
+  document.getElementById('sumProfit').textContent = bdt(totalProfit);
+
+  // Last updated
+  const updated = new Date(data.lastUpdated);
+  document.getElementById('lastUpdated').textContent = 'Updated ' + updated.toLocaleString('en-GB', {
+    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+  });
+
+  // Desktop table
+  const tbody = document.getElementById('skuBody');
+  tbody.innerHTML = '';
+  skus.forEach(s => {
+    const low = s.remainingStock <= LOW_STOCK_THRESHOLD;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${s.sku}</td>
+      <td><span class="${low ? 'low-stock' : ''}">${s.remainingStock}</span>${low ? '<span class="low-stock-pill">Low</span>' : ''}</td>
+      <td>${bdt(s.currentUnitCost)}</td>
+      <td>${bdt(s.sellingPrice)}</td>
+      <td>${bdt(s.profitPerUnit)}</td>
+      <td style="color:var(--green);font-weight:600">${bdt(s.totalProfitRealized)}</td>
+      <td>${s.unitsSold}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Mobile cards
+  const cards = document.getElementById('skuCards');
+  cards.innerHTML = '';
+  skus.forEach(s => {
+    const low = s.remainingStock <= LOW_STOCK_THRESHOLD;
+    const card = document.createElement('div');
+    card.className = 'sku-card';
+    card.innerHTML = `
+      <div class="sku-card-header">
+        <span class="name">${s.sku}</span>
+        <span class="remaining ${low ? 'low-stock' : ''}">${s.remainingStock} left${low ? '<span class="low-stock-pill">Low</span>' : ''}</span>
+      </div>
+      <div class="card-row">
+        <div class="card-stat"><label>Unit Cost</label><span class="v">${bdt(s.currentUnitCost)}</span></div>
+        <div class="card-stat"><label>Sell Price</label><span class="v">${bdt(s.sellingPrice)}</span></div>
+        <div class="card-stat"><label>Profit Realized</label><span class="v" style="color:var(--green)">${bdt(s.totalProfitRealized)}</span></div>
+      </div>`;
+    cards.appendChild(card);
+  });
+}
+
+loadStock();
+</script>
+</body>
+</html>
