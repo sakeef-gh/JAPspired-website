@@ -46,7 +46,7 @@ header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,25
   color: var(--mid); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
 }
 
-.summary-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 22px; }
+.summary-strip { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 22px; max-width: 600px; }
 .summary-item { background: var(--white); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
 .summary-item .lbl { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--mid); margin-bottom: 5px; }
 .summary-item .val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--navy); }
@@ -130,10 +130,8 @@ header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,25
 
     <div class="section-label">Overview</div>
     <div class="summary-strip">
-      <div class="summary-item"><div class="lbl">SKUs Tracked</div><div class="val" id="sumSkuCount">—</div></div>
       <div class="summary-item"><div class="lbl">Remaining Units (total)</div><div class="val" id="sumRemaining">—</div></div>
       <div class="summary-item"><div class="lbl">Units Sold (all time)</div><div class="val" id="sumSold">—</div></div>
-      <div class="summary-item"><div class="lbl">Profit Realized (all time)</div><div class="val profit" id="sumProfit">—</div></div>
     </div>
 
     <div class="desktop-only">
@@ -147,7 +145,6 @@ header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,25
               <th>Current Unit Cost</th>
               <th>Selling Price</th>
               <th>Profit / Unit</th>
-              <th>Profit Realized</th>
               <th>Units Sold</th>
             </tr>
           </thead>
@@ -206,11 +203,8 @@ function render(data) {
   // Summary
   const totalRemaining = skus.reduce((a, s) => a + s.remainingStock, 0);
   const totalSold = skus.reduce((a, s) => a + s.unitsSold, 0);
-  const totalProfit = skus.reduce((a, s) => a + s.totalProfitRealized, 0);
-  document.getElementById('sumSkuCount').textContent = skus.length;
   document.getElementById('sumRemaining').textContent = totalRemaining;
   document.getElementById('sumSold').textContent = totalSold;
-  document.getElementById('sumProfit').textContent = bdt(totalProfit);
 
   // Last updated
   const updated = new Date(data.lastUpdated);
@@ -230,7 +224,6 @@ function render(data) {
       <td>${bdt(s.currentUnitCost)}</td>
       <td>${bdt(s.sellingPrice)}</td>
       <td>${bdt(s.profitPerUnit)}</td>
-      <td style="color:var(--green);font-weight:600">${bdt(s.totalProfitRealized)}</td>
       <td>${s.unitsSold}</td>`;
     tbody.appendChild(tr);
   });
@@ -250,7 +243,7 @@ function render(data) {
       <div class="card-row">
         <div class="card-stat"><label>Unit Cost</label><span class="v">${bdt(s.currentUnitCost)}</span></div>
         <div class="card-stat"><label>Sell Price</label><span class="v">${bdt(s.sellingPrice)}</span></div>
-        <div class="card-stat"><label>Profit Realized</label><span class="v" style="color:var(--green)">${bdt(s.totalProfitRealized)}</span></div>
+        <div class="card-stat"><label>Profit/Unit</label><span class="v">${bdt(s.profitPerUnit)}</span></div>
       </div>`;
     cards.appendChild(card);
   });
