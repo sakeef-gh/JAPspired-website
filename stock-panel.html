@@ -46,6 +46,7 @@ header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,25
   font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em;
   color: var(--mid); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
 }
+.section-label .hint { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 400; color: #BBB; text-transform: none; letter-spacing: 0; }
 
 .summary-strip { display: flex; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
 .summary-item { background: var(--white); border: 1px solid var(--border); border-radius: 4px; padding: 14px 20px; min-width: 180px; flex: 0 0 auto; }
@@ -63,6 +64,11 @@ header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,25
   color: rgba(255,255,255,0.7); padding: 9px 8px; text-align: right; white-space: nowrap; user-select: none;
 }
 .sheet-table th:first-child, .sheet-table th:nth-child(2) { text-align: left; }
+.sheet-table th.sortable { cursor: pointer; transition: color 0.15s; }
+.sheet-table th.sortable:hover { color: rgba(255,255,255,0.95); }
+.sheet-table th .sort-arrow { display: inline-block; margin-left: 4px; font-size: 9px; color: rgba(255,255,255,0.3); }
+.sheet-table th.sortable.active { color: var(--white); }
+.sheet-table th.sortable.active .sort-arrow { color: var(--navy-light); }
 .sheet-table td { padding: 10px 12px; border-bottom: 1px solid #EDE8E0; vertical-align: middle; text-align: right; font-family: 'DM Mono', monospace; font-size: 12px; }
 .sheet-table td:first-child { text-align: left; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 13px; }
 .sheet-table td.lot-label { text-align: left; color: var(--mid); font-family: 'DM Sans', sans-serif; }
@@ -94,13 +100,30 @@ header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,25
 .lot-row { padding: 12px 16px; border-top: 1px solid #EDE8E0; }
 .sku-group-body.single-lot .lot-row { border-top: none; }
 .lot-row-label { font-size: 10px; color: var(--mid); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-.card-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .card-stat { display: flex; flex-direction: column; gap: 2px; }
 .card-stat label { font-size: 9px; color: var(--mid); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
 .card-stat .v { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--charcoal); }
 .card-stat .v.profit-cell { color: var(--green); }
 
 .mobile-cards { display: none; }
+
+.mobile-sort-bar { margin-bottom: 8px; }
+.mobile-sort-bar select {
+  width: 100%; font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 9px 28px 9px 12px;
+  border: 1px solid var(--border); border-radius: 4px; background: var(--white); color: var(--charcoal);
+  outline: none; -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.4' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+}
+.mobile-sort-bar select:focus { border-color: var(--navy-light); }
+.mobile-sort-dir { display: flex; gap: 8px; margin-bottom: 10px; }
+.mobile-sort-dir .dir-btn {
+  flex: 1; padding: 9px 8px; border: 1px solid var(--border); border-radius: 4px;
+  background: var(--white); color: var(--charcoal); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s; text-align: center;
+}
+.mobile-sort-dir .dir-btn.active { border-color: var(--navy); background: var(--navy); color: var(--white); }
 
 .state-msg { text-align: center; padding: 60px 20px; color: var(--mid); font-size: 13px; }
 .state-msg.error { color: var(--red); }
@@ -157,18 +180,18 @@ header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,25
     </div>
 
     <div class="desktop-only">
-      <div class="section-label">SKUs</div>
+      <div class="section-label">SKUs <span class="hint">Click a column to sort</span></div>
       <div class="sheet-wrap">
         <table class="sheet-table">
           <thead>
             <tr>
-              <th>SKU</th>
-              <th>Lot</th>
-              <th>Remaining</th>
-              <th>Unit Cost</th>
-              <th>Selling Price</th>
-              <th>Profit / Unit</th>
-              <th>Units Sold</th>
+              <th class="sortable" data-col="sku" onclick="setSort('sku')" title="Return to the default grouped view, lowest-remaining-first">SKU<span class="sort-arrow" id="arrow-sku"></span></th>
+              <th class="sortable" data-col="lot" onclick="setSort('lot')">Lot<span class="sort-arrow" id="arrow-lot"></span></th>
+              <th class="sortable" data-col="remainingStock" onclick="setSort('remainingStock')">Remaining<span class="sort-arrow" id="arrow-remainingStock"></span></th>
+              <th class="sortable" data-col="unitCost" onclick="setSort('unitCost')">Unit Cost<span class="sort-arrow" id="arrow-unitCost"></span></th>
+              <th class="sortable" data-col="sellingPrice" onclick="setSort('sellingPrice')">Selling Price<span class="sort-arrow" id="arrow-sellingPrice"></span></th>
+              <th class="sortable" data-col="profitPerUnit" onclick="setSort('profitPerUnit')">Profit / Unit<span class="sort-arrow" id="arrow-profitPerUnit"></span></th>
+              <th class="sortable" data-col="unitsSoldFromLot" onclick="setSort('unitsSoldFromLot')">Units Sold<span class="sort-arrow" id="arrow-unitsSoldFromLot"></span></th>
             </tr>
           </thead>
           <tbody id="skuBody"></tbody>
@@ -178,6 +201,21 @@ header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,25
 
     <div class="mobile-cards mobile-only">
       <div class="section-label" style="margin-bottom:10px">SKUs</div>
+      <div class="mobile-sort-bar">
+        <select id="mobileSortSelect" onchange="setSort(this.value, true)">
+          <option value="sku">Sort: SKU (default)</option>
+          <option value="lot">Sort: Lot</option>
+          <option value="remainingStock">Sort: Remaining</option>
+          <option value="unitCost">Sort: Unit Cost</option>
+          <option value="sellingPrice">Sort: Selling Price</option>
+          <option value="profitPerUnit">Sort: Profit / Unit</option>
+          <option value="unitsSoldFromLot">Sort: Units Sold</option>
+        </select>
+      </div>
+      <div class="mobile-sort-dir" id="mobileSortDir">
+        <button class="dir-btn" id="dirBtnAsc" onclick="setSortDirection('asc')">Lowest first</button>
+        <button class="dir-btn" id="dirBtnDesc" onclick="setSortDirection('desc')">Highest first</button>
+      </div>
       <div id="skuCards"></div>
     </div>
 
@@ -194,6 +232,70 @@ header span.subtitle { font-size: 11px; font-weight: 300; color: rgba(255,255,25
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwmQoAz2OtFADWXiqF9TVHkEOrFOCFgdqCc01-2P71CrxlmWePgSywL2SfvV0EANAZA/exec';
 const LOW_STOCK_THRESHOLD = 8;
 const bdt = n => '৳' + Math.round(n).toLocaleString('en-US');
+
+// ── SORT STATE ───────────────────────────────────────────────────────────
+// 'sku' is the default/neutral state: grouped by SKU, lowest-remaining-first
+// (the original behavior). Any other column flattens to one row per lot,
+// sorted by that value, ascending/descending toggled by re-clicking.
+let lastData = null;
+let sortColumn = 'sku';
+let sortDirection = 'asc';
+
+function setSort(col, fromDropdown) {
+  if (!fromDropdown && sortColumn === col && col !== 'sku') {
+    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortColumn = col;
+    sortDirection = 'asc';
+  }
+  updateSortControls();
+  if (lastData) render(lastData);
+}
+
+function setSortDirection(dir) {
+  if (sortColumn === 'sku') return; // grouped default has no direction to set
+  sortDirection = dir;
+  updateSortControls();
+  if (lastData) render(lastData);
+}
+
+function updateSortControls() {
+  document.querySelectorAll('.sheet-table th.sortable').forEach(th => {
+    th.classList.remove('active');
+    const arrow = th.querySelector('.sort-arrow');
+    if (arrow) arrow.textContent = '';
+  });
+  if (sortColumn !== 'sku') {
+    const activeTh = document.querySelector('.sheet-table th[data-col="' + sortColumn + '"]');
+    if (activeTh) {
+      activeTh.classList.add('active');
+      const arrow = activeTh.querySelector('.sort-arrow');
+      if (arrow) arrow.textContent = sortDirection === 'asc' ? '▲' : '▼';
+    }
+  }
+  const sel = document.getElementById('mobileSortSelect');
+  if (sel) sel.value = sortColumn;
+  const dirWrap = document.getElementById('mobileSortDir');
+  const dirBtnAsc = document.getElementById('dirBtnAsc');
+  const dirBtnDesc = document.getElementById('dirBtnDesc');
+  if (dirWrap) dirWrap.style.visibility = sortColumn === 'sku' ? 'hidden' : 'visible';
+  if (dirBtnAsc && dirBtnDesc) {
+    dirBtnAsc.classList.toggle('active', sortDirection === 'asc');
+    dirBtnDesc.classList.toggle('active', sortDirection === 'desc');
+  }
+}
+
+function buildFlatLots(groups) {
+  const flat = [];
+  groups.forEach(g => g.lots.forEach(l => flat.push(Object.assign({}, l, { sku: g.sku }))));
+  flat.sort((a, b) => {
+    let av = a[sortColumn], bv = b[sortColumn];
+    if (typeof av === 'string' || typeof bv === 'string') { av = String(av).toLowerCase(); bv = String(bv).toLowerCase(); }
+    let cmp = av < bv ? -1 : (av > bv ? 1 : 0);
+    return sortDirection === 'asc' ? cmp : -cmp;
+  });
+  return flat;
+}
 
 function showState(state, message) {
   document.getElementById('loadingState').style.display = state === 'loading' ? 'block' : 'none';
@@ -221,6 +323,7 @@ async function loadStock() {
 }
 
 function render(data) {
+  lastData = data;
   // Group lots by SKU, compute per-group stats
   const groupsBySku = {};
   data.lots.forEach(l => {
@@ -258,19 +361,41 @@ function render(data) {
     return '';
   }
 
-  // Desktop table — rows grouped by SKU, banded by group (not by row),
-  // most urgent SKU first
+  // Desktop table.
+  // Default (sortColumn === 'sku'): grouped by SKU, banded by group, most
+  // urgent SKU first — the original behavior, unchanged.
+  // Any other column: flattened to one row per lot, SKU name repeated,
+  // sorted by that column.
   const tbody = document.getElementById('skuBody');
   tbody.innerHTML = '';
-  groups.forEach((g, groupIndex) => {
-    g.lots.forEach((l, lotIndex) => {
+  if (sortColumn === 'sku') {
+    groups.forEach((g, groupIndex) => {
+      g.lots.forEach((l, lotIndex) => {
+        const isCritical = l.remainingStock <= 0;
+        const isLow = l.remainingStock > 0 && l.remainingStock <= LOW_STOCK_THRESHOLD;
+        const tr = document.createElement('tr');
+        if (groupIndex % 2 === 1) tr.style.background = 'var(--row-alt)';
+        if (lotIndex === 0 && groupIndex > 0) tr.style.borderTop = '2px solid var(--border)';
+        tr.innerHTML = `
+          <td>${lotIndex === 0 ? g.sku : ''}</td>
+          <td class="lot-label">Lot ${l.lot}</td>
+          <td><span class="${isCritical || isLow ? 'low-stock' : ''}">${l.remainingStock}</span>${severityHtml(l.remainingStock)}</td>
+          <td>${bdt(l.unitCost)}</td>
+          <td>${bdt(l.sellingPrice)}</td>
+          <td class="profit-cell">${bdt(l.profitPerUnit)}</td>
+          <td>${l.unitsSoldFromLot}</td>`;
+        tbody.appendChild(tr);
+      });
+    });
+  } else {
+    const flat = buildFlatLots(groups);
+    flat.forEach((l, idx) => {
       const isCritical = l.remainingStock <= 0;
       const isLow = l.remainingStock > 0 && l.remainingStock <= LOW_STOCK_THRESHOLD;
       const tr = document.createElement('tr');
-      if (groupIndex % 2 === 1) tr.style.background = 'var(--row-alt)';
-      if (lotIndex === 0 && groupIndex > 0) tr.style.borderTop = '2px solid var(--border)';
+      if (idx % 2 === 1) tr.style.background = 'var(--row-alt)';
       tr.innerHTML = `
-        <td>${lotIndex === 0 ? g.sku : ''}</td>
+        <td>${l.sku}</td>
         <td class="lot-label">Lot ${l.lot}</td>
         <td><span class="${isCritical || isLow ? 'low-stock' : ''}">${l.remainingStock}</span>${severityHtml(l.remainingStock)}</td>
         <td>${bdt(l.unitCost)}</td>
@@ -279,39 +404,70 @@ function render(data) {
         <td>${l.unitsSoldFromLot}</td>`;
       tbody.appendChild(tr);
     });
-  });
+  }
 
-  // Mobile cards — one outer group card per SKU, lots nested inside
+  // Mobile cards.
+  // Default: one outer group card per SKU, lots nested inside (unchanged).
+  // Any other sort: one flat card per lot, SKU name + lot shown together
+  // in the card header, in sorted order.
   const cards = document.getElementById('skuCards');
   cards.innerHTML = '';
-  groups.forEach(g => {
-    const singleLot = g.lots.length === 1;
-    const groupEl = document.createElement('div');
-    groupEl.className = 'sku-group';
+  if (sortColumn === 'sku') {
+    groups.forEach(g => {
+      const singleLot = g.lots.length === 1;
+      const groupEl = document.createElement('div');
+      groupEl.className = 'sku-group';
 
-    let lotRowsHtml = '';
-    g.lots.forEach(l => {
-      lotRowsHtml += `
-        <div class="lot-row">
-          ${!singleLot ? `<div class="lot-row-label">Lot ${l.lot}</div>` : ''}
-          <div class="card-row">
-            <div class="card-stat"><label>Remaining</label><span class="v ${l.remainingStock <= LOW_STOCK_THRESHOLD ? 'low-stock' : ''}">${l.remainingStock}${severityHtml(l.remainingStock)}</span></div>
-            <div class="card-stat"><label>Unit Cost</label><span class="v">${bdt(l.unitCost)}</span></div>
-            <div class="card-stat"><label>Profit/Unit</label><span class="v profit-cell">${bdt(l.profitPerUnit)}</span></div>
+      let lotRowsHtml = '';
+      g.lots.forEach(l => {
+        lotRowsHtml += `
+          <div class="lot-row">
+            ${!singleLot ? `<div class="lot-row-label">Lot ${l.lot}</div>` : ''}
+            <div class="card-row">
+              <div class="card-stat"><label>Remaining</label><span class="v ${l.remainingStock <= LOW_STOCK_THRESHOLD ? 'low-stock' : ''}">${l.remainingStock}${severityHtml(l.remainingStock)}</span></div>
+              <div class="card-stat"><label>Unit Cost</label><span class="v">${bdt(l.unitCost)}</span></div>
+              <div class="card-stat"><label>Selling Price</label><span class="v">${bdt(l.sellingPrice)}</span></div>
+              <div class="card-stat"><label>Profit/Unit</label><span class="v profit-cell">${bdt(l.profitPerUnit)}</span></div>
+              <div class="card-stat"><label>Units Sold</label><span class="v">${l.unitsSoldFromLot}</span></div>
+            </div>
+          </div>`;
+      });
+
+      groupEl.innerHTML = `
+        <div class="sku-group-header">
+          <span class="name">${g.sku}</span>
+          <span class="remaining">${g.totalRemaining} left</span>
+        </div>
+        <div class="sku-group-body ${singleLot ? 'single-lot' : ''}">${lotRowsHtml}</div>`;
+      cards.appendChild(groupEl);
+    });
+  } else {
+    const flat = buildFlatLots(groups);
+    flat.forEach(l => {
+      const groupEl = document.createElement('div');
+      groupEl.className = 'sku-group';
+      groupEl.innerHTML = `
+        <div class="sku-group-header">
+          <span class="name">${l.sku} <span style="color:var(--mid);font-weight:400;font-size:12px">— Lot ${l.lot}</span></span>
+          <span class="remaining">${l.remainingStock} left</span>
+        </div>
+        <div class="sku-group-body single-lot">
+          <div class="lot-row">
+            <div class="card-row">
+              <div class="card-stat"><label>Remaining</label><span class="v ${l.remainingStock <= LOW_STOCK_THRESHOLD ? 'low-stock' : ''}">${l.remainingStock}${severityHtml(l.remainingStock)}</span></div>
+              <div class="card-stat"><label>Unit Cost</label><span class="v">${bdt(l.unitCost)}</span></div>
+              <div class="card-stat"><label>Selling Price</label><span class="v">${bdt(l.sellingPrice)}</span></div>
+              <div class="card-stat"><label>Profit/Unit</label><span class="v profit-cell">${bdt(l.profitPerUnit)}</span></div>
+              <div class="card-stat"><label>Units Sold</label><span class="v">${l.unitsSoldFromLot}</span></div>
+            </div>
           </div>
         </div>`;
+      cards.appendChild(groupEl);
     });
-
-    groupEl.innerHTML = `
-      <div class="sku-group-header">
-        <span class="name">${g.sku}</span>
-        <span class="remaining">${g.totalRemaining} left</span>
-      </div>
-      <div class="sku-group-body ${singleLot ? 'single-lot' : ''}">${lotRowsHtml}</div>`;
-    cards.appendChild(groupEl);
-  });
+  }
 }
 
+updateSortControls();
 loadStock();
 </script>
 </body>
