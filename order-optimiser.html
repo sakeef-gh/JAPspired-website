@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>JAPspired — Order Optimiser</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1B3A6B;
+  --navy-light: #2E6DB4;
+  --navy-pale: #EBF1FA;
+  --off-white: #F7F3ED;
+  --charcoal: #2C2C2C;
+  --mid: #888;
+  --border: #D0C8BC;
+  --green: #2E7D52;
+  --green-bg: #EAF5EF;
+  --yellow: #7A5C00;
+  --yellow-bg: #FFF8E1;
+  --red: #B71C1C;
+  --red-bg: #FFEBEE;
+  --white: #FFFFFF;
+  --row-alt: #FAF7F3;
+  --selected: #D6E8FA;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
+body { font-family: 'DM Sans', sans-serif; background: var(--off-white); color: var(--charcoal); min-height: 100vh; font-size: 13px; }
+
+/* ── HEADER ── */
+header { background: var(--navy); padding: 22px 36px 18px; display: flex; align-items: baseline; gap: 14px; }
+header h1 { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; color: var(--white); letter-spacing: 0.02em; }
+header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ── LAYOUT ── */
+.container { max-width: 1300px; margin: 0 auto; padding: 28px 36px 60px; }
+
+/* ── SETTINGS BAR ── */
+.settings-bar {
+  display: flex; gap: 24px; align-items: flex-end; flex-wrap: wrap;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 4px; padding: 14px 20px; margin-bottom: 20px;
+}
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 10px; font-weight: 500; color: var(--mid); text-transform: uppercase; letter-spacing: 0.07em; }
+.field input {
+  font-family: 'DM Mono', monospace; font-size: 13px;
+  padding: 6px 9px; border: 1px solid var(--border); border-radius: 3px;
+  background: var(--off-white); color: var(--charcoal); width: 130px; outline: none;
+  transition: border-color 0.15s;
+}
+.field input::placeholder { color: #BBB; }
+.field input:focus { border-color: var(--navy-light); background: var(--white); }
+
+/* ── GRID (desktop) ── */
+.grid-2 { display: grid; grid-template-columns: 3fr 1.4fr; gap: 20px; margin-bottom: 20px; }
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--mid); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;
+}
+.section-label span { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 400; color: #BBB; text-transform: none; letter-spacing: 0; }
+
+/* ── SPREADSHEET (desktop) ── */
+.sheet-wrap { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: var(--white); }
+.sheet-table { width: 100%; border-collapse: collapse; }
+.sheet-table thead tr { background: #2C2C2C; }
+.sheet-table th {
+  font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em;
+  color: rgba(255,255,255,0.7); padding: 8px 8px; text-align: left;
+  border-right: 1px solid rgba(255,255,255,0.1); white-space: nowrap; user-select: none;
+}
+.sheet-table th:last-child { border-right: none; width: 28px; }
+.sheet-table th.num { text-align: right; }
+.sheet-table .row-num {
+  background: #F0EBE3; color: var(--mid); font-family: 'DM Mono', monospace;
+  font-size: 10px; text-align: center; padding: 0 6px; border-right: 1px solid var(--border);
+  user-select: none; min-width: 24px;
+}
+.sheet-table td {
+  padding: 0; border-bottom: 1px solid #EDE8E0; border-right: 1px solid #EDE8E0; vertical-align: middle;
+}
+.sheet-table td:last-child { border-right: none; }
+.sheet-table tbody tr:last-child td { border-bottom: none; }
+.sheet-table tbody tr:nth-child(even) { background: var(--row-alt); }
+.sheet-table tbody tr:hover { background: var(--navy-pale); }
+.cell-input {
+  font-family: 'DM Mono', monospace; font-size: 12px;
+  padding: 6px 8px; border: none; background: transparent;
+  color: var(--charcoal); width: 100%; outline: none; transition: background 0.1s;
+}
+.cell-input:focus { background: var(--selected); box-shadow: inset 0 0 0 2px var(--navy-light); }
+.cell-input.text-cell { font-family: 'DM Sans', sans-serif; font-size: 12px; }
+.cell-input[type=number] { text-align: right; }
+.btn-del { background: none; border: none; cursor: pointer; color: #CCC; font-size: 14px; padding: 4px 8px; width: 28px; transition: color 0.15s; }
+.btn-del:hover { color: var(--red); }
+.btn-add-row {
+  width: 100%; padding: 8px; border: none; border-top: 1px dashed var(--border);
+  background: none; color: var(--mid); font-size: 11px; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; text-align: center; transition: all 0.15s; border-radius: 0 0 4px 4px;
+}
+.btn-add-row:hover { background: var(--navy-pale); color: var(--navy-light); }
+
+/* ── MOBILE CARDS (hidden on desktop) ── */
+.mobile-cards { display: none; }
+.sku-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: 6px;
+  padding: 14px 16px; margin-bottom: 10px;
+}
+.sku-card-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+}
+.sku-card-header .sku-num { font-size: 10px; color: var(--mid); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+.sku-card .card-name-input {
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  border: none; border-bottom: 1px solid var(--border); background: transparent;
+  color: var(--charcoal); width: 100%; outline: none; padding: 2px 0 6px; margin-bottom: 12px;
+}
+.sku-card .card-name-input:focus { border-bottom-color: var(--navy-light); }
+.card-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.card-field { display: flex; flex-direction: column; gap: 3px; }
+.card-field label { font-size: 10px; color: var(--mid); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+.card-field input {
+  font-family: 'DM Mono', monospace; font-size: 13px; padding: 6px 8px;
+  border: 1px solid var(--border); border-radius: 3px; background: var(--off-white);
+  color: var(--charcoal); text-align: right; outline: none; width: 100%;
+}
+.card-field input:focus { border-color: var(--navy-light); background: var(--white); }
+.btn-del-card {
+  background: none; border: 1px solid var(--border); border-radius: 3px;
+  cursor: pointer; color: var(--mid); font-size: 12px; padding: 4px 10px;
+  transition: all 0.15s;
+}
+.btn-del-card:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+.btn-add-card {
+  width: 100%; padding: 12px; border: 1px dashed var(--border); border-radius: 6px;
+  background: none; color: var(--mid); font-size: 12px; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; text-align: center; transition: all 0.15s; margin-bottom: 16px;
+}
+.btn-add-card:hover { background: var(--navy-pale); color: var(--navy-light); border-color: var(--navy-light); }
+
+/* Bracket card (mobile) */
+.bracket-section-mobile { margin-bottom: 20px; }
+.bracket-grid-mobile { background: var(--white); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.bracket-row-mobile {
+  display: grid; grid-template-columns: 1fr 1fr 36px;
+  border-bottom: 1px solid #EDE8E0; align-items: center;
+}
+.bracket-row-mobile:last-child { border-bottom: none; }
+.bracket-row-mobile input {
+  font-family: 'DM Mono', monospace; font-size: 13px; padding: 9px 12px;
+  border: none; background: transparent; color: var(--charcoal); text-align: right;
+  outline: none; width: 100%; border-right: 1px solid #EDE8E0;
+}
+.bracket-row-mobile input:focus { background: var(--selected); }
+.bracket-row-mobile .btn-del { border-right: none; }
+
+/* ── RUN BUTTON ── */
+.run-wrap { text-align: center; margin: 20px 0; }
+.btn-run {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.04em;
+  padding: 12px 52px; background: var(--navy); color: var(--white); border: none; border-radius: 3px;
+  cursor: pointer; transition: background 0.15s, transform 0.1s; width: 100%; max-width: 360px;
+}
+.btn-run:hover { background: var(--navy-light); }
+.btn-run:active { transform: scale(0.98); }
+
+/* ── RESULTS ── */
+#results { display: none; }
+.results-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.results-header h2 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: var(--navy); }
+
+.summary-strip { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 20px; }
+.summary-item { background: var(--white); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+.summary-item .lbl { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--mid); margin-bottom: 5px; }
+.summary-item .val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--navy); }
+.summary-item .val.profit { color: var(--green); }
+
+.res-wrap { border: 1px solid var(--border); border-radius: 4px; overflow-x: auto; background: var(--white); margin-bottom: 20px; }
+.res-table { width: 100%; border-collapse: collapse; min-width: 500px; }
+.res-table thead tr { background: var(--navy); }
+.res-table th { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(255,255,255,0.75); padding: 9px 12px; text-align: right; white-space: nowrap; }
+.res-table th:first-child { text-align: left; }
+.res-table td { padding: 9px 12px; border-bottom: 1px solid #EDE8E0; text-align: right; font-family: 'DM Mono', monospace; font-size: 12px; }
+.res-table td:first-child { text-align: left; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 13px; }
+.res-table tbody tr:last-child td { border-bottom: none; }
+.res-table tbody tr:hover { background: var(--off-white); }
+
+.pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500; font-family: 'DM Sans', sans-serif; }
+.pill.green { background: var(--green-bg); color: var(--green); }
+.pill.yellow { background: var(--yellow-bg); color: var(--yellow); }
+.pill.red { background: var(--red-bg); color: var(--red); }
+
+.scenario-title { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--navy); margin-bottom: 10px; }
+.scenario-wrap { border: 1px solid var(--border); border-radius: 4px; overflow-x: auto; background: var(--white); }
+.scenario-table { width: 100%; border-collapse: collapse; }
+.scenario-table th { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--mid); padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.scenario-table th:first-child { text-align: left; min-width: 140px; }
+.scenario-table td { padding: 7px 10px; border-bottom: 1px solid #EDE8E0; text-align: right; font-family: 'DM Mono', monospace; font-size: 11px; white-space: nowrap; }
+.scenario-table td:first-child { text-align: left; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; }
+.scenario-table tbody tr:last-child td { border-bottom: none; }
+.scenario-table td.opt { background: var(--navy-pale); color: var(--navy); font-weight: 600; }
+.scenario-table td.dash { color: #CCC; font-size: 10px; }
+
+.note { margin-top: 16px; padding: 11px 15px; background: var(--navy-pale); border-left: 3px solid var(--navy-light); border-radius: 0 3px 3px 0; font-size: 12px; color: var(--navy); line-height: 1.6; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  header { padding: 16px 20px; }
+  .container { padding: 16px 16px 48px; }
+  .settings-bar { gap: 16px; padding: 12px 16px; }
+  .field input { width: 100%; }
+  .settings-bar { flex-direction: column; align-items: stretch; }
+
+  /* Hide desktop spreadsheet, show mobile cards */
+  .grid-2 { display: block; }
+  .desktop-only { display: none; }
+  .mobile-cards { display: block; }
+
+  .summary-strip { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .summary-item .val { font-size: 15px; }
+
+  .btn-run { padding: 13px 24px; }
+}
+@media (min-width: 769px) {
+  .mobile-only { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>JAPspired</h1>
+  <span>Order Optimiser</span>
+</header>
+
+<div class="container">
+
+  <!-- Settings -->
+  <div class="settings-bar">
+    <div class="field">
+      <label>FX Rate (JPY → BDT)</label>
+      <input type="number" id="fx" value="0.80" step="0.01" min="0.1">
+    </div>
+    <div class="field">
+      <label>Packaging Weight (g)</label>
+      <input type="number" id="pkgWeight" value="500" step="10" min="0">
+    </div>
+    <div class="field">
+      <label>Import Budget (BDT)</label>
+      <input type="number" id="budget" value="" step="500" min="0" placeholder="No limit">
+    </div>
+  </div>
+
+  <div class="run-wrap" style="margin-bottom:20px;margin-top:0">
+    <button class="btn-run" onclick="runOptimiser()">Run Optimiser</button>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- ── DESKTOP: SKU Spreadsheet ── -->
+    <div class="desktop-only">
+      <div class="section-label">
+        SKUs
+        <span>Lot = minimum purchase increment</span>
+      </div>
+      <div class="sheet-wrap">
+        <table class="sheet-table">
+          <thead>
+            <tr>
+              <th style="width:24px"></th>
+              <th style="min-width:160px">SKU Name</th>
+              <th class="num">Wt (g)</th>
+              <th class="num">Price JPY</th>
+              <th class="num">Ship ZM</th>
+              <th class="num">ZM Fee</th>
+              <th class="num">Sell BDT</th>
+              <th class="num">Lot</th>
+              <th class="num">Min Qty</th>
+              <th class="num">Max Qty</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="skuBody"></tbody>
+        </table>
+        <button class="btn-add-row" onclick="addSku()">+ Add row</button>
+      </div>
+    </div>
+
+    <!-- ── DESKTOP: Bracket Spreadsheet (collapsible) ── -->
+    <div class="desktop-only">
+      <div class="section-label" style="cursor:pointer;user-select:none" onclick="toggleBrackets()">
+        Shipping Brackets
+        <span id="bracketToggleHint" style="color:#BBB;font-size:10px">▶ expand</span>
+      </div>
+      <div id="bracketPanel" style="display:none">
+        <div class="sheet-wrap">
+          <table class="sheet-table">
+            <thead>
+              <tr>
+                <th style="width:24px"></th>
+                <th class="num">Up to (g)</th>
+                <th class="num">Cost (JPY)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="bracketBody"></tbody>
+          </table>
+          <button class="btn-add-row" onclick="addBracket()">+ Add row</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── MOBILE: SKU Cards ── -->
+  <div class="mobile-cards mobile-only">
+    <div class="section-label" style="margin-bottom:10px">SKUs <span>Tap a field to edit</span></div>
+    <div id="skuCards"></div>
+    <button class="btn-add-card" onclick="addSku()">+ Add SKU</button>
+
+    <div class="section-label" style="margin-bottom:8px;cursor:pointer" onclick="toggleBracketsMobile()">Shipping Brackets <span id="bracketToggleHintMobile">▶ expand</span></div>
+    <div id="bracketPanelMobile" style="display:none">
+      <div class="bracket-grid-mobile" id="bracketCards">
+        <div class="bracket-row-mobile" style="background:#2C2C2C">
+          <div style="padding:7px 12px;font-size:10px;color:rgba(255,255,255,0.6);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;text-align:right;border-right:1px solid rgba(255,255,255,0.1)">Up to (g)</div>
+          <div style="padding:7px 12px;font-size:10px;color:rgba(255,255,255,0.6);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;text-align:right">Cost (JPY)</div>
+          <div></div>
+        </div>
+      </div>
+      <button class="btn-add-card" onclick="addBracket()" style="margin-top:8px">+ Add bracket</button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+    <div class="results-header">
+      <h2>Optimal Order</h2>
+    </div>
+    <div class="summary-strip">
+      <div class="summary-item"><div class="lbl">Total Units</div><div class="val" id="sumUnits">—</div></div>
+      <div class="summary-item"><div class="lbl">Total Weight</div><div class="val" id="sumWeight">—</div></div>
+      <div class="summary-item"><div class="lbl">Shipping JPY</div><div class="val" id="sumShip">—</div></div>
+      <div class="summary-item"><div class="lbl">Import Cost BDT</div><div class="val" id="sumImport">—</div></div>
+      <div class="summary-item"><div class="lbl">Total Profit BDT</div><div class="val profit" id="sumProfit">—</div></div>
+    </div>
+    <div class="res-wrap">
+      <table class="res-table">
+        <thead>
+          <tr>
+            <th>SKU</th><th>Qty</th><th>Unit Cost</th><th>Profit/unit</th><th>Markup</th><th>Total Profit</th><th>Verdict</th>
+          </tr>
+        </thead>
+        <tbody id="resBody"></tbody>
+      </table>
+    </div>
+
+
+  </div>
+
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const DEFAULT_SKUS = [
+  {name:'Sarasa Clip Black', wt:11, price:66,  shipZm:300, zmFee:500, sell:150, lot:10, minQty:20, maxQty:40},
+  {name:'Sarasa Clip Blue',  wt:11, price:67,  shipZm:300, zmFee:500, sell:150, lot:10, minQty:20, maxQty:30},
+  {name:'Jetstream Standard',wt:10, price:98,  shipZm:520, zmFee:500, sell:160, lot:10, minQty:20, maxQty:30},
+  {name:'bLen U',            wt:11, price:166, shipZm:825, zmFee:500, sell:270, lot:10, minQty:20, maxQty:30},
+  {name:'Jetstream Lite',    wt:10, price:154, shipZm:330, zmFee:500, sell:250, lot:10, minQty:20, maxQty:30},
+];
+
+const DEFAULT_BRACKETS = [
+  {upTo:100,cost:862},{upTo:200,cost:1000},{upTo:300,cost:1138},{upTo:400,cost:1276},
+  {upTo:500,cost:1414},{upTo:600,cost:1552},{upTo:700,cost:1690},{upTo:800,cost:1828},
+  {upTo:900,cost:1966},{upTo:1000,cost:2104},{upTo:1100,cost:2242},{upTo:1200,cost:2380},
+  {upTo:1300,cost:2518},{upTo:1400,cost:2656},{upTo:1500,cost:2794},{upTo:1600,cost:2932},
+  {upTo:1700,cost:3070},{upTo:1800,cost:3208},{upTo:1900,cost:3346},{upTo:2000,cost:3484},
+  {upTo:3000,cost:4900},{upTo:4000,cost:6100},{upTo:5000,cost:7300},{upTo:6000,cost:8500},
+  {upTo:7000,cost:9700},{upTo:8000,cost:10900},{upTo:9000,cost:12100},{upTo:10000,cost:13300},
+  {upTo:11000,cost:13950},
+];
+
+// ── DESKTOP: SKU TABLE ────────────────────────────────────────────────────────
+function renderSkus() {
+  const tbody = document.getElementById('skuBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  DEFAULT_SKUS.forEach((s, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="row-num">${i+1}</td>
+      <td><input class="cell-input text-cell" type="text" value="${s.name}" oninput="DEFAULT_SKUS[${i}].name=this.value;syncCards()"></td>
+      <td><input class="cell-input" type="number" value="${s.wt}" min="1" oninput="DEFAULT_SKUS[${i}].wt=+this.value"></td>
+      <td><input class="cell-input" type="number" value="${s.price}" min="1" oninput="DEFAULT_SKUS[${i}].price=+this.value"></td>
+      <td><input class="cell-input" type="number" value="${s.shipZm}" min="0" oninput="DEFAULT_SKUS[${i}].shipZm=+this.value"></td>
+      <td><input class="cell-input" type="number" value="${s.zmFee}" min="0" oninput="DEFAULT_SKUS[${i}].zmFee=+this.value"></td>
+      <td><input class="cell-input" type="number" value="${s.sell}" min="1" oninput="DEFAULT_SKUS[${i}].sell=+this.value"></td>
+      <td><input class="cell-input" type="number" value="${s.lot}" min="1" oninput="DEFAULT_SKUS[${i}].lot=+this.value"></td>
+      <td><input class="cell-input" type="number" value="${s.minQty}" min="0" oninput="DEFAULT_SKUS[${i}].minQty=+this.value"></td>
+      <td><input class="cell-input" type="number" value="${s.maxQty}" min="0" oninput="DEFAULT_SKUS[${i}].maxQty=+this.value"></td>
+      <td><button class="btn-del" onclick="removeSku(${i})">×</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── MOBILE: SKU CARDS ────────────────────────────────────────────────────────
+function renderSkuCards() {
+  const container = document.getElementById('skuCards');
+  if (!container) return;
+  container.innerHTML = '';
+  DEFAULT_SKUS.forEach((s, i) => {
+    const card = document.createElement('div');
+    card.className = 'sku-card';
+    card.innerHTML = `
+      <div class="sku-card-header">
+        <span class="sku-num">SKU ${i+1}</span>
+        <button class="btn-del-card" onclick="removeSku(${i})">Remove</button>
+      </div>
+      <input class="card-name-input" type="text" value="${s.name}" placeholder="SKU name" oninput="DEFAULT_SKUS[${i}].name=this.value;syncTable()">
+      <div class="card-fields">
+        <div class="card-field"><label>Wt (g)</label><input type="number" value="${s.wt}" min="1" oninput="DEFAULT_SKUS[${i}].wt=+this.value"></div>
+        <div class="card-field"><label>Price JPY</label><input type="number" value="${s.price}" min="1" oninput="DEFAULT_SKUS[${i}].price=+this.value"></div>
+        <div class="card-field"><label>Ship ZM</label><input type="number" value="${s.shipZm}" min="0" oninput="DEFAULT_SKUS[${i}].shipZm=+this.value"></div>
+        <div class="card-field"><label>ZM Fee</label><input type="number" value="${s.zmFee}" min="0" oninput="DEFAULT_SKUS[${i}].zmFee=+this.value"></div>
+        <div class="card-field"><label>Sell BDT</label><input type="number" value="${s.sell}" min="1" oninput="DEFAULT_SKUS[${i}].sell=+this.value"></div>
+        <div class="card-field"><label>Lot</label><input type="number" value="${s.lot}" min="1" oninput="DEFAULT_SKUS[${i}].lot=+this.value"></div>
+        <div class="card-field"><label>Min Qty</label><input type="number" value="${s.minQty}" min="0" oninput="DEFAULT_SKUS[${i}].minQty=+this.value"></div>
+        <div class="card-field"><label>Max Qty</label><input type="number" value="${s.maxQty}" min="0" oninput="DEFAULT_SKUS[${i}].maxQty=+this.value"></div>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+function syncCards() { renderSkuCards(); }
+function syncTable() { renderSkus(); }
+
+// ── ARROW KEY NAVIGATION ──────────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) return;
+  const el = document.activeElement;
+  if (!el || !el.classList.contains('cell-input')) return;
+  e.preventDefault();
+
+  const td   = el.closest('td');
+  const tr   = el.closest('tr');
+  const tbody = tr.closest('tbody');
+  const rows  = Array.from(tbody.querySelectorAll('tr'));
+  const cells = Array.from(tr.querySelectorAll('td'));
+
+  const rowIdx  = rows.indexOf(tr);
+  const colIdx  = cells.indexOf(td);
+
+  let targetRow = rowIdx, targetCol = colIdx;
+  if (e.key === 'ArrowUp')    targetRow--;
+  if (e.key === 'ArrowDown')  targetRow++;
+  if (e.key === 'ArrowLeft')  targetCol--;
+  if (e.key === 'ArrowRight') targetCol++;
+
+  const destRow = rows[targetRow];
+  if (!destRow) return;
+  const destCells = Array.from(destRow.querySelectorAll('td'));
+  const destTd    = destCells[targetCol];
+  if (!destTd) return;
+  const destInput = destTd.querySelector('input.cell-input');
+  if (destInput) destInput.focus();
+});
+
+function addSku() {
+  DEFAULT_SKUS.push({name:'', wt:10, price:100, shipZm:300, zmFee:500, sell:200, lot:10, minQty:10, maxQty:50});
+  renderSkus(); renderSkuCards();
+}
+function removeSku(i) {
+  if (DEFAULT_SKUS.length <= 1) return;
+  DEFAULT_SKUS.splice(i, 1);
+  renderSkus(); renderSkuCards();
+}
+
+// ── BRACKETS ─────────────────────────────────────────────────────────────────
+function renderBrackets() {
+  // Desktop table
+  const tbody = document.getElementById('bracketBody');
+  if (tbody) {
+    tbody.innerHTML = '';
+    DEFAULT_BRACKETS.forEach((b, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="row-num">${i+1}</td>
+        <td><input class="cell-input" type="number" value="${b.upTo}" min="1" oninput="DEFAULT_BRACKETS[${i}].upTo=+this.value"></td>
+        <td><input class="cell-input" type="number" value="${b.cost}" min="0" oninput="DEFAULT_BRACKETS[${i}].cost=+this.value"></td>
+        <td><button class="btn-del" onclick="removeBracket(${i})">×</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+  // Mobile rows
+  const mContainer = document.getElementById('bracketCards');
+  if (mContainer) {
+    // Keep header row (first child), re-render rest
+    const header = mContainer.firstElementChild;
+    mContainer.innerHTML = '';
+    mContainer.appendChild(header);
+    DEFAULT_BRACKETS.forEach((b, i) => {
+      const row = document.createElement('div');
+      row.className = 'bracket-row-mobile';
+      row.innerHTML = `
+        <input type="number" value="${b.upTo}" min="1" oninput="DEFAULT_BRACKETS[${i}].upTo=+this.value">
+        <input type="number" value="${b.cost}" min="0" oninput="DEFAULT_BRACKETS[${i}].cost=+this.value">
+        <button class="btn-del" onclick="removeBracket(${i})">×</button>`;
+      mContainer.appendChild(row);
+    });
+  }
+}
+function addBracket() {
+  const last = DEFAULT_BRACKETS[DEFAULT_BRACKETS.length-1];
+  DEFAULT_BRACKETS.push({upTo: last.upTo+1000, cost: last.cost+1200});
+  renderBrackets();
+}
+function removeBracket(i) {
+  if (DEFAULT_BRACKETS.length <= 1) return;
+  DEFAULT_BRACKETS.splice(i, 1);
+  renderBrackets();
+}
+
+// ── CORE MODEL ────────────────────────────────────────────────────────────────
+function getShipCost(weightG) {
+  const sorted = [...DEFAULT_BRACKETS].sort((a,b) => a.upTo - b.upTo);
+  let cost = sorted[0].cost;
+  for (let i = 0; i < sorted.length; i++) {
+    if (weightG <= sorted[i].upTo) { cost = sorted[i].cost; break; }
+    if (i === sorted.length - 1) cost = sorted[i].cost;
+  }
+  return cost;
+}
+
+function calcOrder(qtys) {
+  const fx  = +document.getElementById('fx').value;
+  const pkg = +document.getElementById('pkgWeight').value;
+  const merchW = DEFAULT_SKUS.reduce((sum,s,i) => sum + s.wt * qtys[i], 0);
+  const totalW = merchW + pkg;
+  const shipJpy = getShipCost(totalW);
+  let totalProfit = 0, totalImportCost = 0;
+  const rows = DEFAULT_SKUS.map((s,i) => {
+    const q = qtys[i];
+    if (q === 0) return {q:0,unitCost:0,profitU:0,markup:0,totalProfit:0,importCost:0};
+    const pct = (s.wt*q + pkg*(s.wt*q/merchW)) / totalW;
+    const bdShipJpy = shipJpy * pct;
+    const totalCostBdt = (s.price*q + s.shipZm + s.zmFee + bdShipJpy) * fx;
+    const unitCost = totalCostBdt / q;
+    const profitU  = s.sell - unitCost;
+    const markup   = profitU / unitCost;
+    totalProfit    += profitU * q;
+    totalImportCost+= totalCostBdt;
+    return {q, unitCost, profitU, markup, totalProfit: profitU*q, importCost: totalCostBdt};
+  });
+  return {qtys, totalW, shipJpy, totalProfit, totalImportCost, rows};
+}
+
+// ── OPTIMISER ─────────────────────────────────────────────────────────────────
+// Maximise total profit within budget, respecting per-SKU min/max qty bounds.
+function findOptimalQtys() {
+  const n         = DEFAULT_SKUS.length;
+  const budgetVal = document.getElementById('budget').value;
+  const budget    = budgetVal ? +budgetVal : Infinity;
+
+  // Build valid quantity list per SKU: multiples of lot, within [minQty, maxQty]
+  const lotsPerSku = DEFAULT_SKUS.map(s => {
+    const lots = [];
+    const min = s.minQty || s.lot;
+    const max = s.maxQty || 100;
+    // Round min up to nearest lot
+    const start = Math.ceil(min / s.lot) * s.lot;
+    for (let q = start; q <= max; q += s.lot) lots.push(q);
+    return lots.length ? lots : [s.lot]; // fallback to lot if range is empty
+  });
+
+  // Start at minimum qty per SKU
+  let current = lotsPerSku.map(lots => lots[0]);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (let i = 0; i < n; i++) {
+      let bestQ = current[i], bestP = calcOrder(current).totalProfit;
+      for (const q of lotsPerSku[i]) {
+        const candidate = [...current]; candidate[i] = q;
+        if (calcOrder(candidate).totalImportCost > budget) continue;
+        const p = calcOrder(candidate).totalProfit;
+        if (p > bestP + 0.01) { bestP = p; bestQ = q; }
+      }
+      if (bestQ !== current[i]) { current[i] = bestQ; changed = true; }
+    }
+  }
+  return calcOrder(current);
+}
+
+// ── RUN ───────────────────────────────────────────────────────────────────────
+function runOptimiser() {
+  const optimal   = findOptimalQtys();
+  const budgetVal = document.getElementById('budget').value;
+  const budget    = budgetVal ? +budgetVal : Infinity;
+
+  document.getElementById('sumUnits').textContent  = optimal.qtys.reduce((a,b)=>a+b,0);
+  document.getElementById('sumWeight').textContent = Math.round(optimal.totalW) + 'g';
+  document.getElementById('sumShip').textContent   = optimal.shipJpy.toLocaleString();
+  document.getElementById('sumImport').textContent = '৳' + Math.round(optimal.totalImportCost).toLocaleString();
+  document.getElementById('sumProfit').textContent = '৳' + Math.round(optimal.totalProfit).toLocaleString();
+
+  const resBody = document.getElementById('resBody');
+  resBody.innerHTML = '';
+  optimal.rows.forEach((r,i) => {
+    const s = DEFAULT_SKUS[i];
+    const markup = r.markup * 100;
+    const pillClass = markup>=40?'green':'red';
+    const pillText  = markup>=40?'Strong':'Below 40%';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s.name}</td><td>${r.q}</td><td>৳${r.unitCost.toFixed(1)}</td><td>৳${r.profitU.toFixed(1)}</td><td>${markup.toFixed(0)}%</td><td>৳${Math.round(r.totalProfit).toLocaleString()}</td><td><span class="pill ${pillClass}">${pillText}</span></td>`;
+    resBody.appendChild(tr);
+  });
+
+
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ── BRACKET TOGGLE ────────────────────────────────────────────────────────────
+function toggleBrackets() {
+  const panel = document.getElementById('bracketPanel');
+  const hint  = document.getElementById('bracketToggleHint');
+  const open  = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  hint.textContent    = open ? '▼ collapse' : '▶ expand';
+}
+function toggleBracketsMobile() {
+  const panel = document.getElementById('bracketPanelMobile');
+  const hint  = document.getElementById('bracketToggleHintMobile');
+  const open  = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  hint.textContent    = open ? '▼ collapse' : '▶ expand';
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderSkus();
+renderSkuCards();
+renderBrackets();
+</script>
+</body>
+</html>
