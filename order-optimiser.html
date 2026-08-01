@@ -245,20 +245,23 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
   <div class="settings-bar">
     <div class="field">
       <label>FX Rate (JPY → BDT)</label>
-      <input type="number" id="fx" value="0.80" step="0.01" min="0.1">
+      <input type="number" id="fx" value="0.80" step="0.01" min="0.1" oninput="saveState()">
     </div>
     <div class="field">
       <label>Packaging Weight (g)</label>
-      <input type="number" id="pkgWeight" value="500" step="10" min="0">
+      <input type="number" id="pkgWeight" value="500" step="10" min="0" oninput="saveState()">
     </div>
     <div class="field">
       <label>Import Budget (BDT)</label>
-      <input type="number" id="budget" value="" step="500" min="0" placeholder="No limit">
+      <input type="number" id="budget" value="" step="500" min="0" placeholder="No limit" oninput="saveState()">
     </div>
   </div>
 
   <div class="run-wrap" style="margin-bottom:20px;margin-top:0">
     <button class="btn-run" onclick="runOptimiser()">Run Optimiser</button>
+    <div style="margin-top:10px">
+      <a href="#" onclick="clearSavedState();return false" style="font-size:11px;color:var(--mid);text-decoration:underline">Clear saved data</a>
+    </div>
   </div>
 
   <div class="grid-2">
@@ -380,6 +383,37 @@ const DEFAULT_BRACKETS = [
   {upTo:11000,cost:13950},
 ];
 
+// ── AUTOSAVE (browser local storage — persists between visits on this device) ──
+const STORAGE_KEY = 'japspired_optimiser_state_v1';
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      skus: DEFAULT_SKUS,
+      brackets: DEFAULT_BRACKETS,
+      fx: document.getElementById('fx').value,
+      pkgWeight: document.getElementById('pkgWeight').value,
+      budget: document.getElementById('budget').value
+    }));
+  } catch (e) { /* storage unavailable — fail silently, nothing else depends on this */ }
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (Array.isArray(data.skus)) { DEFAULT_SKUS.length = 0; DEFAULT_SKUS.push(...data.skus); }
+    if (Array.isArray(data.brackets) && data.brackets.length) { DEFAULT_BRACKETS.length = 0; DEFAULT_BRACKETS.push(...data.brackets); }
+    if (data.fx)        document.getElementById('fx').value = data.fx;
+    if (data.pkgWeight)  document.getElementById('pkgWeight').value = data.pkgWeight;
+    if (data.budget)    document.getElementById('budget').value = data.budget;
+  } catch (e) { /* corrupted or unavailable — start fresh */ }
+}
+function clearSavedState() {
+  if (!confirm('Clear all saved SKU rows and settings on this device? This cannot be undone.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
 // ── DESKTOP: SKU TABLE ────────────────────────────────────────────────────────
 function renderSkus() {
   const tbody = document.getElementById('skuBody');
@@ -389,15 +423,15 @@ function renderSkus() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="row-num">${i+1}</td>
-      <td><input class="cell-input text-cell" type="text" value="${s.name}" oninput="DEFAULT_SKUS[${i}].name=this.value;syncCards()"></td>
-      <td><input class="cell-input" type="number" value="${s.wt}" min="1" oninput="DEFAULT_SKUS[${i}].wt=+this.value"></td>
-      <td><input class="cell-input" type="number" value="${s.price}" min="1" oninput="DEFAULT_SKUS[${i}].price=+this.value"></td>
-      <td><input class="cell-input" type="number" value="${s.shipZm}" min="0" oninput="DEFAULT_SKUS[${i}].shipZm=+this.value"></td>
-      <td><input class="cell-input" type="number" value="${s.zmFee}" min="0" oninput="DEFAULT_SKUS[${i}].zmFee=+this.value"></td>
-      <td><input class="cell-input" type="number" value="${s.sell}" min="1" oninput="DEFAULT_SKUS[${i}].sell=+this.value"></td>
-      <td><input class="cell-input" type="number" value="${s.lot}" min="1" oninput="DEFAULT_SKUS[${i}].lot=+this.value"></td>
-      <td><input class="cell-input" type="number" value="${s.minQty}" min="0" oninput="DEFAULT_SKUS[${i}].minQty=+this.value"></td>
-      <td><input class="cell-input" type="number" value="${s.maxQty}" min="0" oninput="DEFAULT_SKUS[${i}].maxQty=+this.value"></td>
+      <td><input class="cell-input text-cell" type="text" value="${s.name}" oninput="DEFAULT_SKUS[${i}].name=this.value;syncCards();saveState()"></td>
+      <td><input class="cell-input" type="number" value="${s.wt}" min="1" oninput="DEFAULT_SKUS[${i}].wt=+this.value;saveState()"></td>
+      <td><input class="cell-input" type="number" value="${s.price}" min="1" oninput="DEFAULT_SKUS[${i}].price=+this.value;saveState()"></td>
+      <td><input class="cell-input" type="number" value="${s.shipZm}" min="0" oninput="DEFAULT_SKUS[${i}].shipZm=+this.value;saveState()"></td>
+      <td><input class="cell-input" type="number" value="${s.zmFee}" min="0" oninput="DEFAULT_SKUS[${i}].zmFee=+this.value;saveState()"></td>
+      <td><input class="cell-input" type="number" value="${s.sell}" min="1" oninput="DEFAULT_SKUS[${i}].sell=+this.value;saveState()"></td>
+      <td><input class="cell-input" type="number" value="${s.lot}" min="1" oninput="DEFAULT_SKUS[${i}].lot=+this.value;saveState()"></td>
+      <td><input class="cell-input" type="number" value="${s.minQty}" min="0" oninput="DEFAULT_SKUS[${i}].minQty=+this.value;saveState()"></td>
+      <td><input class="cell-input" type="number" value="${s.maxQty}" min="0" oninput="DEFAULT_SKUS[${i}].maxQty=+this.value;saveState()"></td>
       <td><button class="btn-del" onclick="removeSku(${i})">×</button></td>`;
     tbody.appendChild(tr);
   });
@@ -416,16 +450,16 @@ function renderSkuCards() {
         <span class="sku-num">SKU ${i+1}</span>
         <button class="btn-del-card" onclick="removeSku(${i})">Remove</button>
       </div>
-      <input class="card-name-input" type="text" value="${s.name}" placeholder="SKU name" oninput="DEFAULT_SKUS[${i}].name=this.value;syncTable()">
+      <input class="card-name-input" type="text" value="${s.name}" placeholder="SKU name" oninput="DEFAULT_SKUS[${i}].name=this.value;syncTable();saveState()">
       <div class="card-fields">
-        <div class="card-field"><label>Wt (g)</label><input type="number" value="${s.wt}" min="1" oninput="DEFAULT_SKUS[${i}].wt=+this.value"></div>
-        <div class="card-field"><label>Price JPY</label><input type="number" value="${s.price}" min="1" oninput="DEFAULT_SKUS[${i}].price=+this.value"></div>
-        <div class="card-field"><label>Ship ZM</label><input type="number" value="${s.shipZm}" min="0" oninput="DEFAULT_SKUS[${i}].shipZm=+this.value"></div>
-        <div class="card-field"><label>ZM Fee</label><input type="number" value="${s.zmFee}" min="0" oninput="DEFAULT_SKUS[${i}].zmFee=+this.value"></div>
-        <div class="card-field"><label>Sell BDT</label><input type="number" value="${s.sell}" min="1" oninput="DEFAULT_SKUS[${i}].sell=+this.value"></div>
-        <div class="card-field"><label>Lot</label><input type="number" value="${s.lot}" min="1" oninput="DEFAULT_SKUS[${i}].lot=+this.value"></div>
-        <div class="card-field"><label>Min Qty</label><input type="number" value="${s.minQty}" min="0" oninput="DEFAULT_SKUS[${i}].minQty=+this.value"></div>
-        <div class="card-field"><label>Max Qty</label><input type="number" value="${s.maxQty}" min="0" oninput="DEFAULT_SKUS[${i}].maxQty=+this.value"></div>
+        <div class="card-field"><label>Wt (g)</label><input type="number" value="${s.wt}" min="1" oninput="DEFAULT_SKUS[${i}].wt=+this.value;saveState()"></div>
+        <div class="card-field"><label>Price JPY</label><input type="number" value="${s.price}" min="1" oninput="DEFAULT_SKUS[${i}].price=+this.value;saveState()"></div>
+        <div class="card-field"><label>Ship ZM</label><input type="number" value="${s.shipZm}" min="0" oninput="DEFAULT_SKUS[${i}].shipZm=+this.value;saveState()"></div>
+        <div class="card-field"><label>ZM Fee</label><input type="number" value="${s.zmFee}" min="0" oninput="DEFAULT_SKUS[${i}].zmFee=+this.value;saveState()"></div>
+        <div class="card-field"><label>Sell BDT</label><input type="number" value="${s.sell}" min="1" oninput="DEFAULT_SKUS[${i}].sell=+this.value;saveState()"></div>
+        <div class="card-field"><label>Lot</label><input type="number" value="${s.lot}" min="1" oninput="DEFAULT_SKUS[${i}].lot=+this.value;saveState()"></div>
+        <div class="card-field"><label>Min Qty</label><input type="number" value="${s.minQty}" min="0" oninput="DEFAULT_SKUS[${i}].minQty=+this.value;saveState()"></div>
+        <div class="card-field"><label>Max Qty</label><input type="number" value="${s.maxQty}" min="0" oninput="DEFAULT_SKUS[${i}].maxQty=+this.value;saveState()"></div>
       </div>`;
     container.appendChild(card);
   });
@@ -467,11 +501,11 @@ document.addEventListener('keydown', function(e) {
 
 function addSku() {
   DEFAULT_SKUS.push({name:'', wt:'', price:'', shipZm:'', zmFee:'', sell:'', lot:'', minQty:'', maxQty:''});
-  renderSkus(); renderSkuCards();
+  renderSkus(); renderSkuCards(); saveState();
 }
 function removeSku(i) {
   DEFAULT_SKUS.splice(i, 1);
-  renderSkus(); renderSkuCards();
+  renderSkus(); renderSkuCards(); saveState();
 }
 
 // ── BRACKETS ─────────────────────────────────────────────────────────────────
@@ -484,8 +518,8 @@ function renderBrackets() {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td class="row-num">${i+1}</td>
-        <td><input class="cell-input" type="number" value="${b.upTo}" min="1" oninput="DEFAULT_BRACKETS[${i}].upTo=+this.value"></td>
-        <td><input class="cell-input" type="number" value="${b.cost}" min="0" oninput="DEFAULT_BRACKETS[${i}].cost=+this.value"></td>
+        <td><input class="cell-input" type="number" value="${b.upTo}" min="1" oninput="DEFAULT_BRACKETS[${i}].upTo=+this.value;saveState()"></td>
+        <td><input class="cell-input" type="number" value="${b.cost}" min="0" oninput="DEFAULT_BRACKETS[${i}].cost=+this.value;saveState()"></td>
         <td><button class="btn-del" onclick="removeBracket(${i})">×</button></td>`;
       tbody.appendChild(tr);
     });
@@ -501,8 +535,8 @@ function renderBrackets() {
       const row = document.createElement('div');
       row.className = 'bracket-row-mobile';
       row.innerHTML = `
-        <input type="number" value="${b.upTo}" min="1" oninput="DEFAULT_BRACKETS[${i}].upTo=+this.value">
-        <input type="number" value="${b.cost}" min="0" oninput="DEFAULT_BRACKETS[${i}].cost=+this.value">
+        <input type="number" value="${b.upTo}" min="1" oninput="DEFAULT_BRACKETS[${i}].upTo=+this.value;saveState()">
+        <input type="number" value="${b.cost}" min="0" oninput="DEFAULT_BRACKETS[${i}].cost=+this.value;saveState()">
         <button class="btn-del" onclick="removeBracket(${i})">×</button>`;
       mContainer.appendChild(row);
     });
@@ -511,12 +545,12 @@ function renderBrackets() {
 function addBracket() {
   const last = DEFAULT_BRACKETS[DEFAULT_BRACKETS.length-1];
   DEFAULT_BRACKETS.push({upTo: last.upTo+1000, cost: last.cost+1200});
-  renderBrackets();
+  renderBrackets(); saveState();
 }
 function removeBracket(i) {
   if (DEFAULT_BRACKETS.length <= 1) return;
   DEFAULT_BRACKETS.splice(i, 1);
-  renderBrackets();
+  renderBrackets(); saveState();
 }
 
 // ── CORE MODEL ────────────────────────────────────────────────────────────────
@@ -637,6 +671,7 @@ function toggleBracketsMobile() {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
+loadState();
 renderSkus();
 renderSkuCards();
 renderBrackets();
