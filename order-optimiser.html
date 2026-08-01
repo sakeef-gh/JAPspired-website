@@ -466,11 +466,10 @@ document.addEventListener('keydown', function(e) {
 });
 
 function addSku() {
-  DEFAULT_SKUS.push({name:'', wt:10, price:100, shipZm:300, zmFee:500, sell:200, lot:10, minQty:10, maxQty:50});
+  DEFAULT_SKUS.push({name:'', wt:'', price:'', shipZm:'', zmFee:'', sell:'', lot:'', minQty:'', maxQty:''});
   renderSkus(); renderSkuCards();
 }
 function removeSku(i) {
-  if (DEFAULT_SKUS.length <= 1) return;
   DEFAULT_SKUS.splice(i, 1);
   renderSkus(); renderSkuCards();
 }
