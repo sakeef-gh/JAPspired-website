@@ -360,7 +360,7 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
       <table class="res-table">
         <thead>
           <tr>
-            <th>SKU</th><th>Qty (drag)</th><th>Unit Cost</th><th>Profit/unit</th><th>Markup</th><th>Total Profit</th><th>Verdict</th>
+            <th>SKU</th><th>Qty (drag)</th><th>Unit Cost</th><th>Profit/unit</th><th>Markup</th><th>Total Profit</th>
           </tr>
         </thead>
         <tbody id="resBody"></tbody>
@@ -676,8 +676,7 @@ function buildResultsTableSkeleton() {
       <td id="eqUnitCost-${i}"></td>
       <td id="eqProfitU-${i}"></td>
       <td id="eqMarkup-${i}"></td>
-      <td id="eqTotalProfit-${i}"></td>
-      <td id="eqVerdict-${i}"></td>`;
+      <td id="eqTotalProfit-${i}"></td>`;
     resBody.appendChild(tr);
   });
 }
@@ -689,7 +688,9 @@ function updateResultsDisplay(optimal, skipIdx) {
   document.getElementById('sumWeight').textContent = Math.round(optimal.totalW) + 'g';
   document.getElementById('sumShip').textContent   = optimal.shipJpy.toLocaleString();
   document.getElementById('sumImport').textContent = '৳' + Math.round(optimal.totalImportCost).toLocaleString();
-  document.getElementById('sumProfit').textContent = '৳' + Math.round(optimal.totalProfit).toLocaleString();
+  const sumProfitEl = document.getElementById('sumProfit');
+  sumProfitEl.textContent = '৳' + Math.round(optimal.totalProfit).toLocaleString();
+  sumProfitEl.style.color = optimal.totalProfit < 0 ? 'var(--red)' : '';
 
   optimal.rows.forEach((r, i) => {
     if (i !== skipIdx) {
@@ -698,13 +699,19 @@ function updateResultsDisplay(optimal, skipIdx) {
     }
     document.getElementById('eqQtyLabel-' + i).textContent = r.q + ' units';
     document.getElementById('eqUnitCost-' + i).textContent = '৳' + r.unitCost.toFixed(1);
-    document.getElementById('eqProfitU-' + i).textContent  = '৳' + r.profitU.toFixed(1);
+
+    const profitUEl = document.getElementById('eqProfitU-' + i);
+    profitUEl.textContent = '৳' + r.profitU.toFixed(1);
+    profitUEl.style.color = r.profitU < 0 ? 'var(--red)' : '';
+
     const markup = r.markup * 100;
-    document.getElementById('eqMarkup-' + i).textContent = markup.toFixed(0) + '%';
-    document.getElementById('eqTotalProfit-' + i).textContent = '৳' + Math.round(r.totalProfit).toLocaleString();
-    const pillClass = markup >= 40 ? 'green' : 'red';
-    const pillText  = markup >= 40 ? 'Strong' : 'Below 40%';
-    document.getElementById('eqVerdict-' + i).innerHTML = `<span class="pill ${pillClass}">${pillText}</span>`;
+    const markupEl = document.getElementById('eqMarkup-' + i);
+    markupEl.textContent = markup.toFixed(0) + '%';
+    markupEl.style.color = markup < 0 ? 'var(--red)' : '';
+
+    const totalProfitEl = document.getElementById('eqTotalProfit-' + i);
+    totalProfitEl.textContent = '৳' + Math.round(r.totalProfit).toLocaleString();
+    totalProfitEl.style.color = r.totalProfit < 0 ? 'var(--red)' : '';
   });
 }
 
