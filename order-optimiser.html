@@ -182,7 +182,7 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
 .summary-item .val.profit { color: var(--green); }
 
 .res-wrap { border: 1px solid var(--border); border-radius: 4px; overflow-x: auto; background: var(--white); margin-bottom: 20px; }
-.res-table { width: 100%; border-collapse: collapse; min-width: 500px; }
+.res-table { width: 100%; border-collapse: collapse; min-width: 500px; table-layout: fixed; }
 .res-table thead tr { background: var(--navy); }
 .res-table th { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(255,255,255,0.75); padding: 9px 12px; text-align: right; white-space: nowrap; }
 .res-table th:first-child { text-align: left; }
@@ -627,7 +627,7 @@ function findOptimalQtys(locks) {
   const lotsPerSku = DEFAULT_SKUS.map((s, i) => {
     if (locks.hasOwnProperty(i)) return [locks[i]];
     const lots = [];
-    const min = s.minQty || s.lot;
+    const min = (s.minQty === '' || s.minQty === undefined || s.minQty === null) ? s.lot : s.minQty;
     const max = s.maxQty || 100;
     const start = Math.ceil(min / s.lot) * s.lot;
     for (let q = start; q <= max; q += s.lot) lots.push(q);
@@ -708,10 +708,26 @@ function updateResultsDisplay(optimal, skipIdx) {
   });
 }
 
+// Dragging a slider fires an 'input' event on every pixel of movement — far
+// more often than the screen can redraw. Without throttling, each of those
+// triggers a full recompute (re-solving every other SKU) and a full DOM
+// rewrite, which piles up faster than the browser can render it and shows
+// up as the slider/table visibly stuttering or shaking mid-drag. This keeps
+// only the latest value and processes it once per animation frame instead.
+let eqRafPending = false;
+let eqPendingUpdate = null;
+
 function onEqualizerInput(i, value) {
-  currentLocks[i] = +value;
-  const optimal = findOptimalQtys(currentLocks);
-  updateResultsDisplay(optimal, i);
+  eqPendingUpdate = { i, value: +value };
+  if (eqRafPending) return;
+  eqRafPending = true;
+  requestAnimationFrame(() => {
+    eqRafPending = false;
+    const { i: idx, value: val } = eqPendingUpdate;
+    currentLocks[idx] = val;
+    const optimal = findOptimalQtys(currentLocks);
+    updateResultsDisplay(optimal, idx);
+  });
 }
 
 function resetToAuto() {
@@ -731,15 +747,12 @@ function runOptimiser() {
   document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-// ── SANITY CHECK ──────────────────────────────────────────────────────────────
-// Static, no dragging: for each SKU, shows total order profit at one lot
-// fewer, the optimiser's own pick, and one lot more — everything else held
-// fixed. A quick "does this actually beat its neighbours?" read before you
-// commit money on Zenmarket.
+// Computes the valid lot-stepped quantity range for a SKU — used to set
+// each equalizer slider's min/max/step.
 function whatIfLotSteps(s) {
-  const min = s.minQty || s.lot || 1;
-  const max = s.maxQty || 100;
   const lot = s.lot || 1;
+  const min = (s.minQty === '' || s.minQty === undefined || s.minQty === null) ? lot : s.minQty;
+  const max = s.maxQty || 100;
   const steps = [];
   const start = Math.ceil(min / lot) * lot;
   for (let q = start; q <= max; q += lot) steps.push(q);
