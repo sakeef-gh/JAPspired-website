@@ -190,6 +190,8 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
 .res-table td:first-child { text-align: left; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 13px; }
 .res-table tbody tr:last-child td { border-bottom: none; }
 .res-table tbody tr:hover { background: var(--off-white); }
+.res-table td.opt { background: var(--navy-pale); color: var(--navy); font-weight: 600; }
+.res-table td.dash { color: #CCC; text-align: center; }
 
 .pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500; font-family: 'DM Sans', sans-serif; }
 .pill.green { background: var(--green-bg); color: var(--green); }
@@ -344,6 +346,7 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
   <div id="results">
     <div class="results-header">
       <h2>Optimal Order</h2>
+      <a href="#" onclick="resetToAuto();return false" style="font-size:11px;color:var(--mid);text-decoration:underline;margin-left:auto">Reset to Auto (unlock all)</a>
     </div>
     <div class="summary-strip">
       <div class="summary-item"><div class="lbl">Total Units</div><div class="val" id="sumUnits">—</div></div>
@@ -352,17 +355,17 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
       <div class="summary-item"><div class="lbl">Import Cost BDT</div><div class="val" id="sumImport">—</div></div>
       <div class="summary-item"><div class="lbl">Total Profit BDT</div><div class="val profit" id="sumProfit">—</div></div>
     </div>
+
     <div class="res-wrap">
       <table class="res-table">
         <thead>
           <tr>
-            <th>SKU</th><th>Qty</th><th>Unit Cost</th><th>Profit/unit</th><th>Markup</th><th>Total Profit</th><th>Verdict</th>
+            <th>SKU</th><th>Qty (drag)</th><th>Unit Cost</th><th>Profit/unit</th><th>Markup</th><th>Total Profit</th><th>Verdict</th>
           </tr>
         </thead>
         <tbody id="resBody"></tbody>
       </table>
     </div>
-
 
   </div>
 
@@ -370,7 +373,13 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
 
 <script>
 // ── DATA ─────────────────────────────────────────────────────────────────────
-const DEFAULT_SKUS = [];
+const DEFAULT_SKUS = [
+  {name:'TEST — Sample Pen A', wt:11, price:90,  shipZm:300, zmFee:500, sell:160, lot:10, minQty:20, maxQty:40},
+  {name:'TEST — Sample Pen B', wt:9,  price:120, shipZm:350, zmFee:500, sell:200, lot:10, minQty:10, maxQty:30},
+  {name:'TEST — Sample Pen C', wt:14, price:200, shipZm:600, zmFee:500, sell:320, lot:10, minQty:10, maxQty:20},
+  {name:'TEST — Sample Pen D', wt:8,  price:60,  shipZm:250, zmFee:500, sell:130, lot:20, minQty:20, maxQty:60},
+  {name:'TEST — Sample Pen E', wt:20, price:300, shipZm:700, zmFee:500, sell:480, lot:10, minQty:10, maxQty:30},
+];
 
 const DEFAULT_BRACKETS = [
   {upTo:100,cost:862},{upTo:200,cost:1000},{upTo:300,cost:1138},{upTo:400,cost:1276},
@@ -412,6 +421,23 @@ function clearSavedState() {
   if (!confirm('Clear all saved SKU rows and settings on this device? This cannot be undone.')) return;
   localStorage.removeItem(STORAGE_KEY);
   location.reload();
+}
+
+// Reads a ?data=<json> query param (used for pre-filled share links) and
+// loads it into DEFAULT_SKUS, overriding whatever was in local storage.
+// Returns true if a link payload was found and applied.
+function loadFromURL() {
+  try {
+    const raw = new URLSearchParams(location.search).get('data');
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (Array.isArray(data) && data.length) {
+      DEFAULT_SKUS.length = 0;
+      DEFAULT_SKUS.push(...data);
+      return true;
+    }
+  } catch (e) { /* malformed link data — ignore, fall back to saved/empty state */ }
+  return false;
 }
 
 // ── DESKTOP: SKU TABLE ────────────────────────────────────────────────────────
@@ -589,28 +615,31 @@ function calcOrder(qtys) {
 
 // ── OPTIMISER ─────────────────────────────────────────────────────────────────
 // Maximise total profit within budget, respecting per-SKU min/max qty bounds.
-function findOptimalQtys() {
+function findOptimalQtys(locks) {
+  locks = locks || {};
   const n         = DEFAULT_SKUS.length;
   const budgetVal = document.getElementById('budget').value;
   const budget    = budgetVal ? +budgetVal : Infinity;
 
-  // Build valid quantity list per SKU: multiples of lot, within [minQty, maxQty]
-  const lotsPerSku = DEFAULT_SKUS.map(s => {
+  // Build valid quantity list per SKU: multiples of lot, within [minQty, maxQty].
+  // A locked SKU only gets one "choice" — its pinned value — so the hill
+  // climb below can never move it.
+  const lotsPerSku = DEFAULT_SKUS.map((s, i) => {
+    if (locks.hasOwnProperty(i)) return [locks[i]];
     const lots = [];
     const min = s.minQty || s.lot;
     const max = s.maxQty || 100;
-    // Round min up to nearest lot
     const start = Math.ceil(min / s.lot) * s.lot;
     for (let q = start; q <= max; q += s.lot) lots.push(q);
-    return lots.length ? lots : [s.lot]; // fallback to lot if range is empty
+    return lots.length ? lots : [s.lot];
   });
 
-  // Start at minimum qty per SKU
   let current = lotsPerSku.map(lots => lots[0]);
   let changed = true;
   while (changed) {
     changed = false;
     for (let i = 0; i < n; i++) {
+      if (locks.hasOwnProperty(i)) continue; // pinned — never reassigned
       let bestQ = current[i], bestP = calcOrder(current).totalProfit;
       for (const q of lotsPerSku[i]) {
         const candidate = [...current]; candidate[i] = q;
@@ -624,35 +653,100 @@ function findOptimalQtys() {
   return calcOrder(current);
 }
 
-// ── RUN ───────────────────────────────────────────────────────────────────────
-function runOptimiser() {
-  const optimal   = findOptimalQtys();
-  const budgetVal = document.getElementById('budget').value;
-  const budget    = budgetVal ? +budgetVal : Infinity;
+// ── EQUALIZER ─────────────────────────────────────────────────────────────────
+// Each SKU row has a slider. Dragging one PINS that SKU at your chosen qty and
+// re-solves the rest to maximise profit around it — like moving one fader on
+// an equalizer and watching the others rebalance. Untouched sliders stay free
+// for the optimiser to move; "Reset to Auto" releases all pins.
+let currentLocks = {};
 
+function buildResultsTableSkeleton() {
+  const resBody = document.getElementById('resBody');
+  resBody.innerHTML = '';
+  DEFAULT_SKUS.forEach((s, i) => {
+    const steps = whatIfLotSteps(s);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${s.name || '(unnamed row ' + (i+1) + ')'}</td>
+      <td>
+        <input type="range" id="eqSlider-${i}" min="${steps[0]}" max="${steps[steps.length-1]}" step="${s.lot || 1}"
+          oninput="onEqualizerInput(${i}, this.value)" style="width:88px;vertical-align:middle">
+        <div id="eqQtyLabel-${i}" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--mid);margin-top:2px"></div>
+      </td>
+      <td id="eqUnitCost-${i}"></td>
+      <td id="eqProfitU-${i}"></td>
+      <td id="eqMarkup-${i}"></td>
+      <td id="eqTotalProfit-${i}"></td>
+      <td id="eqVerdict-${i}"></td>`;
+    resBody.appendChild(tr);
+  });
+}
+
+// skipIdx = the row currently being dragged — its slider is left alone so the
+// browser's own drag gesture isn't interrupted by us overwriting its value.
+function updateResultsDisplay(optimal, skipIdx) {
   document.getElementById('sumUnits').textContent  = optimal.qtys.reduce((a,b)=>a+b,0);
   document.getElementById('sumWeight').textContent = Math.round(optimal.totalW) + 'g';
   document.getElementById('sumShip').textContent   = optimal.shipJpy.toLocaleString();
   document.getElementById('sumImport').textContent = '৳' + Math.round(optimal.totalImportCost).toLocaleString();
   document.getElementById('sumProfit').textContent = '৳' + Math.round(optimal.totalProfit).toLocaleString();
 
-  const resBody = document.getElementById('resBody');
-  resBody.innerHTML = '';
-  optimal.rows.forEach((r,i) => {
-    const s = DEFAULT_SKUS[i];
+  optimal.rows.forEach((r, i) => {
+    if (i !== skipIdx) {
+      const slider = document.getElementById('eqSlider-' + i);
+      if (slider) slider.value = r.q;
+    }
+    document.getElementById('eqQtyLabel-' + i).textContent = r.q + ' units';
+    document.getElementById('eqUnitCost-' + i).textContent = '৳' + r.unitCost.toFixed(1);
+    document.getElementById('eqProfitU-' + i).textContent  = '৳' + r.profitU.toFixed(1);
     const markup = r.markup * 100;
-    const pillClass = markup>=40?'green':'red';
-    const pillText  = markup>=40?'Strong':'Below 40%';
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${s.name}</td><td>${r.q}</td><td>৳${r.unitCost.toFixed(1)}</td><td>৳${r.profitU.toFixed(1)}</td><td>${markup.toFixed(0)}%</td><td>৳${Math.round(r.totalProfit).toLocaleString()}</td><td><span class="pill ${pillClass}">${pillText}</span></td>`;
-    resBody.appendChild(tr);
+    document.getElementById('eqMarkup-' + i).textContent = markup.toFixed(0) + '%';
+    document.getElementById('eqTotalProfit-' + i).textContent = '৳' + Math.round(r.totalProfit).toLocaleString();
+    const pillClass = markup >= 40 ? 'green' : 'red';
+    const pillText  = markup >= 40 ? 'Strong' : 'Below 40%';
+    document.getElementById('eqVerdict-' + i).innerHTML = `<span class="pill ${pillClass}">${pillText}</span>`;
   });
+}
 
+function onEqualizerInput(i, value) {
+  currentLocks[i] = +value;
+  const optimal = findOptimalQtys(currentLocks);
+  updateResultsDisplay(optimal, i);
+}
 
+function resetToAuto() {
+  currentLocks = {};
+  const optimal = findOptimalQtys(currentLocks);
+  updateResultsDisplay(optimal, null);
+}
+
+// ── RUN ───────────────────────────────────────────────────────────────────────
+function runOptimiser() {
+  currentLocks = {}; // a fresh run always starts from a fully free optimum
+  buildResultsTableSkeleton();
+  const optimal = findOptimalQtys(currentLocks);
+  updateResultsDisplay(optimal, null);
 
   document.getElementById('results').style.display = 'block';
   document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
 }
+
+// ── SANITY CHECK ──────────────────────────────────────────────────────────────
+// Static, no dragging: for each SKU, shows total order profit at one lot
+// fewer, the optimiser's own pick, and one lot more — everything else held
+// fixed. A quick "does this actually beat its neighbours?" read before you
+// commit money on Zenmarket.
+function whatIfLotSteps(s) {
+  const min = s.minQty || s.lot || 1;
+  const max = s.maxQty || 100;
+  const lot = s.lot || 1;
+  const steps = [];
+  const start = Math.ceil(min / lot) * lot;
+  for (let q = start; q <= max; q += lot) steps.push(q);
+  if (!steps.length) steps.push(start);
+  return steps;
+}
+
 
 // ── BRACKET TOGGLE ────────────────────────────────────────────────────────────
 function toggleBrackets() {
@@ -672,6 +766,7 @@ function toggleBracketsMobile() {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 loadState();
+if (loadFromURL()) saveState();
 renderSkus();
 renderSkuCards();
 renderBrackets();
