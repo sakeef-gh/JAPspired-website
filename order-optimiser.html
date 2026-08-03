@@ -683,14 +683,38 @@ function buildResultsTableSkeleton() {
 
 // skipIdx = the row currently being dragged — its slider is left alone so the
 // browser's own drag gesture isn't interrupted by us overwriting its value.
+// Accounting-style formatting: negative values shown in (brackets) instead
+// of a minus sign, matching how Sakeef's invoices/spreadsheets read numbers.
+function fmtBdt(v, decimals) {
+  const d = decimals || 0;
+  const abs = Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+  return v < 0 ? '(৳' + abs + ')' : '৳' + abs;
+}
+function fmtPct(v) {
+  const abs = Math.abs(v).toFixed(0);
+  return v < 0 ? '(' + abs + '%)' : abs + '%';
+}
+
+// Plain red text at small monospace size barely stands out from the
+// charcoal body text. This mimics the familiar spreadsheet convention for
+// negative numbers instead — light red fill, bold dark red text — which is
+// much harder to miss at a glance.
+function markNegative(el, isNeg) {
+  el.style.color = isNeg ? 'var(--red)' : '';
+  el.style.background = isNeg ? 'var(--red-bg)' : '';
+  el.style.fontWeight = isNeg ? '700' : '';
+  el.style.borderRadius = isNeg ? '3px' : '';
+  el.style.padding = isNeg ? '2px 6px' : '';
+}
+
 function updateResultsDisplay(optimal, skipIdx) {
   document.getElementById('sumUnits').textContent  = optimal.qtys.reduce((a,b)=>a+b,0);
   document.getElementById('sumWeight').textContent = Math.round(optimal.totalW) + 'g';
   document.getElementById('sumShip').textContent   = optimal.shipJpy.toLocaleString();
   document.getElementById('sumImport').textContent = '৳' + Math.round(optimal.totalImportCost).toLocaleString();
   const sumProfitEl = document.getElementById('sumProfit');
-  sumProfitEl.textContent = '৳' + Math.round(optimal.totalProfit).toLocaleString();
-  sumProfitEl.style.color = optimal.totalProfit < 0 ? 'var(--red)' : '';
+  sumProfitEl.textContent = fmtBdt(optimal.totalProfit);
+  markNegative(sumProfitEl, optimal.totalProfit < 0);
 
   optimal.rows.forEach((r, i) => {
     if (i !== skipIdx) {
@@ -701,17 +725,17 @@ function updateResultsDisplay(optimal, skipIdx) {
     document.getElementById('eqUnitCost-' + i).textContent = '৳' + r.unitCost.toFixed(1);
 
     const profitUEl = document.getElementById('eqProfitU-' + i);
-    profitUEl.textContent = '৳' + r.profitU.toFixed(1);
-    profitUEl.style.color = r.profitU < 0 ? 'var(--red)' : '';
+    profitUEl.textContent = fmtBdt(r.profitU, 1);
+    markNegative(profitUEl, r.profitU < 0);
 
     const markup = r.markup * 100;
     const markupEl = document.getElementById('eqMarkup-' + i);
-    markupEl.textContent = markup.toFixed(0) + '%';
-    markupEl.style.color = markup < 0 ? 'var(--red)' : '';
+    markupEl.textContent = fmtPct(markup);
+    markNegative(markupEl, markup < 0);
 
     const totalProfitEl = document.getElementById('eqTotalProfit-' + i);
-    totalProfitEl.textContent = '৳' + Math.round(r.totalProfit).toLocaleString();
-    totalProfitEl.style.color = r.totalProfit < 0 ? 'var(--red)' : '';
+    totalProfitEl.textContent = fmtBdt(r.totalProfit);
+    markNegative(totalProfitEl, r.totalProfit < 0);
   });
 }
 
