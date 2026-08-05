@@ -175,7 +175,7 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
 .results-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
 .results-header h2 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: var(--navy); }
 
-.summary-strip { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 20px; }
+.summary-strip { display: grid; grid-template-columns: repeat(6,1fr); gap: 10px; margin-bottom: 20px; }
 .summary-item { background: var(--white); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
 .summary-item .lbl { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--mid); margin-bottom: 5px; }
 .summary-item .val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--navy); }
@@ -366,6 +366,7 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
       <div class="summary-item"><div class="lbl">Total Weight</div><div class="val" id="sumWeight">—</div></div>
       <div class="summary-item"><div class="lbl">Shipping JPY</div><div class="val" id="sumShip">—</div></div>
       <div class="summary-item"><div class="lbl">Import Cost BDT</div><div class="val" id="sumImport">—</div></div>
+      <div class="summary-item"><div class="lbl">Total Sales BDT</div><div class="val" id="sumSales">—</div></div>
       <div class="summary-item"><div class="lbl">Total Profit BDT</div><div class="val profit" id="sumProfit">—</div></div>
     </div>
 
@@ -373,7 +374,7 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
       <table class="res-table">
         <thead>
           <tr>
-            <th>SKU</th><th>Qty (drag)</th><th>Unit Cost</th><th>Profit/unit</th><th>Markup</th><th>Total Profit</th>
+            <th>SKU</th><th>Qty (drag)</th><th>Unit Cost</th><th>Selling Price/unit</th><th>Profit/unit</th><th>Markup</th><th>Total Profit</th>
           </tr>
         </thead>
         <tbody id="resBody"></tbody>
@@ -708,6 +709,7 @@ function buildResultsTableSkeleton() {
         <div id="eqQtyLabel-${i}" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--mid);margin-top:2px"></div>
       </td>
       <td id="eqUnitCost-${i}"></td>
+      <td id="eqSellPrice-${i}"></td>
       <td id="eqProfitU-${i}"></td>
       <td id="eqMarkup-${i}"></td>
       <td id="eqTotalProfit-${i}"></td>`;
@@ -764,8 +766,9 @@ function markNegative(el, isNeg) {
 function updateResultsDisplay(optimal, skipIdx) {
   document.getElementById('sumUnits').textContent  = optimal.qtys.reduce((a,b)=>a+b,0);
   document.getElementById('sumWeight').textContent = Math.round(optimal.totalW) + 'g';
-  document.getElementById('sumShip').textContent   = optimal.shipJpy.toLocaleString();
+  document.getElementById('sumShip').textContent   = Math.round(optimal.shipJpy).toLocaleString();
   document.getElementById('sumImport').textContent = '৳' + Math.round(optimal.totalImportCost).toLocaleString();
+  document.getElementById('sumSales').textContent  = '৳' + Math.round(optimal.totalProfit + optimal.totalImportCost).toLocaleString();
   const sumProfitEl = document.getElementById('sumProfit');
   sumProfitEl.textContent = fmtBdt(optimal.totalProfit);
   markNegative(sumProfitEl, optimal.totalProfit < 0);
@@ -776,10 +779,11 @@ function updateResultsDisplay(optimal, skipIdx) {
       if (slider) slider.value = r.q;
     }
     document.getElementById('eqQtyLabel-' + i).textContent = r.q + ' units';
-    document.getElementById('eqUnitCost-' + i).textContent = '৳' + r.unitCost.toFixed(1);
+    document.getElementById('eqUnitCost-' + i).textContent = fmtBdt(r.unitCost);
+    document.getElementById('eqSellPrice-' + i).textContent = '৳' + Math.round(DEFAULT_SKUS[i].sell || 0).toLocaleString();
 
     const profitUEl = document.getElementById('eqProfitU-' + i);
-    profitUEl.textContent = fmtBdt(r.profitU, 1);
+    profitUEl.textContent = fmtBdt(r.profitU);
     markNegative(profitUEl, r.profitU < 0);
 
     const markup = r.markup * 100;
