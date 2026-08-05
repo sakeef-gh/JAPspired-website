@@ -191,6 +191,19 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
 .res-table tbody tr:last-child td { border-bottom: none; }
 .res-table tbody tr:hover { background: var(--off-white); }
 .res-table td.opt { background: var(--navy-pale); color: var(--navy); font-weight: 600; }
+
+.eq-slider-wrap { position: relative; display: inline-block; vertical-align: middle; }
+.eq-slider { width: 88px; vertical-align: middle; }
+.eq-slider-bubble {
+  position: absolute; top: -24px; left: 0; transform: translateX(-50%);
+  background: var(--navy); color: var(--off-white); font-family: 'DM Mono', monospace;
+  font-size: 10px; padding: 2px 7px; border-radius: 3px; white-space: nowrap;
+  pointer-events: none; opacity: 0; transition: opacity 0.12s;
+}
+.eq-slider-bubble.show { opacity: 1; }
+@media (min-width: 769px) {
+  .eq-slider { width: 160px; }
+}
 .res-table td.dash { color: #CCC; text-align: center; }
 
 .pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500; font-family: 'DM Sans', sans-serif; }
@@ -660,17 +673,38 @@ function findOptimalQtys(locks) {
 // for the optimiser to move; "Reset to Auto" releases all pins.
 let currentLocks = {};
 
+// Real lot-step granularity can be fine (small lot, wide range), which would
+// otherwise flood the slider track with dozens of tick marks. This thins the
+// DISPLAYED ticks down to a readable count — the slider itself still snaps
+// to every real lot via its own step attribute, only the visual marks are capped.
+function tickSubset(steps, maxTicks) {
+  maxTicks = maxTicks || 10;
+  if (steps.length <= maxTicks) return steps;
+  const stride = Math.ceil(steps.length / maxTicks);
+  const subset = [];
+  for (let i = 0; i < steps.length; i += stride) subset.push(steps[i]);
+  if (subset[subset.length - 1] !== steps[steps.length - 1]) subset.push(steps[steps.length - 1]);
+  return subset;
+}
+
 function buildResultsTableSkeleton() {
   const resBody = document.getElementById('resBody');
   resBody.innerHTML = '';
   DEFAULT_SKUS.forEach((s, i) => {
     const steps = whatIfLotSteps(s);
+    const tickOptions = tickSubset(steps).map(q => `<option value="${q}"></option>`).join('');
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${s.name || '(unnamed row ' + (i+1) + ')'}</td>
       <td>
-        <input type="range" id="eqSlider-${i}" min="${steps[0]}" max="${steps[steps.length-1]}" step="${s.lot || 1}"
-          oninput="onEqualizerInput(${i}, this.value)" style="width:88px;vertical-align:middle">
+        <div class="eq-slider-wrap">
+          <div class="eq-slider-bubble" id="eqBubble-${i}"></div>
+          <input type="range" class="eq-slider" id="eqSlider-${i}" min="${steps[0]}" max="${steps[steps.length-1]}" step="${s.lot || 1}"
+            list="eqTicks-${i}"
+            oninput="onEqualizerInput(${i}, this.value); positionEqBubble(${i}, this)"
+            onmousedown="showEqBubble(${i})" onmouseup="hideEqBubble(${i})" onmouseleave="hideEqBubble(${i})">
+          <datalist id="eqTicks-${i}">${tickOptions}</datalist>
+        </div>
         <div id="eqQtyLabel-${i}" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--mid);margin-top:2px"></div>
       </td>
       <td id="eqUnitCost-${i}"></td>
@@ -679,6 +713,27 @@ function buildResultsTableSkeleton() {
       <td id="eqTotalProfit-${i}"></td>`;
     resBody.appendChild(tr);
   });
+}
+
+// Desktop-only live value bubble that tracks the slider thumb while dragging.
+function showEqBubble(i) {
+  if (window.innerWidth < 769) return; // desktop only, per request
+  const bubble = document.getElementById('eqBubble-' + i);
+  if (bubble) bubble.classList.add('show');
+}
+function hideEqBubble(i) {
+  const bubble = document.getElementById('eqBubble-' + i);
+  if (bubble) bubble.classList.remove('show');
+}
+function positionEqBubble(i, slider) {
+  const bubble = document.getElementById('eqBubble-' + i);
+  if (!bubble) return;
+  const min = +slider.min, max = +slider.max, val = +slider.value;
+  const pct = (val - min) / ((max - min) || 1);
+  const thumb = 16; // approx native thumb width in px
+  const x = pct * (slider.offsetWidth - thumb) + thumb / 2;
+  bubble.style.left = x + 'px';
+  bubble.textContent = val + ' units';
 }
 
 // skipIdx = the row currently being dragged — its slider is left alone so the
