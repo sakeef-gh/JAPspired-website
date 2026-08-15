@@ -244,6 +244,14 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
 }
 @media (min-width: 769px) {
   .mobile-only { display: none; }
+  .run-wrap {
+    position: sticky;
+    bottom: 0;
+    background: var(--off-white);
+    padding: 14px 0;
+    z-index: 40;
+    box-shadow: 0 -6px 16px rgba(0,0,0,0.08);
+  }
 }
 </style>
 </head>
@@ -275,7 +283,8 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
   <div class="run-wrap" style="margin-bottom:20px;margin-top:0">
     <button class="btn-run" onclick="runOptimiser()">Run Optimiser</button>
     <div style="margin-top:10px">
-      <a href="#" onclick="clearSavedState();return false" style="font-size:11px;color:var(--mid);text-decoration:underline">Clear saved data</a>
+      <a href="#" onclick="exportCsv();return false" style="font-size:11px;color:var(--mid);text-decoration:underline">Download as CSV</a>
+      <a href="#" onclick="clearSavedState();return false" style="font-size:11px;color:var(--mid);text-decoration:underline;margin-left:16px">Clear saved data</a>
     </div>
   </div>
 
@@ -292,6 +301,7 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
           <thead>
             <tr>
               <th style="width:24px"></th>
+              <th style="width:50px" class="num">Incl.</th>
               <th style="min-width:160px">SKU Name</th>
               <th class="num">Wt (g)</th>
               <th class="num">Price JPY</th>
@@ -388,11 +398,15 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
 <script>
 // ── DATA ─────────────────────────────────────────────────────────────────────
 const DEFAULT_SKUS = [
-  {name:'TEST — Sample Pen A', wt:11, price:90,  shipZm:300, zmFee:500, sell:160, lot:10, minQty:20, maxQty:40},
-  {name:'TEST — Sample Pen B', wt:9,  price:120, shipZm:350, zmFee:500, sell:200, lot:10, minQty:10, maxQty:30},
-  {name:'TEST — Sample Pen C', wt:14, price:200, shipZm:600, zmFee:500, sell:320, lot:10, minQty:10, maxQty:20},
-  {name:'TEST — Sample Pen D', wt:8,  price:60,  shipZm:250, zmFee:500, sell:130, lot:20, minQty:20, maxQty:60},
-  {name:'TEST — Sample Pen E', wt:20, price:300, shipZm:700, zmFee:500, sell:480, lot:10, minQty:10, maxQty:30},
+  {name:'Uniball One Black 0.5mm', wt:11,  price:82,  shipZm:352, zmFee:500, sell:180, lot:10, minQty:'', maxQty:30},
+  {name:'Zebra bLen U Black 0.5mm', wt:13, price:158, shipZm:0,   zmFee:500, sell:270, lot:10, minQty:'', maxQty:30},
+  {name:'Uniball Zento Black 0.5mm', wt:11,price:189, shipZm:825, zmFee:500, sell:290, lot:10, minQty:'', maxQty:20},
+  {name:'Mildliner Yellow', wt:10,         price:71,  shipZm:0,   zmFee:500, sell:180, lot:10, minQty:'', maxQty:20},
+  {name:'Mildliner Pink', wt:11,           price:77,  shipZm:770, zmFee:500, sell:180, lot:10, minQty:'', maxQty:20},
+  {name:'Mildliner Green', wt:10,          price:69,  shipZm:594, zmFee:500, sell:180, lot:10, minQty:'', maxQty:20},
+  {name:'Apica CD A6 Blue', wt:139,        price:129, shipZm:0,   zmFee:500, sell:400, lot:10, minQty:'', maxQty:20},
+  {name:'Apica CD B5 Red', wt:130,         price:172, shipZm:0,   zmFee:500, sell:430, lot:10, minQty:'', maxQty:20},
+  {name:'Pilot Juice Black', wt:10,        price:89,  shipZm:0,   zmFee:500, sell:190, lot:10, minQty:'', maxQty:20},
 ];
 
 const DEFAULT_BRACKETS = [
@@ -431,6 +445,33 @@ function loadState() {
     if (data.budget)    document.getElementById('budget').value = data.budget;
   } catch (e) { /* corrupted or unavailable — start fresh */ }
 }
+// Generates a ?data= link (same format loadFromURL reads) from whatever is
+// currently in the SKU table — a durable, portable snapshot independent of
+// this device's local storage. Save the URL itself somewhere permanent.
+// Plain spreadsheet export — for archiving alongside Stock Master or eyeballing
+// in Excel/Sheets. Read-only snapshot: does not re-import back into the tool.
+function exportCsv() {
+  const headers = ['SKU Name','Weight (g)','Price JPY','Ship ZM','ZM Fee','Sell BDT','Lot','Min Qty','Max Qty','Included'];
+  const esc = v => {
+    const s = (v === undefined || v === null) ? '' : String(v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const rows = DEFAULT_SKUS.map(s => [
+    s.name, s.wt, s.price, s.shipZm, s.zmFee, s.sell, s.lot, s.minQty, s.maxQty, s.excluded ? 'No' : 'Yes'
+  ].map(esc).join(','));
+  const csv = headers.join(',') + '\n' + rows.join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'japspired-order-optimiser-' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 function clearSavedState() {
   if (!confirm('Clear all saved SKU rows and settings on this device? This cannot be undone.')) return;
   localStorage.removeItem(STORAGE_KEY);
@@ -461,8 +502,10 @@ function renderSkus() {
   tbody.innerHTML = '';
   DEFAULT_SKUS.forEach((s, i) => {
     const tr = document.createElement('tr');
+    if (s.excluded) tr.style.opacity = '0.45';
     tr.innerHTML = `
       <td class="row-num">${i+1}</td>
+      <td style="text-align:center"><input type="checkbox" ${s.excluded ? '' : 'checked'} onchange="onToggleInclude(${i}, this.checked)" title="Include this SKU in the optimiser"></td>
       <td><input class="cell-input text-cell" type="text" value="${s.name}" oninput="DEFAULT_SKUS[${i}].name=this.value;syncCards();saveState()"></td>
       <td><input class="cell-input" type="number" value="${s.wt}" min="1" oninput="DEFAULT_SKUS[${i}].wt=+this.value;saveState()"></td>
       <td><input class="cell-input" type="number" value="${s.price}" min="1" oninput="DEFAULT_SKUS[${i}].price=+this.value;saveState()"></td>
@@ -485,9 +528,13 @@ function renderSkuCards() {
   DEFAULT_SKUS.forEach((s, i) => {
     const card = document.createElement('div');
     card.className = 'sku-card';
+    if (s.excluded) card.style.opacity = '0.45';
     card.innerHTML = `
       <div class="sku-card-header">
         <span class="sku-num">SKU ${i+1}</span>
+        <label style="font-size:11px;color:var(--mid);display:flex;align-items:center;gap:4px;margin-left:auto;margin-right:10px">
+          <input type="checkbox" ${s.excluded ? '' : 'checked'} onchange="onToggleInclude(${i}, this.checked)"> Include
+        </label>
         <button class="btn-del-card" onclick="removeSku(${i})">Remove</button>
       </div>
       <input class="card-name-input" type="text" value="${s.name}" placeholder="SKU name" oninput="DEFAULT_SKUS[${i}].name=this.value;syncTable();saveState()">
@@ -636,9 +683,11 @@ function findOptimalQtys(locks) {
   const budget    = budgetVal ? +budgetVal : Infinity;
 
   // Build valid quantity list per SKU: multiples of lot, within [minQty, maxQty].
-  // A locked SKU only gets one "choice" — its pinned value — so the hill
-  // climb below can never move it.
+  // Excluded SKUs are forced to 0 and skipped entirely — their data stays put,
+  // they just don't compete for budget/weight. A locked SKU only gets one
+  // "choice" — its pinned value — so the hill climb below can never move it.
   const lotsPerSku = DEFAULT_SKUS.map((s, i) => {
+    if (s.excluded) return [0];
     if (locks.hasOwnProperty(i)) return [locks[i]];
     const lots = [];
     const min = (s.minQty === '' || s.minQty === undefined || s.minQty === null) ? s.lot : s.minQty;
@@ -653,7 +702,7 @@ function findOptimalQtys(locks) {
   while (changed) {
     changed = false;
     for (let i = 0; i < n; i++) {
-      if (locks.hasOwnProperty(i)) continue; // pinned — never reassigned
+      if (DEFAULT_SKUS[i].excluded || locks.hasOwnProperty(i)) continue; // excluded or pinned — never reassigned
       let bestQ = current[i], bestP = calcOrder(current).totalProfit;
       for (const q of lotsPerSku[i]) {
         const candidate = [...current]; candidate[i] = q;
@@ -774,11 +823,13 @@ function updateResultsDisplay(optimal, skipIdx) {
   markNegative(sumProfitEl, optimal.totalProfit < 0);
 
   optimal.rows.forEach((r, i) => {
-    if (i !== skipIdx) {
-      const slider = document.getElementById('eqSlider-' + i);
-      if (slider) slider.value = r.q;
+    const isExcluded = !!DEFAULT_SKUS[i].excluded;
+    const slider = document.getElementById('eqSlider-' + i);
+    if (slider) {
+      slider.disabled = isExcluded;
+      if (i !== skipIdx) slider.value = r.q;
     }
-    document.getElementById('eqQtyLabel-' + i).textContent = r.q + ' units';
+    document.getElementById('eqQtyLabel-' + i).textContent = isExcluded ? 'excluded' : r.q + ' units';
     document.getElementById('eqUnitCost-' + i).textContent = fmtBdt(r.unitCost);
     document.getElementById('eqSellPrice-' + i).textContent = '৳' + Math.round(DEFAULT_SKUS[i].sell || 0).toLocaleString();
 
@@ -825,8 +876,48 @@ function resetToAuto() {
   updateResultsDisplay(optimal, null);
 }
 
+// Toggling Include on/off keeps the SKU's own data (weight, price, sell,
+// lot, min/max) completely untouched — only whether the optimiser considers
+// it changes. Clears any existing pin on that row since exclude/include
+// should start fresh rather than fight with a stale drag position.
+function onToggleInclude(i, checked) {
+  DEFAULT_SKUS[i].excluded = !checked;
+  delete currentLocks[i];
+  saveState();
+  renderSkus();
+  renderSkuCards();
+  if (document.getElementById('results').style.display === 'block') {
+    const optimal = findOptimalQtys(currentLocks);
+    updateResultsDisplay(optimal, null);
+  }
+}
+
 // ── RUN ───────────────────────────────────────────────────────────────────────
+// A missing or zero Weight silently gives that SKU a 0% share of shipping
+// cost, which shifts its real cost onto other SKUs instead — the row then
+// LOOKS unusually profitable, and other rows look artificially worse, with
+// no error or crash to signal anything is wrong. Same problem for Price and
+// Sell at 0 (unit cost or profit math breaks silently). This blocks a run
+// rather than let that happen.
+function validateSkus() {
+  const problems = [];
+  DEFAULT_SKUS.forEach((s, i) => {
+    if (s.excluded) return; // not being ordered, no need to validate its fields
+    const name = s.name || 'Row ' + (i + 1);
+    if (!s.wt || +s.wt <= 0)    problems.push(name + ': missing Weight');
+    if (!s.price || +s.price <= 0) problems.push(name + ': missing Price JPY');
+    if (!s.sell || +s.sell <= 0)   problems.push(name + ': missing Sell BDT');
+    if (!s.lot || +s.lot <= 0)     problems.push(name + ': missing Lot');
+  });
+  return problems;
+}
+
 function runOptimiser() {
+  const problems = validateSkus();
+  if (problems.length) {
+    alert('Cannot run — some SKUs are missing required values:\n\n' + problems.join('\n') + '\n\nFill these in before running, otherwise shipping cost gets misallocated between SKUs without any visible error.');
+    return;
+  }
   currentLocks = {}; // a fresh run always starts from a fully free optimum
   buildResultsTableSkeleton();
   const optimal = findOptimalQtys(currentLocks);
