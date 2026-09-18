@@ -94,18 +94,6 @@
             "position": 3,
             "item": {
               "@type": "Product",
-              "name": "Uni-ball Jetstream Standard",
-              "description": "Ballpoint pen, Black ink. The bestselling ballpoint pen worldwide. Ink that writes darker and smoother than a regular ballpoint, with no skipping or blobs.",
-              "brand": { "@type": "Brand", "name": "Uni-ball" },
-              "additionalProperty": { "@type": "PropertyValue", "name": "Nib Size", "value": "0.5mm" },
-              "offers": { "@type": "Offer", "priceCurrency": "BDT", "price": "160", "availability": "https://schema.org/InStock", "seller": { "@type": "Organization", "name": "JAPspired" } }
-            }
-          },
-          {
-            "@type": "ListItem",
-            "position": 4,
-            "item": {
-              "@type": "Product",
               "name": "Uni-ball One Black",
               "description": "Gel pen, Black ink. Ink that stays on top of the paper rather than being absorbed, giving a deeper, richer black than most gel pens.",
               "brand": { "@type": "Brand", "name": "Uni-ball" },
@@ -115,7 +103,7 @@
           },
           {
             "@type": "ListItem",
-            "position": 5,
+            "position": 4,
             "item": {
               "@type": "Product",
               "name": "Uni-ball One Blue",
@@ -127,7 +115,7 @@
           },
           {
             "@type": "ListItem",
-            "position": 6,
+            "position": 5,
             "item": {
               "@type": "Product",
               "name": "Pilot Juice Black",
@@ -139,7 +127,31 @@
           },
           {
             "@type": "ListItem",
+            "position": 6,
+            "item": {
+              "@type": "Product",
+              "name": "Uni-ball Zento Black",
+              "description": "Gel pen, Black ink. Built for small, dense handwriting, with a low-friction tip that holds a controlled line even when writing fast.",
+              "brand": { "@type": "Brand", "name": "Uni-ball" },
+              "additionalProperty": { "@type": "PropertyValue", "name": "Nib Size", "value": "0.5mm" },
+              "offers": { "@type": "Offer", "priceCurrency": "BDT", "price": "270", "availability": "https://schema.org/InStock", "seller": { "@type": "Organization", "name": "JAPspired" } }
+            }
+          },
+          {
+            "@type": "ListItem",
             "position": 7,
+            "item": {
+              "@type": "Product",
+              "name": "Uni-ball Jetstream Standard",
+              "description": "Ballpoint pen, Black ink. The bestselling ballpoint pen worldwide. Ink that writes darker and smoother than a regular ballpoint, with no skipping or blobs.",
+              "brand": { "@type": "Brand", "name": "Uni-ball" },
+              "additionalProperty": { "@type": "PropertyValue", "name": "Nib Size", "value": "0.5mm" },
+              "offers": { "@type": "Offer", "priceCurrency": "BDT", "price": "160", "availability": "https://schema.org/InStock", "seller": { "@type": "Organization", "name": "JAPspired" } }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 8,
             "item": {
               "@type": "Product",
               "name": "Uni-ball Jetstream Lite Touch",
@@ -151,24 +163,12 @@
           },
           {
             "@type": "ListItem",
-            "position": 8,
+            "position": 9,
             "item": {
               "@type": "Product",
               "name": "Zebra bLen U",
               "description": "Ballpoint pen, Black ink. Designed to reduce hand fatigue with an internal system that reduces vibration. Winner of all three major Japanese stationery awards in 2025.",
               "brand": { "@type": "Brand", "name": "Zebra" },
-              "additionalProperty": { "@type": "PropertyValue", "name": "Nib Size", "value": "0.5mm" },
-              "offers": { "@type": "Offer", "priceCurrency": "BDT", "price": "270", "availability": "https://schema.org/InStock", "seller": { "@type": "Organization", "name": "JAPspired" } }
-            }
-          },
-          {
-            "@type": "ListItem",
-            "position": 9,
-            "item": {
-              "@type": "Product",
-              "name": "Uni-ball Zento Black",
-              "description": "Gel pen, Black ink. Built for small, dense handwriting, with a low-friction tip that holds a controlled line even when writing fast.",
-              "brand": { "@type": "Brand", "name": "Uni-ball" },
               "additionalProperty": { "@type": "PropertyValue", "name": "Nib Size", "value": "0.5mm" },
               "offers": { "@type": "Offer", "priceCurrency": "BDT", "price": "270", "availability": "https://schema.org/InStock", "seller": { "@type": "Organization", "name": "JAPspired" } }
             }
@@ -445,6 +445,9 @@
       margin-top: 1px;
       background: var(--off-white);
     }
+    .products-category-divider.first {
+      border-top: none; padding-top: 0; margin-top: 0;
+    }
     .products-category-label {
       font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase;
       color: var(--charcoal-light); white-space: nowrap;
@@ -717,6 +720,12 @@
     <hr class="section-rule" />
     <div class="products-grid">
 
+      <!-- Category divider: Gels (first group, no top border) -->
+      <div class="products-category-divider first">
+        <span class="products-category-label">Gels</span>
+        <div class="products-category-rule"></div>
+      </div>
+
       <!-- Sarasa Clip Black -->
       <div class="product-card">
         <img src="images/Sarasa_clip.webp" alt="Zebra Sarasa Clip Black gel pen" class="product-image" loading="lazy" />
@@ -743,21 +752,6 @@
           </p>
           <div class="product-footer">
             <div class="product-price">150 BDT</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Jetstream Standard -->
-      <div class="product-card">
-        <img src="images/Jetstream.webp" alt="Uni-ball Jetstream ballpoint pen" class="product-image" loading="lazy" />
-        <div class="product-card-body">
-          <p class="product-tag"><span class="ink-swatch black"></span>Ballpoint &ndash; 0.5mm &ndash; Black Ink</p>
-          <h3 class="product-name">Uni-ball Jetstream</h3>
-          <p class="product-desc">
-            Ballpoint pen. Black ink. The bestselling ballpoint pen worldwide. Ink that writes darker and smoother than a regular ballpoint. No skipping, no blobs, no smearing. Once you try it, other ballpoints feel wrong.
-          </p>
-          <div class="product-footer">
-            <div class="product-price">160 BDT</div>
           </div>
         </div>
       </div>
@@ -807,6 +801,43 @@
         </div>
       </div>
 
+      <!-- Uni-ball Zento Black -->
+      <div class="product-card">
+        <!-- TODO: replace with real product photo, see note to Sakeef -->
+        <img src="images/Zento.webp" alt="Uni-ball Zento Black gel pen" class="product-image" loading="lazy" />
+        <div class="product-card-body">
+          <p class="product-tag"><span class="ink-swatch black"></span>Gel &ndash; 0.5mm &ndash; Black Ink</p>
+          <h3 class="product-name">Uni-ball Zento</h3>
+          <p class="product-desc">
+            Gel pen. Black ink. Built for small, dense handwriting, with a low-friction tip that holds a controlled line even when writing fast. A slim, matte grip keeps fingers steady through long writing sessions.
+          </p>
+          <div class="product-footer">
+            <div class="product-price">270 BDT</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category divider: Ballpoints -->
+      <div class="products-category-divider">
+        <span class="products-category-label">Ballpoints</span>
+        <div class="products-category-rule"></div>
+      </div>
+
+      <!-- Jetstream Standard -->
+      <div class="product-card">
+        <img src="images/Jetstream.webp" alt="Uni-ball Jetstream ballpoint pen" class="product-image" loading="lazy" />
+        <div class="product-card-body">
+          <p class="product-tag"><span class="ink-swatch black"></span>Ballpoint &ndash; 0.5mm &ndash; Black Ink</p>
+          <h3 class="product-name">Uni-ball Jetstream</h3>
+          <p class="product-desc">
+            Ballpoint pen. Black ink. The bestselling ballpoint pen worldwide. Ink that writes darker and smoother than a regular ballpoint. No skipping, no blobs, no smearing. Once you try it, other ballpoints feel wrong.
+          </p>
+          <div class="product-footer">
+            <div class="product-price">160 BDT</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Jetstream Lite Touch -->
       <div class="product-card">
         <img src="images/Jetstream_lite_touch.webp" alt="Uni-ball Jetstream Lite Touch ballpoint pen" class="product-image" loading="lazy" />
@@ -830,22 +861,6 @@
           <h3 class="product-name">Zebra bLen U</h3>
           <p class="product-desc">
             Ballpoint pen. Black ink. Designed to stop your hand from getting tired. An internal system reduces vibration, keeping strokes steady on long sessions. Winner of all three major Japanese stationery awards in 2025.
-          </p>
-          <div class="product-footer">
-            <div class="product-price">270 BDT</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Uni-ball Zento Black -->
-      <div class="product-card">
-        <!-- TODO: replace with real product photo, see note to Sakeef -->
-        <img src="images/Zento.webp" alt="Uni-ball Zento Black gel pen" class="product-image" loading="lazy" />
-        <div class="product-card-body">
-          <p class="product-tag"><span class="ink-swatch black"></span>Gel &ndash; 0.5mm &ndash; Black Ink</p>
-          <h3 class="product-name">Uni-ball Zento</h3>
-          <p class="product-desc">
-            Gel pen. Black ink. Built for small, dense handwriting, with a low-friction tip that holds a controlled line even when writing fast. A slim, matte grip keeps fingers steady through long writing sessions.
           </p>
           <div class="product-footer">
             <div class="product-price">270 BDT</div>
