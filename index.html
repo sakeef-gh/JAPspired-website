@@ -11,7 +11,6 @@
   </script>
 
   <meta charset="UTF-8" />
-  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#1a2744" />
   <meta name="google-site-verification" content="854b5236ef1be11c" />
@@ -160,6 +159,63 @@
               "brand": { "@type": "Brand", "name": "Kokuyo" },
               "offers": { "@type": "Offer", "priceCurrency": "BDT", "price": "380", "availability": "https://schema.org/InStock", "seller": { "@type": "Organization", "name": "JAPspired" } }
             }
+          },
+          {
+            "@type": "ListItem",
+            "position": 9,
+            "item": {
+              "@type": "Product",
+              "name": "Uni-ball Zento Black",
+              "description": "Gel pen, Black ink. Built for small, dense handwriting, with a low-friction tip that holds a controlled line even when writing fast.",
+              "brand": { "@type": "Brand", "name": "Uni-ball" },
+              "additionalProperty": { "@type": "PropertyValue", "name": "Nib Size", "value": "0.5mm" },
+              "offers": { "@type": "Offer", "priceCurrency": "BDT", "price": "290", "availability": "https://schema.org/InStock", "seller": { "@type": "Organization", "name": "JAPspired" } }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 10,
+            "item": {
+              "@type": "Product",
+              "name": "Zebra Mildliner Pink",
+              "description": "Dual tip highlighter, Pink ink. A muted pink that highlights and colour-codes notes without the harsh brightness of a standard highlighter.",
+              "brand": { "@type": "Brand", "name": "Zebra" },
+              "offers": { "@type": "Offer", "priceCurrency": "BDT", "price": "180", "availability": "https://schema.org/InStock", "seller": { "@type": "Organization", "name": "JAPspired" } }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 11,
+            "item": {
+              "@type": "Product",
+              "name": "Zebra Mildliner Green",
+              "description": "Dual tip highlighter, Green ink. A muted green that highlights and colour-codes notes without the harsh brightness of a standard highlighter.",
+              "brand": { "@type": "Brand", "name": "Zebra" },
+              "offers": { "@type": "Offer", "priceCurrency": "BDT", "price": "180", "availability": "https://schema.org/InStock", "seller": { "@type": "Organization", "name": "JAPspired" } }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 12,
+            "item": {
+              "@type": "Product",
+              "name": "Pilot Juice Black",
+              "description": "Gel pen, Black ink. Smooth, low friction ink in a dense, consistent line from the first stroke to the last.",
+              "brand": { "@type": "Brand", "name": "Pilot" },
+              "additionalProperty": { "@type": "PropertyValue", "name": "Nib Size", "value": "0.5mm" },
+              "offers": { "@type": "Offer", "priceCurrency": "BDT", "price": "190", "availability": "https://schema.org/InStock", "seller": { "@type": "Organization", "name": "JAPspired" } }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 13,
+            "item": {
+              "@type": "Product",
+              "name": "Kokuyo Soft Ring Notebook Blue B5",
+              "description": "Notebook. Soft ring binding that lies fully flat when open, with a covered spine that does not catch on paper while writing. B5 size, blue cover.",
+              "brand": { "@type": "Brand", "name": "Kokuyo" },
+              "offers": { "@type": "Offer", "priceCurrency": "BDT", "price": "380", "availability": "https://schema.org/InStock", "seller": { "@type": "Organization", "name": "JAPspired" } }
+            }
           }
         ]
       },
@@ -171,7 +227,7 @@
             "name": "Where can I buy authentic Japanese pens in Bangladesh?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "JAPspired sources Japanese pens directly from Japan and delivers across Bangladesh. Message us on Facebook to order Zebra, Uni-ball, and Kokuyo products."
+              "text": "JAPspired sources Japanese pens directly from Japan and delivers across Bangladesh. Message us on Facebook or Instagram to order Zebra, Uni-ball, and Kokuyo products."
             }
           },
           {
@@ -179,7 +235,7 @@
             "name": "How do I order Japanese stationery in Bangladesh?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Message JAPspired on Facebook with the product name and quantity. We confirm availability, you pay via bKash or cash on delivery, and we deliver via Pathao within 2 to 3 business days."
+              "text": "Message JAPspired on Facebook or Instagram with the product name and quantity. We confirm availability, you pay cash on delivery or bKash on request, and we deliver via Pathao within 2 to 3 business days."
             }
           },
           {
@@ -295,7 +351,9 @@
 
     /* HERO */
     .hero {
-      min-height: 100vh; display: flex; align-items: center; padding-top: 61px;
+      min-height: 100vh;
+      min-height: 100svh; /* avoids the hero resizing as mobile browser chrome hides */
+      display: flex; align-items: center; padding-top: 61px;
       border-bottom: 1px solid var(--rule);
     }
     .hero-left {
@@ -324,11 +382,21 @@
       display: inline-flex; align-items: center; gap: 12px;
       background: var(--navy); color: #fff; text-decoration: none;
       padding: 14px 28px; font-size: 0.78rem; letter-spacing: 0.14em;
-      text-transform: uppercase; transition: background 0.25s; align-self: flex-start;
+      text-transform: uppercase; transition: background 0.25s;
     }
     .hero-cta:hover { background: #243260; }
     .hero-cta:hover .arrow { transform: translateX(4px); }
     .arrow { display: inline-block; transition: transform 0.2s; }
+
+    .cta-group { display: inline-flex; align-items: center; gap: 14px; flex-wrap: wrap; align-self: flex-start; }
+    .cta-secondary {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: transparent; color: var(--navy); text-decoration: none;
+      border: 1px solid var(--navy); padding: 13px 27px; font-size: 0.78rem; letter-spacing: 0.14em;
+      text-transform: uppercase; transition: background 0.25s, color 0.25s;
+    }
+    .cta-secondary:hover { background: var(--navy); color: #fff; }
+    .cta-secondary:hover .arrow { transform: translateX(4px); }
 
     /* SECTION SHARED */
     section { padding: 100px 64px; }
@@ -414,6 +482,8 @@
     }
     .ink-swatch.black { background: #2c2c2c; }
     .ink-swatch.blue { background: #1a4d8f; }
+    .ink-swatch.pink { background: #c97b95; }
+    .ink-swatch.green { background: #7a9b5e; }
     .product-name {
       font-family: 'Cormorant Garamond', serif;
       font-size: 1.55rem; font-weight: 500; color: var(--charcoal);
@@ -444,23 +514,6 @@
     }
     .products-cta-note { font-size: 0.82rem; color: var(--charcoal-light); line-height: 1.6; }
 
-    /* FOOTER CTA BAND */
-    .footer-cta-band {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 40px 0; border-bottom: 1px solid rgba(255,255,255,0.1);
-      gap: 24px; flex-wrap: wrap;
-    }
-    .footer-cta-text {
-      font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 300; color: #fff;
-    }
-    .footer-cta-btn {
-      display: inline-flex; align-items: center; gap: 10px;
-      border: 1px solid rgba(255,255,255,0.3); color: #fff; text-decoration: none;
-      padding: 12px 24px; font-size: 0.78rem; letter-spacing: 0.14em;
-      text-transform: uppercase; transition: all 0.2s; white-space: nowrap;
-    }
-    .footer-cta-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.6); }
-    .footer-cta-btn:hover .arrow { transform: translateX(4px); }
     .footer-bottom {
       display: flex; justify-content: space-between; align-items: center;
       padding: 32px 0 0; flex-wrap: wrap; gap: 24px;
@@ -512,7 +565,37 @@
     .hero-eyebrow  { animation: fadeUp 0.6s ease both; animation-delay: 0.1s; }
     .hero-heading  { animation: fadeUp 0.6s ease both; animation-delay: 0.25s; }
     .hero-body     { animation: fadeUp 0.6s ease both; animation-delay: 0.4s; }
-    .hero-cta      { animation: fadeUp 0.6s ease both; animation-delay: 0.55s; }
+    .cta-group     { animation: fadeUp 0.6s ease both; animation-delay: 0.55s; }
+
+    /* Respect the OS "reduce motion" setting — vestibular safety, and it also
+       stops the hero from feeling sluggish on low-end Android devices. */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Visible keyboard focus. Without this, a keyboard or screen-reader user
+       has no idea where they are on the page. */
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--navy);
+      outline-offset: 3px;
+    }
+    footer a:focus-visible {
+      outline-color: #fff;
+    }
+
+    /* Skip link — first thing a keyboard user hits, hidden until focused */
+    .skip-link {
+      position: absolute; left: -9999px; top: 0; z-index: 200;
+      background: var(--navy); color: #fff; padding: 12px 20px;
+      font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
+      text-decoration: none;
+    }
+    .skip-link:focus { left: 0; }
 
     /* DESKTOP MAX WIDTH */
     .constrain { max-width: 1400px; margin: 0 auto; width: 100%; }
@@ -561,14 +644,14 @@
       .products-category-divider { padding: 28px 0 0; }
       .order-steps { grid-template-columns: 1fr; gap: 40px; }
       .order-cta-wrap { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .cta-group { flex-direction: column; align-items: stretch; width: 100%; gap: 12px; }
       .hero-cta { align-self: stretch; justify-content: center; padding: 16px 24px; }
       .order-cta { width: 100%; justify-content: center; padding: 16px 24px; }
+      .cta-secondary { width: 100%; justify-content: center; padding: 16px 24px; }
       .products-cta-wrap .hero-cta { width: 100%; justify-content: center; }
       .products-cta-wrap { flex-direction: column; align-items: stretch; }
       .products-cta-note { text-align: center; }
       footer { padding: 40px 20px; }
-      .footer-cta-band { flex-direction: column; align-items: flex-start; gap: 16px; }
-      .footer-cta-btn { width: 100%; justify-content: center; }
       .footer-bottom { flex-direction: column; text-align: center; }
       .footer-links { flex-wrap: wrap; justify-content: center; }
     }
@@ -576,8 +659,10 @@
 </head>
 <body>
 
+<a href="#products" class="skip-link">Skip to products</a>
+
 <!-- NAV -->
-<nav>
+<nav aria-label="Main">
   <div class="constrain" style="display:flex;justify-content:space-between;align-items:center;width:100%;">
     <a href="#home" class="nav-logo">JAPspired</a>
     <ul class="nav-links">
@@ -585,7 +670,7 @@
       <li><a href="#about">About</a></li>
       <li><a href="#order">How to Order</a></li>
     </ul>
-    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+    <button class="nav-hamburger" id="hamburger" aria-label="Menu" aria-expanded="false" aria-controls="mobileNav">
       <span></span><span></span><span></span>
     </button>
   </div>
@@ -613,9 +698,14 @@
       Authentic Japanese pens, notebooks, and stationery. Sourced directly from Japan and delivered across Bangladesh. Personally selected, used, and approved before they reach you.
     </p>
     <p class="hero-social-proof">Used by students, professionals, and stationery enthusiasts across Bangladesh.</p>
-    <a href="https://www.facebook.com/JAPspired" target="_blank" class="hero-cta">
-      Order on Facebook <span class="arrow">&#8594;</span>
-    </a>
+    <div class="cta-group">
+      <a href="https://www.facebook.com/JAPspired" target="_blank" rel="noopener noreferrer" class="hero-cta">
+        Order on Facebook <span class="arrow">&#8594;</span>
+      </a>
+      <a href="https://www.instagram.com/japspired" target="_blank" rel="noopener noreferrer" class="cta-secondary">
+        Order on Instagram <span class="arrow">&#8594;</span>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -732,6 +822,67 @@
         </div>
       </div>
 
+      <!-- Uni-ball Zento Black -->
+      <div class="product-card">
+        <!-- TODO: replace with real product photo, see note to Sakeef -->
+        <img src="images/Zento.webp" alt="Uni-ball Zento Black gel pen" class="product-image" loading="lazy" />
+        <div class="product-card-body">
+          <p class="product-tag"><span class="ink-swatch black"></span>Gel &ndash; 0.5mm &ndash; Black Ink</p>
+          <h3 class="product-name">Uni-ball Zento</h3>
+          <p class="product-desc">
+            Gel pen. Black ink. Built for small, dense handwriting, with a low-friction tip that holds a controlled line even when writing fast. A slim, matte grip keeps fingers steady through long writing sessions.
+          </p>
+          <div class="product-footer">
+            <div class="product-price">290 BDT</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zebra Mildliner Pink -->
+      <div class="product-card">
+        <img src="images/Mildliner_pink.webp" alt="Zebra Mildliner Pink dual tip highlighter" class="product-image" loading="lazy" />
+        <div class="product-card-body">
+          <p class="product-tag"><span class="ink-swatch pink"></span>Highlighter &ndash; Dual Tip &ndash; Pink</p>
+          <h3 class="product-name">Zebra Mildliner</h3>
+          <p class="product-desc">
+            Dual tip highlighter, one broad and one fine. A muted pink that highlights and colour-codes notes without the harsh brightness of a standard highlighter, and without bleeding through the page.
+          </p>
+          <div class="product-footer">
+            <div class="product-price">180 BDT</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zebra Mildliner Green -->
+      <div class="product-card">
+        <img src="images/Mildliner_green.webp" alt="Zebra Mildliner Green dual tip highlighter" class="product-image" loading="lazy" />
+        <div class="product-card-body">
+          <p class="product-tag"><span class="ink-swatch green"></span>Highlighter &ndash; Dual Tip &ndash; Green</p>
+          <h3 class="product-name">Zebra Mildliner</h3>
+          <p class="product-desc">
+            Dual tip highlighter, one broad and one fine. A muted green that highlights and colour-codes notes without the harsh brightness of a standard highlighter, and without bleeding through the page.
+          </p>
+          <div class="product-footer">
+            <div class="product-price">180 BDT</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pilot Juice Black -->
+      <div class="product-card">
+        <img src="images/Pilot_Juice.webp" alt="Pilot Juice Black gel pen" class="product-image" loading="lazy" />
+        <div class="product-card-body">
+          <p class="product-tag"><span class="ink-swatch black"></span>Gel &ndash; 0.5mm &ndash; Black Ink</p>
+          <h3 class="product-name">Pilot Juice</h3>
+          <p class="product-desc">
+            Gel pen. Black ink. Smooth, low friction ink in a dense, consistent line from the first stroke to the last. One of the most popular gel pen lines in Japan, built for everyday writing without pressure or scratch.
+          </p>
+          <div class="product-footer">
+            <div class="product-price">190 BDT</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Category divider -->
       <div class="products-category-divider">
         <span class="products-category-label">Notebooks</span>
@@ -758,6 +909,21 @@
         </div>
       </div>
 
+      <!-- Kokuyo Soft Ring Notebook Blue B5 -->
+      <div class="product-card">
+        <img src="images/Kokuyo_Soft_Ring_B5_Blue.webp" alt="Kokuyo Soft Ring Notebook Blue B5 open flat" class="product-image" loading="lazy" />
+        <div class="product-card-body">
+          <p class="product-tag">Notebook &ndash; B5 &ndash; Blue</p>
+          <h3 class="product-name">Kokuyo Soft Ring Notebook</h3>
+          <p class="product-desc">
+            Notebook. Soft ring binding that lies fully flat when open, with a covered spine that does not dig into your hand or catch on paper while writing. B5 size. Pages tear out cleanly along a perforated edge.
+          </p>
+          <div class="product-footer">
+            <div class="product-price">380 BDT</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Empty space note -->
       <div class="notebook-grid-note">
         <p>More notebook formats<br>coming soon.</p>
@@ -766,9 +932,14 @@
     </div>
 
     <div class="products-cta-wrap">
-      <a href="https://www.facebook.com/JAPspired" target="_blank" class="hero-cta">
-        Order on Facebook <span class="arrow">&#8594;</span>
-      </a>
+      <div class="cta-group">
+        <a href="https://www.facebook.com/JAPspired" target="_blank" rel="noopener noreferrer" class="hero-cta">
+          Order on Facebook <span class="arrow">&#8594;</span>
+        </a>
+        <a href="https://www.instagram.com/japspired" target="_blank" rel="noopener noreferrer" class="cta-secondary">
+          Order on Instagram <span class="arrow">&#8594;</span>
+        </a>
+      </div>
       <p class="products-cta-note">Message us with the product name and quantity. We confirm availability and send you the total.</p>
     </div>
   </div>
@@ -809,9 +980,9 @@
     <div class="order-steps">
       <div class="order-step">
         <div class="step-number">01</div>
-        <div class="step-title">Message us on Facebook</div>
+        <div class="step-title">Message us on Facebook or Instagram</div>
         <p class="step-desc">
-          Send a DM to our Facebook page with the product name and quantity.
+          Send a DM with the product name and quantity, on whichever platform you prefer.
           We will confirm availability and send you the total.
         </p>
       </div>
@@ -819,8 +990,8 @@
         <div class="step-number">02</div>
         <div class="step-title">Confirm and pay</div>
         <p class="step-desc">
-          Pay via bKash (Send Money to 01680064597) or choose cash on delivery.
-          We confirm your order once payment is received.
+          Cash on delivery by default. bKash is available if you prefer it, just ask when you message us.
+          We confirm your order once payment is arranged.
         </p>
       </div>
       <div class="order-step">
@@ -833,9 +1004,14 @@
       </div>
     </div>
     <div class="order-cta-wrap">
-      <a href="https://www.facebook.com/JAPspired" target="_blank" class="order-cta">
-        Order on Facebook <span class="arrow">&#8594;</span>
-      </a>
+      <div class="cta-group">
+        <a href="https://www.facebook.com/JAPspired" target="_blank" rel="noopener noreferrer" class="order-cta">
+          Order on Facebook <span class="arrow">&#8594;</span>
+        </a>
+        <a href="https://www.instagram.com/japspired" target="_blank" rel="noopener noreferrer" class="cta-secondary">
+          Order on Instagram <span class="arrow">&#8594;</span>
+        </a>
+      </div>
       <p class="order-note">We typically respond within a few hours.</p>
     </div>
   </div>
@@ -846,17 +1022,11 @@
 <!-- FOOTER -->
 <footer>
   <div class="constrain" style="width:100%;">
-    <div class="footer-cta-band">
-      <p class="footer-cta-text">Find the right tool for your desk.</p>
-      <a href="https://www.facebook.com/JAPspired" target="_blank" class="footer-cta-btn">
-        Order on Facebook <span class="arrow">&#8594;</span>
-      </a>
-    </div>
     <div class="footer-bottom">
       <a href="#home" class="footer-logo">JAPspired</a>
       <ul class="footer-links">
-        <li><a href="https://www.facebook.com/JAPspired" target="_blank">Facebook</a></li>
-        <li><a href="https://www.instagram.com/japspired" target="_blank">Instagram</a></li>
+        <li><a href="https://www.facebook.com/JAPspired" target="_blank" rel="noopener noreferrer">Facebook</a></li>
+        <li><a href="https://www.instagram.com/japspired" target="_blank" rel="noopener noreferrer">Instagram</a></li>
         <li><a href="#products">Products</a></li>
         <li><a href="#about">About</a></li>
         <li><a href="#order">How to Order</a></li>
@@ -870,13 +1040,22 @@
   const hamburger = document.getElementById('hamburger');
   const mobileNav = document.getElementById('mobileNav');
   hamburger.addEventListener('click', () => {
-    hamburger.classList.toggle('open');
-    mobileNav.classList.toggle('open');
+    const isOpen = hamburger.classList.toggle('open');
+    mobileNav.classList.toggle('open', isOpen);
+    hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   });
   function closeNav() {
     hamburger.classList.remove('open');
     mobileNav.classList.remove('open');
+    hamburger.setAttribute('aria-expanded', 'false');
   }
+  // Escape closes the menu and returns focus to the button it came from
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobileNav.classList.contains('open')) {
+      closeNav();
+      hamburger.focus();
+    }
+  });
 </script>
 </body>
 </html>
