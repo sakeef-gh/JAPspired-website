@@ -122,7 +122,7 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
   color: var(--charcoal); width: 100%; outline: none; padding: 2px 0 6px; margin-bottom: 12px;
 }
 .sku-card .card-name-input:focus { border-bottom-color: var(--navy-light); }
-.card-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.card-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .card-field { display: flex; flex-direction: column; gap: 3px; }
 .card-field label { font-size: 10px; color: var(--mid); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
 .card-field input {
@@ -356,7 +356,7 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
     <div class="desktop-only">
       <div class="section-label">
         SKUs
-        <span>Lot = minimum purchase increment</span>
+        <span>Qty (max) = most the optimiser may order</span>
       </div>
       <div class="sheet-wrap">
         <table class="sheet-table">
@@ -368,9 +368,7 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
               <th class="num">Wt (g)</th>
               <th class="num">Price JPY</th>
               <th class="num">Sell BDT</th>
-              <th class="num">Lot</th>
-              <th class="num">Min Qty</th>
-              <th class="num">Max Qty</th>
+              <th class="num">Qty (max)</th>
               <th></th>
             </tr>
           </thead>
@@ -458,11 +456,21 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
 
 <script>
 // ── DATA ─────────────────────────────────────────────────────────────────────
-const DEFAULT_SKUS = []; // empty on purpose: enter or upload current numbers, saved on this device only
+const DEFAULT_SKUS = [
+  {name:'Uniball One Black 0.5mm', wt:11,  price:82,  sell:180, maxQty:30},
+  {name:'Zebra bLen U Black 0.5mm', wt:13, price:158, sell:270, maxQty:30},
+  {name:'Uniball Zento Black 0.5mm', wt:11,price:189, sell:290, maxQty:20},
+  {name:'Mildliner Yellow', wt:10,         price:71,  sell:180, maxQty:20},
+  {name:'Mildliner Pink', wt:11,           price:77,  sell:180, maxQty:20},
+  {name:'Mildliner Green', wt:10,          price:69,  sell:180, maxQty:20},
+  {name:'Apica CD A6 Blue', wt:139,        price:129, sell:400, maxQty:20},
+  {name:'Apica CD B5 Red', wt:130,         price:172, sell:430, maxQty:20},
+  {name:'Pilot Juice Black', wt:10,        price:89,  sell:190, maxQty:20},
+];
 
 
 // ── AUTOSAVE (browser local storage — persists between visits on this device) ──
-const STORAGE_KEY = 'japspired_optimiser_state_v2';
+const STORAGE_KEY = 'japspired_optimiser_state_v1';
 function saveState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -490,13 +498,13 @@ function loadState() {
 // Plain spreadsheet export — for archiving alongside Stock Master or eyeballing
 // in Excel/Sheets. Read-only snapshot: does not re-import back into the tool.
 function exportCsv() {
-  const headers = ['SKU Name','Weight (g)','Price JPY','Sell BDT','Lot','Min Qty','Max Qty','Included'];
+  const headers = ['SKU Name','Weight (g)','Price JPY','Sell BDT','Qty (max)','Included'];
   const esc = v => {
     const s = (v === undefined || v === null) ? '' : String(v);
     return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   };
   const rows = DEFAULT_SKUS.map(s => [
-    s.name, s.wt, s.price, s.sell, s.lot, s.minQty, s.maxQty, s.excluded ? 'No' : 'Yes'
+    s.name, s.wt, s.price, s.sell, s.maxQty, s.excluded ? 'No' : 'Yes'
   ].map(esc).join(','));
   const csv = headers.join(',') + '\n' + rows.join('\n');
 
@@ -552,8 +560,6 @@ function renderSkus() {
       <td><input class="cell-input" type="number" value="${s.wt}" min="1" oninput="DEFAULT_SKUS[${i}].wt=+this.value;saveState()"></td>
       <td><input class="cell-input" type="number" value="${s.price}" min="1" oninput="DEFAULT_SKUS[${i}].price=+this.value;saveState()"></td>
       <td><input class="cell-input" type="number" value="${s.sell}" min="1" oninput="DEFAULT_SKUS[${i}].sell=+this.value;saveState()"></td>
-      <td><input class="cell-input" type="number" value="${s.lot}" min="1" oninput="DEFAULT_SKUS[${i}].lot=+this.value;saveState()"></td>
-      <td><input class="cell-input" type="number" value="${s.minQty}" min="0" oninput="DEFAULT_SKUS[${i}].minQty=+this.value;saveState()"></td>
       <td><input class="cell-input" type="number" value="${s.maxQty}" min="0" oninput="DEFAULT_SKUS[${i}].maxQty=+this.value;saveState()"></td>
       <td><button class="btn-del" onclick="removeSku(${i})">×</button></td>`;
     tbody.appendChild(tr);
@@ -585,9 +591,7 @@ function renderSkuCards() {
         <div class="card-field"><label>Wt (g)</label><input type="number" value="${s.wt}" min="1" oninput="DEFAULT_SKUS[${i}].wt=+this.value;saveState()"></div>
         <div class="card-field"><label>Price JPY</label><input type="number" value="${s.price}" min="1" oninput="DEFAULT_SKUS[${i}].price=+this.value;saveState()"></div>
         <div class="card-field"><label>Sell BDT</label><input type="number" value="${s.sell}" min="1" oninput="DEFAULT_SKUS[${i}].sell=+this.value;saveState()"></div>
-        <div class="card-field"><label>Lot</label><input type="number" value="${s.lot}" min="1" oninput="DEFAULT_SKUS[${i}].lot=+this.value;saveState()"></div>
-        <div class="card-field"><label>Min Qty</label><input type="number" value="${s.minQty}" min="0" oninput="DEFAULT_SKUS[${i}].minQty=+this.value;saveState()"></div>
-        <div class="card-field"><label>Max Qty</label><input type="number" value="${s.maxQty}" min="0" oninput="DEFAULT_SKUS[${i}].maxQty=+this.value;saveState()"></div>
+        <div class="card-field"><label>Qty (max)</label><input type="number" value="${s.maxQty}" min="0" oninput="DEFAULT_SKUS[${i}].maxQty=+this.value;saveState()"></div>
       </div>`;
     container.appendChild(card);
   });
@@ -628,7 +632,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 function addSku() {
-  DEFAULT_SKUS.push({name:'', wt:'', price:'', sell:'', lot:'', minQty:'', maxQty:''});
+  DEFAULT_SKUS.push({name:'', wt:'', price:'', sell:'', maxQty:''});
   renderSkus(); renderSkuCards(); saveState();
 }
 function removeSku(i) {
@@ -663,40 +667,57 @@ function calcOrder(qtys) {
 }
 
 // ── OPTIMISER ─────────────────────────────────────────────────────────────────
-// Maximise total profit within budget, respecting per-SKU min/max qty bounds.
+// Maximise total profit within the budget. Each SKU can be ordered anywhere
+// from 0 up to its Qty (max), one unit at a time. Excluded SKUs stay at 0 and
+// a pinned (slider-dragged) SKU only has its pinned value as a choice.
 function findOptimalQtys(locks) {
   locks = locks || {};
   const n         = DEFAULT_SKUS.length;
   const budgetVal = document.getElementById('budget').value;
   const budget    = budgetVal ? +budgetVal : Infinity;
 
-  // Build valid quantity list per SKU: multiples of lot, within [minQty, maxQty].
-  // Excluded SKUs are forced to 0 and skipped entirely — their data stays put,
-  // they just don't compete for budget/weight. A locked SKU only gets one
-  // "choice" — its pinned value — so the hill climb below can never move it.
-  const lotsPerSku = DEFAULT_SKUS.map((s, i) => {
+  const optionsPerSku = DEFAULT_SKUS.map((s, i) => {
     if (s.excluded) return [0];
     if (locks.hasOwnProperty(i)) return [locks[i]];
-    const lots = [];
-    const min = (s.minQty === '' || s.minQty === undefined || s.minQty === null) ? s.lot : s.minQty;
     const max = s.maxQty || 100;
-    const start = Math.ceil(min / s.lot) * s.lot;
-    for (let q = start; q <= max; q += s.lot) lots.push(q);
-    return lots.length ? lots : [s.lot];
+    const opts = [];
+    for (let q = 0; q <= max; q++) opts.push(q);
+    return opts;
   });
 
-  let current = lotsPerSku.map(lots => lots[0]);
+  let current = optionsPerSku.map(opts => opts[0]); // 0, or the pinned value
+
+  // With a budget set, hand it out best-markup-first so that row order (which
+  // you can now rearrange) does not decide who gets the money.
+  if (isFinite(budget)) {
+    const ranked = [];
+    for (let i = 0; i < n; i++) {
+      if (DEFAULT_SKUS[i].excluded || locks.hasOwnProperty(i)) continue;
+      const probe = new Array(n).fill(0); probe[i] = 1;
+      ranked.push({ i, markup: calcOrder(probe).rows[i].markup });
+    }
+    ranked.sort((a, b) => b.markup - a.markup);
+    for (const { i } of ranked) {
+      const opts = optionsPerSku[i];
+      for (let k = opts.length - 1; k >= 0; k--) {
+        const candidate = [...current]; candidate[i] = opts[k];
+        if (calcOrder(candidate).totalImportCost <= budget) { current[i] = opts[k]; break; }
+      }
+    }
+  }
+
+  // Then improve one SKU at a time until nothing gains.
   let changed = true;
   while (changed) {
     changed = false;
     for (let i = 0; i < n; i++) {
-      if (DEFAULT_SKUS[i].excluded || locks.hasOwnProperty(i)) continue; // excluded or pinned — never reassigned
+      if (DEFAULT_SKUS[i].excluded || locks.hasOwnProperty(i)) continue;
       let bestQ = current[i], bestP = calcOrder(current).totalProfit;
-      for (const q of lotsPerSku[i]) {
+      for (const q of optionsPerSku[i]) {
         const candidate = [...current]; candidate[i] = q;
-        if (calcOrder(candidate).totalImportCost > budget) continue;
-        const p = calcOrder(candidate).totalProfit;
-        if (p > bestP + 0.01) { bestP = p; bestQ = q; }
+        const c = calcOrder(candidate);
+        if (c.totalImportCost > budget) continue;
+        if (c.totalProfit > bestP + 0.01) { bestP = c.totalProfit; bestQ = q; }
       }
       if (bestQ !== current[i]) { current[i] = bestQ; changed = true; }
     }
@@ -711,10 +732,10 @@ function findOptimalQtys(locks) {
 // for the optimiser to move; "Reset to Auto" releases all pins.
 let currentLocks = {};
 
-// Real lot-step granularity can be fine (small lot, wide range), which would
+// A wide quantity range stepped one unit at a time can be fine-grained, which would
 // otherwise flood the slider track with dozens of tick marks. This thins the
 // DISPLAYED ticks down to a readable count — the slider itself still snaps
-// to every real lot via its own step attribute, only the visual marks are capped.
+// to every unit via its own step attribute, only the visual marks are capped.
 function tickSubset(steps, maxTicks) {
   maxTicks = maxTicks || 10;
   if (steps.length <= maxTicks) return steps;
@@ -729,7 +750,7 @@ function buildResultsTableSkeleton() {
   const resBody = document.getElementById('resBody');
   resBody.innerHTML = '';
   DEFAULT_SKUS.forEach((s, i) => {
-    const steps = whatIfLotSteps(s);
+    const steps = whatIfQtySteps(s);
     const tickOptions = tickSubset(steps).map(q => `<option value="${q}"></option>`).join('');
     const tr = document.createElement('tr');
     tr.id = 'resRow-' + i;
@@ -738,7 +759,7 @@ function buildResultsTableSkeleton() {
       <td>
         <div class="eq-slider-wrap">
           <div class="eq-slider-bubble" id="eqBubble-${i}"></div>
-          <input type="range" class="eq-slider" id="eqSlider-${i}" min="${steps[0]}" max="${steps[steps.length-1]}" step="${s.lot || 1}"
+          <input type="range" class="eq-slider" id="eqSlider-${i}" min="${steps[0]}" max="${steps[steps.length-1]}" step="1"
             list="eqTicks-${i}"
             oninput="onEqualizerInput(${i}, this.value); positionEqBubble(${i}, this)"
             onmousedown="showEqBubble(${i})" onmouseup="hideEqBubble(${i})" onmouseleave="hideEqBubble(${i})">
@@ -936,7 +957,7 @@ function resetToAuto() {
 }
 
 // Toggling Include on/off keeps the SKU's own data (weight, price, sell,
-// lot, min/max) completely untouched — only whether the optimiser considers
+// max qty) completely untouched — only whether the optimiser considers
 // it changes. Clears any existing pin on that row since exclude/include
 // should start fresh rather than fight with a stale drag position.
 function onToggleInclude(i, checked) {
@@ -966,7 +987,6 @@ function validateSkus() {
     if (!s.wt || +s.wt <= 0)    problems.push(name + ': missing Weight');
     if (!s.price || +s.price <= 0) problems.push(name + ': missing Price JPY');
     if (!s.sell || +s.sell <= 0)   problems.push(name + ': missing Sell BDT');
-    if (!s.lot || +s.lot <= 0)     problems.push(name + ': missing Lot');
   });
   return problems;
 }
@@ -986,16 +1006,12 @@ function runOptimiser() {
   document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-// Computes the valid lot-stepped quantity range for a SKU — used to set
+// Computes the valid quantity range (0 up to Qty max) for a SKU — used to set
 // each equalizer slider's min/max/step.
-function whatIfLotSteps(s) {
-  const lot = s.lot || 1;
-  const min = (s.minQty === '' || s.minQty === undefined || s.minQty === null) ? lot : s.minQty;
+function whatIfQtySteps(s) {
   const max = s.maxQty || 100;
   const steps = [];
-  const start = Math.ceil(min / lot) * lot;
-  for (let q = start; q <= max; q += lot) steps.push(q);
-  if (!steps.length) steps.push(start);
+  for (let q = 0; q <= max; q++) steps.push(q);
   return steps;
 }
 
@@ -1075,15 +1091,13 @@ const UPLOAD_COLS = {
   wt:     ['weightg', 'weight', 'wtg', 'wt'],
   price:  ['pricejpy', 'price', 'jpyprice'],
   sell:   ['sellbdt', 'sell', 'sellprice', 'sellingprice'],
-  lot:    ['lot'],
-  minQty: ['minqty', 'min'],
-  maxQty: ['maxqty', 'max'],
+  maxQty: ['qtymax', 'maxqty', 'qty', 'quantity', 'max'],
   included: ['included', 'incl', 'include']
 };
-const UPLOAD_REQUIRED = { name: 'SKU Name', wt: 'Weight (g)', price: 'Price JPY', sell: 'Sell BDT', lot: 'Lot' };
+const UPLOAD_REQUIRED = { name: 'SKU Name', wt: 'Weight (g)', price: 'Price JPY', sell: 'Sell BDT' };
 
 function parseCsvText(text) {
-  text = text.replace(/^﻿/, '');
+  text = text.replace(/^\uFEFF/, '');
   const rows = []; let row = [], cur = '', q = false;
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
@@ -1160,7 +1174,7 @@ function buildUploadPreview(grid) {
       const n = typeof v === 'number' ? v : Number(String(v).replace(/[,৳¥\s]/g, ''));
       return isFinite(n) ? n : null;
     };
-    const fields = { wt: 'Weight', price: 'Price JPY', sell: 'Sell BDT', lot: 'Lot', minQty: 'Min Qty', maxQty: 'Max Qty' };
+    const fields = { wt: 'Weight', price: 'Price JPY', sell: 'Sell BDT', maxQty: 'Qty (max)' };
     const sku = { name: nameStr };
     Object.keys(fields).forEach(k => {
       const n = num(k);
@@ -1173,7 +1187,7 @@ function buildUploadPreview(grid) {
 
     if (!excluded) {
       if (!nameStr) problems.push(label + ': missing SKU Name');
-      const req = { wt: 'Weight', price: 'Price JPY', sell: 'Sell BDT', lot: 'Lot' };
+      const req = { wt: 'Weight', price: 'Price JPY', sell: 'Sell BDT' };
       Object.keys(req).forEach(k => {
         const raw = get(k);
         const notNumber = String(raw).trim() !== '' && sku[k] === '';
@@ -1221,8 +1235,8 @@ function showUploadPreview(p, fileName) {
   }
   p.warnings.forEach(w => { html += '<div class="modal-block warn">' + escHtml(w) + '</div>'; });
   if (p.skus.length) {
-    html += '<table class="modal-preview"><thead><tr><th>SKU</th><th>Wt (g)</th><th>Price JPY</th><th>Sell BDT</th><th>Lot</th></tr></thead><tbody>'
-      + p.skus.slice(0, 5).map(s => '<tr><td>' + escHtml(s.name) + '</td><td>' + escHtml(s.wt) + '</td><td>' + escHtml(s.price) + '</td><td>' + escHtml(s.sell) + '</td><td>' + escHtml(s.lot) + '</td></tr>').join('')
+    html += '<table class="modal-preview"><thead><tr><th>SKU</th><th>Wt (g)</th><th>Price JPY</th><th>Sell BDT</th><th>Qty (max)</th></tr></thead><tbody>'
+      + p.skus.slice(0, 5).map(s => '<tr><td>' + escHtml(s.name) + '</td><td>' + escHtml(s.wt) + '</td><td>' + escHtml(s.price) + '</td><td>' + escHtml(s.sell) + '</td><td>' + escHtml(s.maxQty) + '</td></tr>').join('')
       + '</tbody></table>';
     if (p.skus.length > 5) html += '<div class="modal-more">and ' + (p.skus.length - 5) + ' more row(s)</div>';
   }
