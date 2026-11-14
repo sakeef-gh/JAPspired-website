@@ -356,7 +356,7 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
     <div class="desktop-only">
       <div class="section-label">
         SKUs
-        <span>Qty (max) = most the optimiser may order</span>
+        <span>Local Ship JPY = Rakuten seller to forwarder, once per SKU line</span>
       </div>
       <div class="sheet-wrap">
         <table class="sheet-table">
@@ -367,6 +367,7 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
               <th style="min-width:160px">SKU Name</th>
               <th class="num">Wt (g)</th>
               <th class="num">Price JPY</th>
+              <th class="num">Local Ship JPY</th>
               <th class="num">Sell BDT</th>
               <th class="num">Qty (max)</th>
               <th></th>
@@ -429,7 +430,7 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
       <table class="res-table">
         <thead>
           <tr>
-            <th>SKU</th><th>Qty (drag)</th><th>Unit Cost</th><th>Selling Price/unit</th><th>Profit/unit</th><th>Markup</th><th>Total Profit</th>
+            <th>SKU</th><th>Qty (drag)</th><th>Weight</th><th>Unit Cost</th><th>Selling Price/unit</th><th>Profit/unit</th><th>Markup</th><th>Total Profit</th>
           </tr>
         </thead>
         <tbody id="resBody"></tbody>
@@ -456,21 +457,11 @@ header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); l
 
 <script>
 // ── DATA ─────────────────────────────────────────────────────────────────────
-const DEFAULT_SKUS = [
-  {name:'Uniball One Black 0.5mm', wt:11,  price:82,  sell:180, maxQty:30},
-  {name:'Zebra bLen U Black 0.5mm', wt:13, price:158, sell:270, maxQty:30},
-  {name:'Uniball Zento Black 0.5mm', wt:11,price:189, sell:290, maxQty:20},
-  {name:'Mildliner Yellow', wt:10,         price:71,  sell:180, maxQty:20},
-  {name:'Mildliner Pink', wt:11,           price:77,  sell:180, maxQty:20},
-  {name:'Mildliner Green', wt:10,          price:69,  sell:180, maxQty:20},
-  {name:'Apica CD A6 Blue', wt:139,        price:129, sell:400, maxQty:20},
-  {name:'Apica CD B5 Red', wt:130,         price:172, sell:430, maxQty:20},
-  {name:'Pilot Juice Black', wt:10,        price:89,  sell:190, maxQty:20},
-];
+const DEFAULT_SKUS = []; // empty on purpose: enter or upload current numbers, saved on this device only
 
 
 // ── AUTOSAVE (browser local storage — persists between visits on this device) ──
-const STORAGE_KEY = 'japspired_optimiser_state_v1';
+const STORAGE_KEY = 'japspired_optimiser_state_v2';
 function saveState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -498,13 +489,13 @@ function loadState() {
 // Plain spreadsheet export — for archiving alongside Stock Master or eyeballing
 // in Excel/Sheets. Read-only snapshot: does not re-import back into the tool.
 function exportCsv() {
-  const headers = ['SKU Name','Weight (g)','Price JPY','Sell BDT','Qty (max)','Included'];
+  const headers = ['SKU Name','Weight (g)','Price JPY','Local Ship JPY','Sell BDT','Qty (max)','Included'];
   const esc = v => {
     const s = (v === undefined || v === null) ? '' : String(v);
     return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   };
   const rows = DEFAULT_SKUS.map(s => [
-    s.name, s.wt, s.price, s.sell, s.maxQty, s.excluded ? 'No' : 'Yes'
+    s.name, s.wt, s.price, s.localShip, s.sell, s.maxQty, s.excluded ? 'No' : 'Yes'
   ].map(esc).join(','));
   const csv = headers.join(',') + '\n' + rows.join('\n');
 
@@ -559,6 +550,7 @@ function renderSkus() {
       <td><input class="cell-input text-cell" type="text" value="${escHtml(s.name)}" oninput="DEFAULT_SKUS[${i}].name=this.value;syncCards();saveState()"></td>
       <td><input class="cell-input" type="number" value="${s.wt}" min="1" oninput="DEFAULT_SKUS[${i}].wt=+this.value;saveState()"></td>
       <td><input class="cell-input" type="number" value="${s.price}" min="1" oninput="DEFAULT_SKUS[${i}].price=+this.value;saveState()"></td>
+      <td><input class="cell-input" type="number" value="${s.localShip == null ? '' : s.localShip}" min="0" oninput="DEFAULT_SKUS[${i}].localShip=+this.value;saveState()"></td>
       <td><input class="cell-input" type="number" value="${s.sell}" min="1" oninput="DEFAULT_SKUS[${i}].sell=+this.value;saveState()"></td>
       <td><input class="cell-input" type="number" value="${s.maxQty}" min="0" oninput="DEFAULT_SKUS[${i}].maxQty=+this.value;saveState()"></td>
       <td><button class="btn-del" onclick="removeSku(${i})">×</button></td>`;
@@ -590,6 +582,7 @@ function renderSkuCards() {
       <div class="card-fields">
         <div class="card-field"><label>Wt (g)</label><input type="number" value="${s.wt}" min="1" oninput="DEFAULT_SKUS[${i}].wt=+this.value;saveState()"></div>
         <div class="card-field"><label>Price JPY</label><input type="number" value="${s.price}" min="1" oninput="DEFAULT_SKUS[${i}].price=+this.value;saveState()"></div>
+        <div class="card-field"><label>Local Ship JPY</label><input type="number" value="${s.localShip == null ? '' : s.localShip}" min="0" oninput="DEFAULT_SKUS[${i}].localShip=+this.value;saveState()"></div>
         <div class="card-field"><label>Sell BDT</label><input type="number" value="${s.sell}" min="1" oninput="DEFAULT_SKUS[${i}].sell=+this.value;saveState()"></div>
         <div class="card-field"><label>Qty (max)</label><input type="number" value="${s.maxQty}" min="0" oninput="DEFAULT_SKUS[${i}].maxQty=+this.value;saveState()"></div>
       </div>`;
@@ -632,7 +625,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 function addSku() {
-  DEFAULT_SKUS.push({name:'', wt:'', price:'', sell:'', maxQty:''});
+  DEFAULT_SKUS.push({name:'', wt:'', price:'', localShip:'', sell:'', maxQty:''});
   renderSkus(); renderSkuCards(); saveState();
 }
 function removeSku(i) {
@@ -643,7 +636,9 @@ function removeSku(i) {
 // ── CORE MODEL ────────────────────────────────────────────────────────────────
 // Cost model (shipper bills live weight at a flat BDT/kg rate, no packaging charge):
 //   SKU shipping = SKU weight x qty / 1000 x rate
-//   unit cost    = (JPY price x FX x qty + SKU shipping) / qty
+//   local ship   = Rakuten seller to forwarder inside Japan, JPY, charged once per SKU
+//                  line that is ordered (not per unit)
+//   unit cost    = ((JPY price x qty + local ship) x FX + SKU shipping) / qty
 // Each SKU's cost is independent of the others; only the optional budget links them.
 function calcOrder(qtys) {
   const fx   = +document.getElementById('fx').value;
@@ -655,7 +650,8 @@ function calcOrder(qtys) {
     const q = qtys[i];
     if (q === 0) return {q:0,unitCost:0,profitU:0,markup:0,totalProfit:0,importCost:0};
     const skuShip = s.wt * q / 1000 * rate;
-    const totalCostBdt = s.price*q*fx + skuShip;
+    const localShip = +s.localShip || 0;
+    const totalCostBdt = (s.price*q + localShip)*fx + skuShip;
     const unitCost = totalCostBdt / q;
     const profitU  = s.sell - unitCost;
     const markup   = profitU / unitCost;
@@ -693,7 +689,7 @@ function findOptimalQtys(locks) {
     const ranked = [];
     for (let i = 0; i < n; i++) {
       if (DEFAULT_SKUS[i].excluded || locks.hasOwnProperty(i)) continue;
-      const probe = new Array(n).fill(0); probe[i] = 1;
+      const probe = new Array(n).fill(0); probe[i] = DEFAULT_SKUS[i].maxQty || 100; // markup at a full order, so a fixed local fee is spread fairly
       ranked.push({ i, markup: calcOrder(probe).rows[i].markup });
     }
     ranked.sort((a, b) => b.markup - a.markup);
@@ -767,6 +763,7 @@ function buildResultsTableSkeleton() {
         </div>
         <div id="eqQtyLabel-${i}" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--mid);margin-top:2px"></div>
       </td>
+      <td id="eqWeight-${i}"></td>
       <td id="eqUnitCost-${i}"></td>
       <td id="eqSellPrice-${i}"></td>
       <td id="eqProfitU-${i}"></td>
@@ -845,6 +842,7 @@ function updateResultsDisplay(optimal, skipIdx) {
       if (i !== skipIdx) slider.value = r.q;
     }
     document.getElementById('eqQtyLabel-' + i).textContent = isExcluded ? 'excluded' : r.q + ' units';
+    document.getElementById('eqWeight-' + i).textContent = isExcluded || !r.q ? '—' : Math.round((+DEFAULT_SKUS[i].wt || 0) * r.q).toLocaleString() + 'g';
     document.getElementById('eqUnitCost-' + i).textContent = fmtBdt(r.unitCost);
     document.getElementById('eqSellPrice-' + i).textContent = '৳' + Math.round(DEFAULT_SKUS[i].sell || 0).toLocaleString();
 
@@ -1090,6 +1088,7 @@ const UPLOAD_COLS = {
   name:   ['skuname', 'name', 'sku', 'item', 'product'],
   wt:     ['weightg', 'weight', 'wtg', 'wt'],
   price:  ['pricejpy', 'price', 'jpyprice'],
+  localShip: ['localshipjpy', 'localship', 'localshippingfee', 'localshipping', 'domesticshipping', 'domesticshippingjpy'],
   sell:   ['sellbdt', 'sell', 'sellprice', 'sellingprice'],
   maxQty: ['qtymax', 'maxqty', 'qty', 'quantity', 'max'],
   included: ['included', 'incl', 'include']
@@ -1097,7 +1096,7 @@ const UPLOAD_COLS = {
 const UPLOAD_REQUIRED = { name: 'SKU Name', wt: 'Weight (g)', price: 'Price JPY', sell: 'Sell BDT' };
 
 function parseCsvText(text) {
-  text = text.replace(/^\uFEFF/, '');
+  text = text.replace(/^﻿/, '');
   const rows = []; let row = [], cur = '', q = false;
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
@@ -1174,7 +1173,7 @@ function buildUploadPreview(grid) {
       const n = typeof v === 'number' ? v : Number(String(v).replace(/[,৳¥\s]/g, ''));
       return isFinite(n) ? n : null;
     };
-    const fields = { wt: 'Weight', price: 'Price JPY', sell: 'Sell BDT', maxQty: 'Qty (max)' };
+    const fields = { wt: 'Weight', price: 'Price JPY', localShip: 'Local Ship JPY', sell: 'Sell BDT', maxQty: 'Qty (max)' };
     const sku = { name: nameStr };
     Object.keys(fields).forEach(k => {
       const n = num(k);
@@ -1183,6 +1182,7 @@ function buildUploadPreview(grid) {
         sku[k] = '';
       } else sku[k] = n;
     });
+    if (sku.localShip === '') sku.localShip = 0;
     if (excluded) { sku.excluded = true; excludedCount++; }
 
     if (!excluded) {
