@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>JAPspired — Order Optimiser</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1B3A6B;
+  --navy-light: #2E6DB4;
+  --navy-pale: #EBF1FA;
+  --off-white: #F7F3ED;
+  --charcoal: #2C2C2C;
+  --mid: #888;
+  --border: #D0C8BC;
+  --green: #2E7D52;
+  --green-bg: #EAF5EF;
+  --yellow: #7A5C00;
+  --yellow-bg: #FFF8E1;
+  --red: #B71C1C;
+  --red-bg: #FFEBEE;
+  --white: #FFFFFF;
+  --row-alt: #FAF7F3;
+  --selected: #D6E8FA;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
+body { font-family: 'DM Sans', sans-serif; background: var(--off-white); color: var(--charcoal); min-height: 100vh; font-size: 13px; }
+
+/* ── HEADER ── */
+header { background: var(--navy); padding: 22px 36px 18px; display: flex; align-items: baseline; gap: 14px; }
+header h1 { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; color: var(--white); letter-spacing: 0.02em; }
+header span { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.5); letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ── LAYOUT ── */
+.container { max-width: 1300px; margin: 0 auto; padding: 28px 36px 60px; }
+
+/* ── SETTINGS BAR ── */
+.settings-bar {
+  display: flex; gap: 24px; align-items: flex-end; flex-wrap: wrap;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 4px; padding: 14px 20px; margin-bottom: 20px;
+}
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 10px; font-weight: 500; color: var(--mid); text-transform: uppercase; letter-spacing: 0.07em; }
+.field input {
+  font-family: 'DM Mono', monospace; font-size: 13px;
+  padding: 6px 9px; border: 1px solid var(--border); border-radius: 3px;
+  background: var(--off-white); color: var(--charcoal); width: 130px; outline: none;
+  transition: border-color 0.15s;
+}
+.field input::placeholder { color: #BBB; }
+.field input:focus { border-color: var(--navy-light); background: var(--white); }
+
+/* ── GRID (desktop) ── */
+.grid-2 { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 20px; }
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--mid); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;
+}
+.section-label span { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 400; color: #BBB; text-transform: none; letter-spacing: 0; }
+
+/* ── SPREADSHEET (desktop) ── */
+.sheet-wrap { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: var(--white); }
+.sheet-table { width: 100%; border-collapse: collapse; }
+.sheet-table thead tr { background: #2C2C2C; }
+.sheet-table th {
+  font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em;
+  color: rgba(255,255,255,0.7); padding: 8px 8px; text-align: left;
+  border-right: 1px solid rgba(255,255,255,0.1); white-space: nowrap; user-select: none;
+}
+.sheet-table th:last-child { border-right: none; width: 28px; }
+.sheet-table th.num { text-align: right; }
+.sheet-table .row-num {
+  background: #F0EBE3; color: var(--mid); font-family: 'DM Mono', monospace;
+  font-size: 10px; text-align: center; padding: 0 6px; border-right: 1px solid var(--border);
+  user-select: none; min-width: 24px;
+}
+.sheet-table td {
+  padding: 0; border-bottom: 1px solid #EDE8E0; border-right: 1px solid #EDE8E0; vertical-align: middle;
+}
+.sheet-table td:last-child { border-right: none; }
+.sheet-table tbody tr:last-child td { border-bottom: none; }
+.sheet-table tbody tr:nth-child(even) { background: var(--row-alt); }
+.sheet-table tbody tr:hover { background: var(--navy-pale); }
+.cell-input {
+  font-family: 'DM Mono', monospace; font-size: 12px;
+  padding: 6px 8px; border: none; background: transparent;
+  color: var(--charcoal); width: 100%; outline: none; transition: background 0.1s;
+}
+.cell-input:focus { background: var(--selected); box-shadow: inset 0 0 0 2px var(--navy-light); }
+.cell-input.text-cell { font-family: 'DM Sans', sans-serif; font-size: 12px; }
+.cell-input[type=number] { text-align: right; }
+.btn-del { background: none; border: none; cursor: pointer; color: #CCC; font-size: 14px; padding: 4px 8px; width: 28px; transition: color 0.15s; }
+.btn-del:hover { color: var(--red); }
+.btn-add-row {
+  width: 100%; padding: 8px; border: none; border-top: 1px dashed var(--border);
+  background: none; color: var(--mid); font-size: 11px; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; text-align: center; transition: all 0.15s; border-radius: 0 0 4px 4px;
+}
+.btn-add-row:hover { background: var(--navy-pale); color: var(--navy-light); }
+
+/* ── MOBILE CARDS (hidden on desktop) ── */
+.mobile-cards { display: none; }
+.sku-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: 6px;
+  padding: 14px 16px; margin-bottom: 10px;
+}
+.sku-card-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+}
+.sku-card-header .sku-num { font-size: 10px; color: var(--mid); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+.sku-card .card-name-input {
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  border: none; border-bottom: 1px solid var(--border); background: transparent;
+  color: var(--charcoal); width: 100%; outline: none; padding: 2px 0 6px; margin-bottom: 12px;
+}
+.sku-card .card-name-input:focus { border-bottom-color: var(--navy-light); }
+.card-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.card-field { display: flex; flex-direction: column; gap: 3px; }
+.card-field label { font-size: 10px; color: var(--mid); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+.card-field input {
+  font-family: 'DM Mono', monospace; font-size: 13px; padding: 6px 8px;
+  border: 1px solid var(--border); border-radius: 3px; background: var(--off-white);
+  color: var(--charcoal); text-align: right; outline: none; width: 100%;
+}
+.card-field input:focus { border-color: var(--navy-light); background: var(--white); }
+.btn-del-card {
+  background: none; border: 1px solid var(--border); border-radius: 3px;
+  cursor: pointer; color: var(--mid); font-size: 12px; padding: 4px 10px;
+  transition: all 0.15s;
+}
+.btn-del-card:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+.btn-add-card {
+  width: 100%; padding: 12px; border: 1px dashed var(--border); border-radius: 6px;
+  background: none; color: var(--mid); font-size: 12px; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; text-align: center; transition: all 0.15s; margin-bottom: 16px;
+}
+.btn-add-card:hover { background: var(--navy-pale); color: var(--navy-light); border-color: var(--navy-light); }
+
+/* Bracket card (mobile) */
+.bracket-section-mobile { margin-bottom: 20px; }
+.bracket-grid-mobile { background: var(--white); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.bracket-row-mobile {
+  display: grid; grid-template-columns: 1fr 1fr 36px;
+  border-bottom: 1px solid #EDE8E0; align-items: center;
+}
+.bracket-row-mobile:last-child { border-bottom: none; }
+.bracket-row-mobile input {
+  font-family: 'DM Mono', monospace; font-size: 13px; padding: 9px 12px;
+  border: none; background: transparent; color: var(--charcoal); text-align: right;
+  outline: none; width: 100%; border-right: 1px solid #EDE8E0;
+}
+.bracket-row-mobile input:focus { background: var(--selected); }
+.bracket-row-mobile .btn-del { border-right: none; }
+
+/* ── RUN BUTTON ── */
+.run-wrap { text-align: center; margin: 20px 0; }
+.btn-run {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.04em;
+  padding: 12px 52px; background: var(--navy); color: var(--white); border: none; border-radius: 3px;
+  cursor: pointer; transition: background 0.15s, transform 0.1s; width: 100%; max-width: 360px;
+}
+.btn-run:hover { background: var(--navy-light); }
+.btn-run:active { transform: scale(0.98); }
+
+/* ── RESULTS ── */
+#results { display: none; }
+.results-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.results-header h2 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: var(--navy); }
+
+.summary-strip { display: grid; grid-template-columns: repeat(6,1fr); gap: 10px; margin-bottom: 20px; }
+.summary-item { background: var(--white); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+.summary-item .lbl { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--mid); margin-bottom: 5px; }
+.summary-item .val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--navy); }
+.summary-item .val.profit { color: var(--green); }
+
+/* ── RESULTS FILTER ── */
+.res-filter {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.res-filter input[type=text], .res-filter select {
+  font-family: 'DM Sans', sans-serif; font-size: 12px;
+  padding: 7px 10px; border: 1px solid var(--border); border-radius: 3px;
+  background: var(--white); color: var(--charcoal); outline: none;
+}
+.res-filter input[type=text] { width: 220px; }
+.res-filter input[type=text]:focus, .res-filter select:focus { border-color: var(--navy-light); }
+.res-filter .filter-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--mid); }
+.res-filter a { font-size: 11px; color: var(--mid); text-decoration: underline; }
+.res-empty { display: none; padding: 16px; text-align: center; color: var(--mid); font-size: 12px; background: var(--white); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 20px; }
+
+.res-wrap { border: 1px solid var(--border); border-radius: 4px; overflow-x: auto; background: var(--white); margin-bottom: 20px; }
+.res-table { width: 100%; border-collapse: collapse; min-width: 500px; table-layout: fixed; }
+.res-table thead tr { background: var(--navy); }
+.res-table th { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(255,255,255,0.75); padding: 9px 12px; text-align: right; white-space: nowrap; }
+.res-table th:first-child { text-align: left; }
+.res-table td { padding: 9px 12px; border-bottom: 1px solid #EDE8E0; text-align: right; font-family: 'DM Mono', monospace; font-size: 12px; }
+.res-table td:first-child { text-align: left; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 13px; }
+.res-table tbody tr:last-child td { border-bottom: none; }
+.res-table tbody tr:hover { background: var(--off-white); }
+.res-table td.opt { background: var(--navy-pale); color: var(--navy); font-weight: 600; }
+
+.eq-slider-wrap { position: relative; display: inline-block; vertical-align: middle; }
+.eq-slider { width: 88px; vertical-align: middle; }
+.eq-slider-bubble {
+  position: absolute; top: -24px; left: 0; transform: translateX(-50%);
+  background: var(--navy); color: var(--off-white); font-family: 'DM Mono', monospace;
+  font-size: 10px; padding: 2px 7px; border-radius: 3px; white-space: nowrap;
+  pointer-events: none; opacity: 0; transition: opacity 0.12s;
+}
+.eq-slider-bubble.show { opacity: 1; }
+@media (min-width: 769px) {
+  .eq-slider { width: 160px; }
+}
+.res-table td.dash { color: #CCC; text-align: center; }
+
+.pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500; font-family: 'DM Sans', sans-serif; }
+.pill.green { background: var(--green-bg); color: var(--green); }
+.pill.yellow { background: var(--yellow-bg); color: var(--yellow); }
+.pill.red { background: var(--red-bg); color: var(--red); }
+
+.scenario-title { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--navy); margin-bottom: 10px; }
+.scenario-wrap { border: 1px solid var(--border); border-radius: 4px; overflow-x: auto; background: var(--white); }
+.scenario-table { width: 100%; border-collapse: collapse; }
+.scenario-table th { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--mid); padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.scenario-table th:first-child { text-align: left; min-width: 140px; }
+.scenario-table td { padding: 7px 10px; border-bottom: 1px solid #EDE8E0; text-align: right; font-family: 'DM Mono', monospace; font-size: 11px; white-space: nowrap; }
+.scenario-table td:first-child { text-align: left; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; }
+.scenario-table tbody tr:last-child td { border-bottom: none; }
+.scenario-table td.opt { background: var(--navy-pale); color: var(--navy); font-weight: 600; }
+.scenario-table td.dash { color: #CCC; font-size: 10px; }
+
+.note { margin-top: 16px; padding: 11px 15px; background: var(--navy-pale); border-left: 3px solid var(--navy-light); border-radius: 0 3px 3px 0; font-size: 12px; color: var(--navy); line-height: 1.6; }
+
+/* ── ROW REORDER (SKU input table) ── */
+.sheet-table .row-num.drag-handle { cursor: grab; }
+.sheet-table .row-num.drag-handle:hover { background: var(--selected); color: var(--navy); }
+.sheet-table tr.dragging { opacity: 0.4; }
+.sheet-table tr.drop-before td { box-shadow: inset 0 2px 0 var(--navy-light); }
+.sheet-table tr.drop-after td { box-shadow: inset 0 -2px 0 var(--navy-light); }
+.btn-move {
+  background: none; border: 1px solid var(--border); border-radius: 3px; cursor: pointer;
+  color: var(--mid); font-size: 11px; padding: 4px 9px; margin-right: 4px;
+}
+.btn-move:disabled { opacity: 0.3; cursor: default; }
+
+/* ── UPLOAD PREVIEW MODAL ── */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(44,44,44,0.45); z-index: 100;
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.modal-box {
+  background: var(--white); border-radius: 6px; max-width: 560px; width: 100%;
+  max-height: 85vh; overflow-y: auto; padding: 22px 24px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+}
+.modal-box h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+.modal-file { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--mid); margin-bottom: 14px; word-break: break-all; }
+.modal-summary { font-size: 13px; margin-bottom: 12px; line-height: 1.5; }
+.modal-block { font-size: 12px; line-height: 1.6; padding: 9px 12px; border-radius: 3px; margin-bottom: 10px; }
+.modal-block.bad { background: var(--red-bg); color: var(--red); }
+.modal-block.warn { background: var(--yellow-bg); color: var(--yellow); }
+.modal-block ul { margin: 4px 0 0 18px; }
+.modal-preview { width: 100%; border-collapse: collapse; font-size: 11px; margin: 4px 0 6px; }
+.modal-preview th { text-align: right; font-weight: 500; color: var(--mid); text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em; padding: 5px 6px; border-bottom: 1px solid var(--border); }
+.modal-preview td { text-align: right; font-family: 'DM Mono', monospace; padding: 5px 6px; border-bottom: 1px solid #EDE8E0; }
+.modal-preview th:first-child, .modal-preview td:first-child { text-align: left; font-family: 'DM Sans', sans-serif; }
+.modal-more { font-size: 11px; color: var(--mid); margin-bottom: 10px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+.modal-actions button { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; padding: 9px 20px; border-radius: 3px; cursor: pointer; }
+.modal-actions .btn-cancel { background: none; border: 1px solid var(--border); color: var(--charcoal); }
+.modal-actions .btn-confirm { background: var(--navy); border: 1px solid var(--navy); color: var(--white); }
+.modal-actions .btn-confirm:disabled { background: #BBB; border-color: #BBB; cursor: not-allowed; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  header { padding: 16px 20px; }
+  .container { padding: 16px 16px 48px; }
+  .settings-bar { gap: 16px; padding: 12px 16px; }
+  .field input { width: 100%; }
+  .settings-bar { flex-direction: column; align-items: stretch; }
+
+  /* Hide desktop spreadsheet, show mobile cards */
+  .grid-2 { display: block; }
+  .desktop-only { display: none; }
+  .mobile-cards { display: block; }
+
+  .summary-strip { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .summary-item .val { font-size: 15px; }
+
+  .res-filter input[type=text] { width: 100%; }
+  .res-filter select { flex: 1; }
+
+  .btn-run { padding: 13px 24px; }
+}
+@media (min-width: 769px) {
+  .mobile-only { display: none; }
+  .run-wrap {
+    position: sticky;
+    bottom: 0;
+    background: var(--off-white);
+    padding: 14px 0;
+    z-index: 40;
+    box-shadow: 0 -6px 16px rgba(0,0,0,0.08);
+  }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>JAPspired</h1>
+  <span>Order Optimiser</span>
+</header>
+
+<div class="container">
+
+  <!-- Settings -->
+  <div class="settings-bar">
+    <div class="field">
+      <label>FX Rate (JPY → BDT)</label>
+      <input type="number" id="fx" value="0.80" step="0.01" min="0.1" oninput="saveState()">
+    </div>
+    <div class="field">
+      <label>Shipping Rate (BDT/kg)</label>
+      <input type="number" id="shipRate" value="1580" step="10" min="0" oninput="saveState()">
+    </div>
+    <div class="field">
+      <label>Import Budget (BDT)</label>
+      <input type="number" id="budget" value="" step="500" min="0" placeholder="No limit" oninput="saveState()">
+    </div>
+  </div>
+
+  <div class="run-wrap" style="margin-bottom:20px;margin-top:0">
+    <button class="btn-run" onclick="runOptimiser()">Run Optimiser</button>
+    <div style="margin-top:10px">
+      <a href="#" onclick="exportCsv();return false" style="font-size:11px;color:var(--mid);text-decoration:underline">Download as CSV</a>
+      <a href="#" onclick="clearSavedState();return false" style="font-size:11px;color:var(--mid);text-decoration:underline;margin-left:16px">Clear saved data</a>
+      <a href="#" onclick="document.getElementById('uploadFile').click();return false" style="font-size:11px;color:var(--mid);text-decoration:underline;margin-left:16px">Upload Excel/CSV</a>
+      <a href="#" id="undoUploadLink" onclick="undoUpload();return false" style="display:none;font-size:11px;color:var(--mid);text-decoration:underline;margin-left:16px">Undo last upload</a>
+      <input type="file" id="uploadFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="onUploadFile(this)">
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- ── DESKTOP: SKU Spreadsheet ── -->
+    <div class="desktop-only">
+      <div class="section-label">
+        SKUs
+        <span>Lot = minimum purchase increment</span>
+      </div>
+      <div class="sheet-wrap">
+        <table class="sheet-table">
+          <thead>
+            <tr>
+              <th style="width:24px"></th>
+              <th style="width:50px" class="num">Incl.</th>
+              <th style="min-width:160px">SKU Name</th>
+              <th class="num">Wt (g)</th>
+              <th class="num">Price JPY</th>
+              <th class="num">Sell BDT</th>
+              <th class="num">Lot</th>
+              <th class="num">Min Qty</th>
+              <th class="num">Max Qty</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="skuBody"></tbody>
+        </table>
+        <button class="btn-add-row" onclick="addSku()">+ Add row</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── MOBILE: SKU Cards ── -->
+  <div class="mobile-cards mobile-only">
+    <div class="section-label" style="margin-bottom:10px">SKUs <span>Tap a field to edit</span></div>
+    <div id="skuCards"></div>
+    <button class="btn-add-card" onclick="addSku()">+ Add SKU</button>
+
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+    <div class="results-header">
+      <h2>Optimal Order</h2>
+      <a href="#" onclick="resetToAuto();return false" style="font-size:11px;color:var(--mid);text-decoration:underline;margin-left:auto">Reset to Auto (unlock all)</a>
+    </div>
+    <div class="summary-strip">
+      <div class="summary-item"><div class="lbl">Total Units</div><div class="val" id="sumUnits">—</div></div>
+      <div class="summary-item"><div class="lbl">Total Weight</div><div class="val" id="sumWeight">—</div></div>
+      <div class="summary-item"><div class="lbl">Shipping BDT</div><div class="val" id="sumShip">—</div></div>
+      <div class="summary-item"><div class="lbl">Import Cost BDT</div><div class="val" id="sumImport">—</div></div>
+      <div class="summary-item"><div class="lbl">Total Sales BDT</div><div class="val" id="sumSales">—</div></div>
+      <div class="summary-item"><div class="lbl">Total Profit BDT</div><div class="val profit" id="sumProfit">—</div></div>
+    </div>
+
+    <!-- Filter: only changes which rows are SHOWN. The summary above and the
+         optimiser always use every included SKU. -->
+    <div class="res-filter">
+      <input type="text" id="resSearch" placeholder="Search SKU name…" oninput="applyResultsFilter()">
+      <select id="resShow" onchange="applyResultsFilter()">
+        <option value="all">Show: all SKUs</option>
+        <option value="ordered">Ordered only (qty above 0)</option>
+        <option value="loss">Loss-making only</option>
+        <option value="profit">Profitable only</option>
+      </select>
+      <select id="resSort" onchange="applyResultsFilter()">
+        <option value="sheet">Sort: as in SKU table</option>
+        <option value="profit-desc">Total profit, high to low</option>
+        <option value="profit-asc">Total profit, low to high</option>
+        <option value="markup-desc">Markup, high to low</option>
+        <option value="markup-asc">Markup, low to high</option>
+        <option value="name">Name, A to Z</option>
+      </select>
+      <span class="filter-count" id="resFilterCount"></span>
+      <a href="#" onclick="clearResultsFilter();return false" id="resFilterClear" style="display:none">Clear filter</a>
+    </div>
+
+    <div class="res-wrap">
+      <table class="res-table">
+        <thead>
+          <tr>
+            <th>SKU</th><th>Qty (drag)</th><th>Unit Cost</th><th>Selling Price/unit</th><th>Profit/unit</th><th>Markup</th><th>Total Profit</th>
+          </tr>
+        </thead>
+        <tbody id="resBody"></tbody>
+      </table>
+    </div>
+    <div class="res-empty" id="resEmpty">No SKUs match this filter.</div>
+
+  </div>
+
+</div>
+
+<!-- Upload preview (hidden until a file is picked) -->
+<div id="uploadModal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)cancelUpload()">
+  <div class="modal-box">
+    <h3>Upload preview</h3>
+    <div class="modal-file" id="uploadFileName"></div>
+    <div id="uploadBody"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="cancelUpload()">Cancel</button>
+      <button class="btn-confirm" id="uploadConfirmBtn" onclick="confirmUpload()">Replace my table</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const DEFAULT_SKUS = []; // empty on purpose: enter or upload current numbers, saved on this device only
+
+
+// ── AUTOSAVE (browser local storage — persists between visits on this device) ──
+const STORAGE_KEY = 'japspired_optimiser_state_v2';
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      skus: DEFAULT_SKUS,
+      shipRate: document.getElementById('shipRate').value,
+      fx: document.getElementById('fx').value,
+      budget: document.getElementById('budget').value
+    }));
+  } catch (e) { /* storage unavailable — fail silently, nothing else depends on this */ }
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (Array.isArray(data.skus)) { DEFAULT_SKUS.length = 0; DEFAULT_SKUS.push(...data.skus); }
+    if (data.shipRate)  document.getElementById('shipRate').value = data.shipRate;
+    if (data.fx)        document.getElementById('fx').value = data.fx;
+    if (data.budget)    document.getElementById('budget').value = data.budget;
+  } catch (e) { /* corrupted or unavailable — start fresh */ }
+}
+// Generates a ?data= link (same format loadFromURL reads) from whatever is
+// currently in the SKU table — a durable, portable snapshot independent of
+// this device's local storage. Save the URL itself somewhere permanent.
+// Plain spreadsheet export — for archiving alongside Stock Master or eyeballing
+// in Excel/Sheets. Read-only snapshot: does not re-import back into the tool.
+function exportCsv() {
+  const headers = ['SKU Name','Weight (g)','Price JPY','Sell BDT','Lot','Min Qty','Max Qty','Included'];
+  const esc = v => {
+    const s = (v === undefined || v === null) ? '' : String(v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const rows = DEFAULT_SKUS.map(s => [
+    s.name, s.wt, s.price, s.sell, s.lot, s.minQty, s.maxQty, s.excluded ? 'No' : 'Yes'
+  ].map(esc).join(','));
+  const csv = headers.join(',') + '\n' + rows.join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'japspired-order-optimiser-' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function clearSavedState() {
+  if (!confirm('Clear all saved SKU rows and settings on this device? This cannot be undone.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+// Reads a ?data=<json> query param (used for pre-filled share links) and
+// loads it into DEFAULT_SKUS, overriding whatever was in local storage.
+// Returns true if a link payload was found and applied.
+function loadFromURL() {
+  try {
+    const raw = new URLSearchParams(location.search).get('data');
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (Array.isArray(data) && data.length) {
+      DEFAULT_SKUS.length = 0;
+      DEFAULT_SKUS.push(...data);
+      return true;
+    }
+  } catch (e) { /* malformed link data — ignore, fall back to saved/empty state */ }
+  return false;
+}
+
+// ── DESKTOP: SKU TABLE ────────────────────────────────────────────────────────
+function renderSkus() {
+  const tbody = document.getElementById('skuBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  DEFAULT_SKUS.forEach((s, i) => {
+    const tr = document.createElement('tr');
+    if (s.excluded) tr.style.opacity = '0.45';
+    tr.addEventListener('dragover', e => onRowDragOver(e, i));
+    tr.addEventListener('dragleave', () => tr.classList.remove('drop-before', 'drop-after'));
+    tr.addEventListener('drop', e => onRowDrop(e, i));
+    tr.innerHTML = `
+      <td class="row-num drag-handle" draggable="true" title="Drag to reorder" ondragstart="onRowDragStart(event, ${i})" ondragend="onRowDragEnd()">${i+1}</td>
+      <td style="text-align:center"><input type="checkbox" ${s.excluded ? '' : 'checked'} onchange="onToggleInclude(${i}, this.checked)" title="Include this SKU in the optimiser"></td>
+      <td><input class="cell-input text-cell" type="text" value="${escHtml(s.name)}" oninput="DEFAULT_SKUS[${i}].name=this.value;syncCards();saveState()"></td>
+      <td><input class="cell-input" type="number" value="${s.wt}" min="1" oninput="DEFAULT_SKUS[${i}].wt=+this.value;saveState()"></td>
+      <td><input class="cell-input" type="number" value="${s.price}" min="1" oninput="DEFAULT_SKUS[${i}].price=+this.value;saveState()"></td>
+      <td><input class="cell-input" type="number" value="${s.sell}" min="1" oninput="DEFAULT_SKUS[${i}].sell=+this.value;saveState()"></td>
+      <td><input class="cell-input" type="number" value="${s.lot}" min="1" oninput="DEFAULT_SKUS[${i}].lot=+this.value;saveState()"></td>
+      <td><input class="cell-input" type="number" value="${s.minQty}" min="0" oninput="DEFAULT_SKUS[${i}].minQty=+this.value;saveState()"></td>
+      <td><input class="cell-input" type="number" value="${s.maxQty}" min="0" oninput="DEFAULT_SKUS[${i}].maxQty=+this.value;saveState()"></td>
+      <td><button class="btn-del" onclick="removeSku(${i})">×</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── MOBILE: SKU CARDS ────────────────────────────────────────────────────────
+function renderSkuCards() {
+  const container = document.getElementById('skuCards');
+  if (!container) return;
+  container.innerHTML = '';
+  DEFAULT_SKUS.forEach((s, i) => {
+    const card = document.createElement('div');
+    card.className = 'sku-card';
+    if (s.excluded) card.style.opacity = '0.45';
+    card.innerHTML = `
+      <div class="sku-card-header">
+        <span class="sku-num">SKU ${i+1}</span>
+        <span style="margin-left:10px">
+          <button class="btn-move" ${i === 0 ? 'disabled' : ''} onclick="moveSku(${i}, ${i-1})" title="Move up">▲</button><button class="btn-move" ${i === DEFAULT_SKUS.length - 1 ? 'disabled' : ''} onclick="moveSku(${i}, ${i+1})" title="Move down">▼</button>
+        </span>
+        <label style="font-size:11px;color:var(--mid);display:flex;align-items:center;gap:4px;margin-left:auto;margin-right:10px">
+          <input type="checkbox" ${s.excluded ? '' : 'checked'} onchange="onToggleInclude(${i}, this.checked)"> Include
+        </label>
+        <button class="btn-del-card" onclick="removeSku(${i})">Remove</button>
+      </div>
+      <input class="card-name-input" type="text" value="${escHtml(s.name)}" placeholder="SKU name" oninput="DEFAULT_SKUS[${i}].name=this.value;syncTable();saveState()">
+      <div class="card-fields">
+        <div class="card-field"><label>Wt (g)</label><input type="number" value="${s.wt}" min="1" oninput="DEFAULT_SKUS[${i}].wt=+this.value;saveState()"></div>
+        <div class="card-field"><label>Price JPY</label><input type="number" value="${s.price}" min="1" oninput="DEFAULT_SKUS[${i}].price=+this.value;saveState()"></div>
+        <div class="card-field"><label>Sell BDT</label><input type="number" value="${s.sell}" min="1" oninput="DEFAULT_SKUS[${i}].sell=+this.value;saveState()"></div>
+        <div class="card-field"><label>Lot</label><input type="number" value="${s.lot}" min="1" oninput="DEFAULT_SKUS[${i}].lot=+this.value;saveState()"></div>
+        <div class="card-field"><label>Min Qty</label><input type="number" value="${s.minQty}" min="0" oninput="DEFAULT_SKUS[${i}].minQty=+this.value;saveState()"></div>
+        <div class="card-field"><label>Max Qty</label><input type="number" value="${s.maxQty}" min="0" oninput="DEFAULT_SKUS[${i}].maxQty=+this.value;saveState()"></div>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+function syncCards() { renderSkuCards(); }
+function syncTable() { renderSkus(); }
+
+// ── ARROW KEY NAVIGATION ──────────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) return;
+  const el = document.activeElement;
+  if (!el || !el.classList.contains('cell-input')) return;
+  e.preventDefault();
+
+  const td   = el.closest('td');
+  const tr   = el.closest('tr');
+  const tbody = tr.closest('tbody');
+  const rows  = Array.from(tbody.querySelectorAll('tr'));
+  const cells = Array.from(tr.querySelectorAll('td'));
+
+  const rowIdx  = rows.indexOf(tr);
+  const colIdx  = cells.indexOf(td);
+
+  let targetRow = rowIdx, targetCol = colIdx;
+  if (e.key === 'ArrowUp')    targetRow--;
+  if (e.key === 'ArrowDown')  targetRow++;
+  if (e.key === 'ArrowLeft')  targetCol--;
+  if (e.key === 'ArrowRight') targetCol++;
+
+  const destRow = rows[targetRow];
+  if (!destRow) return;
+  const destCells = Array.from(destRow.querySelectorAll('td'));
+  const destTd    = destCells[targetCol];
+  if (!destTd) return;
+  const destInput = destTd.querySelector('input.cell-input');
+  if (destInput) destInput.focus();
+});
+
+function addSku() {
+  DEFAULT_SKUS.push({name:'', wt:'', price:'', sell:'', lot:'', minQty:'', maxQty:''});
+  renderSkus(); renderSkuCards(); saveState();
+}
+function removeSku(i) {
+  DEFAULT_SKUS.splice(i, 1);
+  renderSkus(); renderSkuCards(); saveState();
+}
+
+// ── CORE MODEL ────────────────────────────────────────────────────────────────
+// Cost model (shipper bills live weight at a flat BDT/kg rate, no packaging charge):
+//   SKU shipping = SKU weight x qty / 1000 x rate
+//   unit cost    = (JPY price x FX x qty + SKU shipping) / qty
+// Each SKU's cost is independent of the others; only the optional budget links them.
+function calcOrder(qtys) {
+  const fx   = +document.getElementById('fx').value;
+  const rate = +document.getElementById('shipRate').value;
+  const totalW = DEFAULT_SKUS.reduce((sum,s,i) => sum + s.wt * qtys[i], 0);
+  const shipBdt = totalW / 1000 * rate;
+  let totalProfit = 0, totalImportCost = 0;
+  const rows = DEFAULT_SKUS.map((s,i) => {
+    const q = qtys[i];
+    if (q === 0) return {q:0,unitCost:0,profitU:0,markup:0,totalProfit:0,importCost:0};
+    const skuShip = s.wt * q / 1000 * rate;
+    const totalCostBdt = s.price*q*fx + skuShip;
+    const unitCost = totalCostBdt / q;
+    const profitU  = s.sell - unitCost;
+    const markup   = profitU / unitCost;
+    totalProfit    += profitU * q;
+    totalImportCost+= totalCostBdt;
+    return {q, unitCost, profitU, markup, totalProfit: profitU*q, importCost: totalCostBdt};
+  });
+  return {qtys, totalW, shipBdt, totalProfit, totalImportCost, rows};
+}
+
+// ── OPTIMISER ─────────────────────────────────────────────────────────────────
+// Maximise total profit within budget, respecting per-SKU min/max qty bounds.
+function findOptimalQtys(locks) {
+  locks = locks || {};
+  const n         = DEFAULT_SKUS.length;
+  const budgetVal = document.getElementById('budget').value;
+  const budget    = budgetVal ? +budgetVal : Infinity;
+
+  // Build valid quantity list per SKU: multiples of lot, within [minQty, maxQty].
+  // Excluded SKUs are forced to 0 and skipped entirely — their data stays put,
+  // they just don't compete for budget/weight. A locked SKU only gets one
+  // "choice" — its pinned value — so the hill climb below can never move it.
+  const lotsPerSku = DEFAULT_SKUS.map((s, i) => {
+    if (s.excluded) return [0];
+    if (locks.hasOwnProperty(i)) return [locks[i]];
+    const lots = [];
+    const min = (s.minQty === '' || s.minQty === undefined || s.minQty === null) ? s.lot : s.minQty;
+    const max = s.maxQty || 100;
+    const start = Math.ceil(min / s.lot) * s.lot;
+    for (let q = start; q <= max; q += s.lot) lots.push(q);
+    return lots.length ? lots : [s.lot];
+  });
+
+  let current = lotsPerSku.map(lots => lots[0]);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (let i = 0; i < n; i++) {
+      if (DEFAULT_SKUS[i].excluded || locks.hasOwnProperty(i)) continue; // excluded or pinned — never reassigned
+      let bestQ = current[i], bestP = calcOrder(current).totalProfit;
+      for (const q of lotsPerSku[i]) {
+        const candidate = [...current]; candidate[i] = q;
+        if (calcOrder(candidate).totalImportCost > budget) continue;
+        const p = calcOrder(candidate).totalProfit;
+        if (p > bestP + 0.01) { bestP = p; bestQ = q; }
+      }
+      if (bestQ !== current[i]) { current[i] = bestQ; changed = true; }
+    }
+  }
+  return calcOrder(current);
+}
+
+// ── EQUALIZER ─────────────────────────────────────────────────────────────────
+// Each SKU row has a slider. Dragging one PINS that SKU at your chosen qty and
+// re-solves the rest to maximise profit around it — like moving one fader on
+// an equalizer and watching the others rebalance. Untouched sliders stay free
+// for the optimiser to move; "Reset to Auto" releases all pins.
+let currentLocks = {};
+
+// Real lot-step granularity can be fine (small lot, wide range), which would
+// otherwise flood the slider track with dozens of tick marks. This thins the
+// DISPLAYED ticks down to a readable count — the slider itself still snaps
+// to every real lot via its own step attribute, only the visual marks are capped.
+function tickSubset(steps, maxTicks) {
+  maxTicks = maxTicks || 10;
+  if (steps.length <= maxTicks) return steps;
+  const stride = Math.ceil(steps.length / maxTicks);
+  const subset = [];
+  for (let i = 0; i < steps.length; i += stride) subset.push(steps[i]);
+  if (subset[subset.length - 1] !== steps[steps.length - 1]) subset.push(steps[steps.length - 1]);
+  return subset;
+}
+
+function buildResultsTableSkeleton() {
+  const resBody = document.getElementById('resBody');
+  resBody.innerHTML = '';
+  DEFAULT_SKUS.forEach((s, i) => {
+    const steps = whatIfLotSteps(s);
+    const tickOptions = tickSubset(steps).map(q => `<option value="${q}"></option>`).join('');
+    const tr = document.createElement('tr');
+    tr.id = 'resRow-' + i;
+    tr.innerHTML = `
+      <td>${escHtml(s.name) || '(unnamed row ' + (i+1) + ')'}</td>
+      <td>
+        <div class="eq-slider-wrap">
+          <div class="eq-slider-bubble" id="eqBubble-${i}"></div>
+          <input type="range" class="eq-slider" id="eqSlider-${i}" min="${steps[0]}" max="${steps[steps.length-1]}" step="${s.lot || 1}"
+            list="eqTicks-${i}"
+            oninput="onEqualizerInput(${i}, this.value); positionEqBubble(${i}, this)"
+            onmousedown="showEqBubble(${i})" onmouseup="hideEqBubble(${i})" onmouseleave="hideEqBubble(${i})">
+          <datalist id="eqTicks-${i}">${tickOptions}</datalist>
+        </div>
+        <div id="eqQtyLabel-${i}" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--mid);margin-top:2px"></div>
+      </td>
+      <td id="eqUnitCost-${i}"></td>
+      <td id="eqSellPrice-${i}"></td>
+      <td id="eqProfitU-${i}"></td>
+      <td id="eqMarkup-${i}"></td>
+      <td id="eqTotalProfit-${i}"></td>`;
+    resBody.appendChild(tr);
+  });
+}
+
+// Desktop-only live value bubble that tracks the slider thumb while dragging.
+function showEqBubble(i) {
+  if (window.innerWidth < 769) return; // desktop only, per request
+  const bubble = document.getElementById('eqBubble-' + i);
+  if (bubble) bubble.classList.add('show');
+}
+function hideEqBubble(i) {
+  const bubble = document.getElementById('eqBubble-' + i);
+  if (bubble) bubble.classList.remove('show');
+}
+function positionEqBubble(i, slider) {
+  const bubble = document.getElementById('eqBubble-' + i);
+  if (!bubble) return;
+  const min = +slider.min, max = +slider.max, val = +slider.value;
+  const pct = (val - min) / ((max - min) || 1);
+  const thumb = 16; // approx native thumb width in px
+  const x = pct * (slider.offsetWidth - thumb) + thumb / 2;
+  bubble.style.left = x + 'px';
+  bubble.textContent = val + ' units';
+}
+
+// skipIdx = the row currently being dragged — its slider is left alone so the
+// browser's own drag gesture isn't interrupted by us overwriting its value.
+// Accounting-style formatting: negative values shown in (brackets) instead
+// of a minus sign, matching how Sakeef's invoices/spreadsheets read numbers.
+function fmtBdt(v, decimals) {
+  const d = decimals || 0;
+  const abs = Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+  return v < 0 ? '(৳' + abs + ')' : '৳' + abs;
+}
+function fmtPct(v) {
+  const abs = Math.abs(v).toFixed(0);
+  return v < 0 ? '(' + abs + '%)' : abs + '%';
+}
+
+// Plain red text at small monospace size barely stands out from the
+// charcoal body text. This mimics the familiar spreadsheet convention for
+// negative numbers instead — light red fill, bold dark red text — which is
+// much harder to miss at a glance.
+function markNegative(el, isNeg) {
+  el.style.color = isNeg ? 'var(--red)' : '';
+  el.style.background = isNeg ? 'var(--red-bg)' : '';
+  el.style.borderRadius = isNeg ? '3px' : '';
+  el.style.padding = isNeg ? '2px 6px' : '';
+}
+
+// The most recent solved order — kept so the filter controls can re-apply
+// without re-running the optimiser.
+let lastOptimal = null;
+
+function updateResultsDisplay(optimal, skipIdx) {
+  lastOptimal = optimal;
+  document.getElementById('sumUnits').textContent  = optimal.qtys.reduce((a,b)=>a+b,0);
+  document.getElementById('sumWeight').textContent = Math.round(optimal.totalW) + 'g';
+  document.getElementById('sumShip').textContent   = '৳' + Math.round(optimal.shipBdt).toLocaleString();
+  document.getElementById('sumImport').textContent = '৳' + Math.round(optimal.totalImportCost).toLocaleString();
+  document.getElementById('sumSales').textContent  = '৳' + Math.round(optimal.totalProfit + optimal.totalImportCost).toLocaleString();
+  const sumProfitEl = document.getElementById('sumProfit');
+  sumProfitEl.textContent = fmtBdt(optimal.totalProfit);
+  markNegative(sumProfitEl, optimal.totalProfit < 0);
+
+  optimal.rows.forEach((r, i) => {
+    const isExcluded = !!DEFAULT_SKUS[i].excluded;
+    const slider = document.getElementById('eqSlider-' + i);
+    if (slider) {
+      slider.disabled = isExcluded;
+      if (i !== skipIdx) slider.value = r.q;
+    }
+    document.getElementById('eqQtyLabel-' + i).textContent = isExcluded ? 'excluded' : r.q + ' units';
+    document.getElementById('eqUnitCost-' + i).textContent = fmtBdt(r.unitCost);
+    document.getElementById('eqSellPrice-' + i).textContent = '৳' + Math.round(DEFAULT_SKUS[i].sell || 0).toLocaleString();
+
+    const profitUEl = document.getElementById('eqProfitU-' + i);
+    profitUEl.textContent = fmtBdt(r.profitU);
+    markNegative(profitUEl, r.profitU < 0);
+
+    const markup = r.markup * 100;
+    const markupEl = document.getElementById('eqMarkup-' + i);
+    markupEl.textContent = fmtPct(markup);
+    markNegative(markupEl, markup < 0);
+
+    const totalProfitEl = document.getElementById('eqTotalProfit-' + i);
+    totalProfitEl.textContent = fmtBdt(r.totalProfit);
+    markNegative(totalProfitEl, r.totalProfit < 0);
+  });
+
+  applyResultsFilter(skipIdx);
+}
+
+// ── RESULTS FILTER ────────────────────────────────────────────────────────────
+// Filters and sorts the DISPLAYED rows only. Hidden rows keep their sliders and
+// still take part in the optimiser and the summary totals above, so filtering
+// never changes the order itself. skipIdx = row being dragged: it is kept
+// visible so it cannot vanish from under the cursor mid-drag.
+function applyResultsFilter(skipIdx) {
+  if (typeof skipIdx !== 'number') skipIdx = null;
+  const resBody = document.getElementById('resBody');
+  if (!resBody) return;
+
+  const term = document.getElementById('resSearch').value.trim().toLowerCase();
+  const show = document.getElementById('resShow').value;
+  const sort = document.getElementById('resSort').value;
+  const isFiltered = term !== '' || show !== 'all';
+  const optimal = lastOptimal;
+
+  let visible = 0, total = 0;
+  const entries = [];
+
+  DEFAULT_SKUS.forEach((s, i) => {
+    const tr = document.getElementById('resRow-' + i);
+    if (!tr) return;
+    total++;
+    const r = optimal && optimal.rows[i] ? optimal.rows[i] : null;
+    let ok = true;
+    if (term && !(s.name || '').toLowerCase().includes(term)) ok = false;
+    if (r) {
+      if (show === 'ordered' && !(r.q > 0)) ok = false;
+      if (show === 'loss' && !(r.q > 0 && r.profitU < 0)) ok = false;
+      if (show === 'profit' && !(r.q > 0 && r.profitU >= 0)) ok = false;
+    }
+    if (i === skipIdx) ok = true;
+    tr.style.display = ok ? '' : 'none';
+    if (ok) visible++;
+    entries.push({ i, tr, r, name: (s.name || '').toLowerCase() });
+  });
+
+  // Reorder rows without destroying them (sliders keep their state).
+  const cmp = {
+    'sheet':       (a, b) => a.i - b.i,
+    'profit-desc': (a, b) => (b.r ? b.r.totalProfit : 0) - (a.r ? a.r.totalProfit : 0),
+    'profit-asc':  (a, b) => (a.r ? a.r.totalProfit : 0) - (b.r ? b.r.totalProfit : 0),
+    'markup-desc': (a, b) => (b.r ? b.r.markup : 0) - (a.r ? a.r.markup : 0),
+    'markup-asc':  (a, b) => (a.r ? a.r.markup : 0) - (b.r ? b.r.markup : 0),
+    'name':        (a, b) => a.name.localeCompare(b.name)
+  }[sort] || ((a, b) => a.i - b.i);
+  // While dragging, keep row order stable so the row does not jump under the cursor.
+  if (skipIdx === null) {
+    entries.sort(cmp).forEach(e => resBody.appendChild(e.tr));
+  }
+
+  document.getElementById('resFilterCount').textContent =
+    isFiltered ? 'Showing ' + visible + ' of ' + total + ' SKUs' : '';
+  document.getElementById('resFilterClear').style.display = isFiltered ? '' : 'none';
+  document.getElementById('resEmpty').style.display = (total > 0 && visible === 0) ? 'block' : 'none';
+}
+
+function clearResultsFilter() {
+  document.getElementById('resSearch').value = '';
+  document.getElementById('resShow').value = 'all';
+  applyResultsFilter();
+}
+
+// Dragging a slider fires an 'input' event on every pixel of movement — far
+// more often than the screen can redraw. Without throttling, each of those
+// triggers a full recompute (re-solving every other SKU) and a full DOM
+// rewrite, which piles up faster than the browser can render it and shows
+// up as the slider/table visibly stuttering or shaking mid-drag. This keeps
+// only the latest value and processes it once per animation frame instead.
+let eqRafPending = false;
+let eqPendingUpdate = null;
+
+function onEqualizerInput(i, value) {
+  eqPendingUpdate = { i, value: +value };
+  if (eqRafPending) return;
+  eqRafPending = true;
+  requestAnimationFrame(() => {
+    eqRafPending = false;
+    const { i: idx, value: val } = eqPendingUpdate;
+    currentLocks[idx] = val;
+    const optimal = findOptimalQtys(currentLocks);
+    updateResultsDisplay(optimal, idx);
+  });
+}
+
+function resetToAuto() {
+  currentLocks = {};
+  const optimal = findOptimalQtys(currentLocks);
+  updateResultsDisplay(optimal, null);
+}
+
+// Toggling Include on/off keeps the SKU's own data (weight, price, sell,
+// lot, min/max) completely untouched — only whether the optimiser considers
+// it changes. Clears any existing pin on that row since exclude/include
+// should start fresh rather than fight with a stale drag position.
+function onToggleInclude(i, checked) {
+  DEFAULT_SKUS[i].excluded = !checked;
+  delete currentLocks[i];
+  saveState();
+  renderSkus();
+  renderSkuCards();
+  if (document.getElementById('results').style.display === 'block') {
+    const optimal = findOptimalQtys(currentLocks);
+    updateResultsDisplay(optimal, null);
+  }
+}
+
+// ── RUN ───────────────────────────────────────────────────────────────────────
+// A missing or zero Weight silently gives that SKU a 0% share of shipping
+// cost, which shifts its real cost onto other SKUs instead — the row then
+// LOOKS unusually profitable, and other rows look artificially worse, with
+// no error or crash to signal anything is wrong. Same problem for Price and
+// Sell at 0 (unit cost or profit math breaks silently). This blocks a run
+// rather than let that happen.
+function validateSkus() {
+  const problems = [];
+  DEFAULT_SKUS.forEach((s, i) => {
+    if (s.excluded) return; // not being ordered, no need to validate its fields
+    const name = s.name || 'Row ' + (i + 1);
+    if (!s.wt || +s.wt <= 0)    problems.push(name + ': missing Weight');
+    if (!s.price || +s.price <= 0) problems.push(name + ': missing Price JPY');
+    if (!s.sell || +s.sell <= 0)   problems.push(name + ': missing Sell BDT');
+    if (!s.lot || +s.lot <= 0)     problems.push(name + ': missing Lot');
+  });
+  return problems;
+}
+
+function runOptimiser() {
+  const problems = validateSkus();
+  if (problems.length) {
+    alert('Cannot run — some SKUs are missing required values:\n\n' + problems.join('\n') + '\n\nFill these in before running, otherwise shipping cost gets misallocated between SKUs without any visible error.');
+    return;
+  }
+  currentLocks = {}; // a fresh run always starts from a fully free optimum
+  buildResultsTableSkeleton();
+  const optimal = findOptimalQtys(currentLocks);
+  updateResultsDisplay(optimal, null); // also re-applies whatever filter is currently set
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// Computes the valid lot-stepped quantity range for a SKU — used to set
+// each equalizer slider's min/max/step.
+function whatIfLotSteps(s) {
+  const lot = s.lot || 1;
+  const min = (s.minQty === '' || s.minQty === undefined || s.minQty === null) ? lot : s.minQty;
+  const max = s.maxQty || 100;
+  const steps = [];
+  const start = Math.ceil(min / lot) * lot;
+  for (let q = start; q <= max; q += lot) steps.push(q);
+  if (!steps.length) steps.push(start);
+  return steps;
+}
+
+
+// ── REORDER ROWS (SKU input table only) ───────────────────────────────────────
+// The input table is the single source of truth for order: the order is saved
+// with the rest of the table, and the results table follows it when its sort is
+// "as in SKU table". Slider pins are keyed by row position, so they are
+// remapped to follow their SKU when rows move.
+let dragIdx = null;
+
+// Pure: where each old position ends up after moving row `from` to `to`.
+function remapLocks(locks, from, to, n) {
+  const order = [...Array(n).keys()];
+  order.splice(to, 0, order.splice(from, 1)[0]); // order[newPos] = oldPos
+  const out = {};
+  Object.keys(locks).forEach(k => { out[order.indexOf(+k)] = locks[k]; });
+  return out;
+}
+
+function moveSku(from, to) {
+  const n = DEFAULT_SKUS.length;
+  if (from === to || from < 0 || to < 0 || from >= n || to >= n) return;
+  currentLocks = remapLocks(currentLocks, from, to, n);
+  DEFAULT_SKUS.splice(to, 0, DEFAULT_SKUS.splice(from, 1)[0]);
+  saveState();
+  renderSkus();
+  renderSkuCards();
+  const resultsEl = document.getElementById('results');
+  if (resultsEl.style.display === 'block' && validateSkus().length === 0) {
+    buildResultsTableSkeleton();
+    updateResultsDisplay(findOptimalQtys(currentLocks), null);
+  }
+}
+
+function onRowDragStart(e, i) {
+  dragIdx = i;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', String(i)); // Firefox needs data set to start a drag
+  const tr = e.target.closest('tr');
+  if (tr) { e.dataTransfer.setDragImage(tr, 0, 0); tr.classList.add('dragging'); }
+}
+function onRowDragOver(e, i) {
+  if (dragIdx === null) return;
+  e.preventDefault();
+  const tr = e.currentTarget;
+  tr.classList.remove('drop-before', 'drop-after');
+  if (i !== dragIdx) tr.classList.add(dragIdx > i ? 'drop-before' : 'drop-after');
+}
+function onRowDrop(e, i) {
+  e.preventDefault();
+  const from = dragIdx;
+  dragIdx = null;
+  if (from !== null) moveSku(from, i);
+}
+function onRowDragEnd() {
+  dragIdx = null;
+  document.querySelectorAll('#skuBody tr').forEach(tr => tr.classList.remove('dragging', 'drop-before', 'drop-after'));
+}
+
+// ── UPLOAD (optional) ─────────────────────────────────────────────────────────
+// Flow: pick file -> parse in the browser -> preview (nothing changes yet) ->
+// confirm replaces the SKU rows only. Settings and the results filter
+// are untouched. "Undo last upload" restores the previous rows until reload.
+// Nothing here runs unless the Upload link is clicked.
+let uploadPending = null;
+let uploadBackup = null;
+
+function escHtml(v) {
+  return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Header names accepted for each field (compared after lower-casing and
+// stripping spaces/punctuation, so "Price JPY", "price_jpy" and "PRICE JPY" all match).
+const UPLOAD_COLS = {
+  name:   ['skuname', 'name', 'sku', 'item', 'product'],
+  wt:     ['weightg', 'weight', 'wtg', 'wt'],
+  price:  ['pricejpy', 'price', 'jpyprice'],
+  sell:   ['sellbdt', 'sell', 'sellprice', 'sellingprice'],
+  lot:    ['lot'],
+  minQty: ['minqty', 'min'],
+  maxQty: ['maxqty', 'max'],
+  included: ['included', 'incl', 'include']
+};
+const UPLOAD_REQUIRED = { name: 'SKU Name', wt: 'Weight (g)', price: 'Price JPY', sell: 'Sell BDT', lot: 'Lot' };
+
+function parseCsvText(text) {
+  text = text.replace(/^﻿/, '');
+  const rows = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; }
+      else cur += c;
+    } else if (c === '"') q = true;
+    else if (c === ',') { row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+
+// The Excel reader is only downloaded when an .xlsx/.xls is actually uploaded.
+function loadSheetJS() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = () => window.XLSX ? resolve(window.XLSX) : reject(new Error('lib'));
+    s.onerror = () => reject(new Error('lib'));
+    document.head.appendChild(s);
+  });
+}
+
+async function readUploadedGrid(file) {
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  if (ext === 'csv') return parseCsvText(await file.text());
+  if (ext === 'xlsx' || ext === 'xls') {
+    let lib;
+    try { lib = await loadSheetJS(); }
+    catch (e) { throw new Error('Could not load the Excel reader (it needs an internet connection once). Save the sheet as CSV and upload that instead.'); }
+    const wb = lib.read(await file.arrayBuffer(), { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    return lib.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true });
+  }
+  throw new Error('Please choose an .xlsx, .xls or .csv file.');
+}
+
+// Pure function: grid (array of rows) -> { skus, problems, warnings, skipped } or { fatal }.
+function buildUploadPreview(grid) {
+  const norm = v => String(v == null ? '' : v).toLowerCase().replace(/[^a-z0-9]/g, '');
+  const hdrIdx = grid.findIndex(r => r.some(c => String(c == null ? '' : c).trim() !== ''));
+  if (hdrIdx < 0) return { fatal: 'The file is empty.' };
+  const headers = grid[hdrIdx].map(norm);
+  const colOf = {};
+  Object.keys(UPLOAD_COLS).forEach(k => {
+    const idx = headers.findIndex(h => UPLOAD_COLS[k].includes(h));
+    if (idx >= 0) colOf[k] = idx;
+  });
+  const missing = Object.keys(UPLOAD_REQUIRED).filter(k => colOf[k] === undefined).map(k => UPLOAD_REQUIRED[k]);
+  if (missing.length) return { fatal: 'Required column(s) not found: ' + missing.join(', ') + '. Check the header row (the "Download as CSV" file shows the expected names).' };
+
+  const skus = [], problems = [], warnings = [];
+  let skipped = 0, excludedCount = 0;
+  const seen = {}, dupes = [];
+
+  for (let r = hdrIdx + 1; r < grid.length; r++) {
+    const raw = grid[r];
+    const get = k => colOf[k] === undefined ? '' : (raw[colOf[k]] == null ? '' : raw[colOf[k]]);
+    if (Object.keys(colOf).every(k => String(get(k)).trim() === '')) { skipped++; continue; }
+    const rowNo = r + 1;
+    const incRaw = String(get('included')).trim().toLowerCase();
+    const excluded = ['no', 'n', 'false', '0', 'x', 'excluded'].includes(incRaw);
+    const nameStr = String(get('name')).trim();
+    const label = 'Row ' + rowNo + (nameStr ? ' (' + nameStr + ')' : '');
+
+    // null = present but not a number; '' = blank
+    const num = k => {
+      const v = get(k);
+      if (String(v).trim() === '') return '';
+      const n = typeof v === 'number' ? v : Number(String(v).replace(/[,৳¥\s]/g, ''));
+      return isFinite(n) ? n : null;
+    };
+    const fields = { wt: 'Weight', price: 'Price JPY', sell: 'Sell BDT', lot: 'Lot', minQty: 'Min Qty', maxQty: 'Max Qty' };
+    const sku = { name: nameStr };
+    Object.keys(fields).forEach(k => {
+      const n = num(k);
+      if (n === null) {
+        if (!excluded) problems.push(label + ': ' + fields[k] + ' is not a number ("' + get(k) + '")');
+        sku[k] = '';
+      } else sku[k] = n;
+    });
+    if (excluded) { sku.excluded = true; excludedCount++; }
+
+    if (!excluded) {
+      if (!nameStr) problems.push(label + ': missing SKU Name');
+      const req = { wt: 'Weight', price: 'Price JPY', sell: 'Sell BDT', lot: 'Lot' };
+      Object.keys(req).forEach(k => {
+        const raw = get(k);
+        const notNumber = String(raw).trim() !== '' && sku[k] === '';
+        if (!notNumber && (sku[k] === '' || sku[k] <= 0)) problems.push(label + ': missing ' + req[k]);
+      });
+    }
+
+    const key = nameStr.toLowerCase();
+    if (key) { if (seen[key]) dupes.push(nameStr); seen[key] = true; }
+    skus.push(sku);
+  }
+
+  if (!skus.length) problems.push('No data rows found under the header row.');
+  if (dupes.length) warnings.push('Duplicate SKU names: ' + [...new Set(dupes)].join(', ') + '. They will be kept as separate rows.');
+  if (excludedCount) warnings.push(excludedCount + ' row(s) marked as not included. They will load unticked.');
+  return { skus, problems, warnings, skipped };
+}
+
+async function onUploadFile(input) {
+  const file = input.files && input.files[0];
+  input.value = ''; // lets the same file be picked again later
+  if (!file) return;
+  try {
+    const grid = await readUploadedGrid(file);
+    const p = buildUploadPreview(grid);
+    if (p.fatal) { alert(p.fatal); return; }
+    uploadPending = p;
+    showUploadPreview(p, file.name);
+  } catch (e) {
+    alert(e.message || 'Could not read that file.');
+  }
+}
+
+function showUploadPreview(p, fileName) {
+  document.getElementById('uploadFileName').textContent = fileName;
+  const blocked = p.problems.length > 0;
+  const cap = 10;
+  let html = '<div class="modal-summary">' + p.skus.length + ' row' + (p.skus.length === 1 ? '' : 's') + ' found'
+    + (blocked ? ', ' + p.problems.length + ' problem' + (p.problems.length === 1 ? '' : 's') : ', no problems')
+    + (p.skipped ? ', ' + p.skipped + ' blank row' + (p.skipped === 1 ? '' : 's') + ' skipped' : '') + '.</div>';
+  if (blocked) {
+    html += '<div class="modal-block bad">Fix these in the file and upload again:<ul>'
+      + p.problems.slice(0, cap).map(x => '<li>' + escHtml(x) + '</li>').join('')
+      + (p.problems.length > cap ? '<li>and ' + (p.problems.length - cap) + ' more</li>' : '') + '</ul></div>';
+  }
+  p.warnings.forEach(w => { html += '<div class="modal-block warn">' + escHtml(w) + '</div>'; });
+  if (p.skus.length) {
+    html += '<table class="modal-preview"><thead><tr><th>SKU</th><th>Wt (g)</th><th>Price JPY</th><th>Sell BDT</th><th>Lot</th></tr></thead><tbody>'
+      + p.skus.slice(0, 5).map(s => '<tr><td>' + escHtml(s.name) + '</td><td>' + escHtml(s.wt) + '</td><td>' + escHtml(s.price) + '</td><td>' + escHtml(s.sell) + '</td><td>' + escHtml(s.lot) + '</td></tr>').join('')
+      + '</tbody></table>';
+    if (p.skus.length > 5) html += '<div class="modal-more">and ' + (p.skus.length - 5) + ' more row(s)</div>';
+  }
+  html += '<div class="modal-more">Replacing keeps your FX rate, shipping rate and budget as they are.</div>';
+  document.getElementById('uploadBody').innerHTML = html;
+  document.getElementById('uploadConfirmBtn').disabled = blocked;
+  document.getElementById('uploadModal').style.display = 'flex';
+}
+
+function cancelUpload() {
+  uploadPending = null;
+  document.getElementById('uploadModal').style.display = 'none';
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('uploadModal').style.display !== 'none') cancelUpload();
+});
+
+// Shared by Replace and Undo: re-render the input tables and, if results are
+// already on screen, rebuild them for the new rows. Pins are cleared because
+// they were tied to the old rows. The results filter is left as the user set it.
+function afterSkuTableReplaced() {
+  currentLocks = {};
+  saveState();
+  renderSkus();
+  renderSkuCards();
+  const resultsEl = document.getElementById('results');
+  if (resultsEl.style.display === 'block') {
+    if (validateSkus().length === 0) {
+      buildResultsTableSkeleton();
+      updateResultsDisplay(findOptimalQtys(currentLocks), null);
+    } else {
+      resultsEl.style.display = 'none'; // table has gaps; run again once filled in
+    }
+  }
+}
+
+function confirmUpload() {
+  if (!uploadPending || uploadPending.problems.length) return;
+  uploadBackup = JSON.parse(JSON.stringify(DEFAULT_SKUS));
+  DEFAULT_SKUS.length = 0;
+  DEFAULT_SKUS.push(...uploadPending.skus);
+  uploadPending = null;
+  document.getElementById('uploadModal').style.display = 'none';
+  document.getElementById('undoUploadLink').style.display = 'inline';
+  afterSkuTableReplaced();
+}
+
+function undoUpload() {
+  if (!uploadBackup) return;
+  DEFAULT_SKUS.length = 0;
+  DEFAULT_SKUS.push(...uploadBackup);
+  uploadBackup = null;
+  document.getElementById('undoUploadLink').style.display = 'none';
+  afterSkuTableReplaced();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+loadState();
+if (loadFromURL()) saveState();
+renderSkus();
+renderSkuCards();
+</script>
+</body>
+</html>
